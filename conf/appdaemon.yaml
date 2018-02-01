@@ -7,5 +7,5 @@ appdaemon:
   plugins:
     HASS:
       type: hass
-      ha_url: 'http://192.168.2.1:8183'
+      ha_url: https://the-home.access.ly
       ha_key: !secret hass_key
