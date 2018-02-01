@@ -1,0 +1,11 @@
+secrets: /conf/secrets.yaml
+log:
+  logfile: STDOUT
+  errorfile: STDERR
+appdaemon:
+  threads: 10
+  plugins:
+    HASS:
+      type: hass
+      ha_url: 'http://192.168.2.1:8183'
+      ha_key: !secret hass_key
