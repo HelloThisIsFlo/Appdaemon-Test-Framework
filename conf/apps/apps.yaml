@@ -1,4 +1,14 @@
-hello_world:
-  module: hello
-  class: HelloWorld
+Kitchen Light:
+  module: automatic_lights
+  class: KitchenLight
+Bathroom Night Light:
+  module: automatic_lights
+  class: BathroomNightLight
 
+Bathroom Smart Volume:
+  module: morning_routine
+  class: BathroomSmartVolume
+
+Washing Machine:
+  module: washing_machine
+  class: WashingMachine
