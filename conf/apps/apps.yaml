@@ -5,9 +5,9 @@ Bathroom Night Light:
   module: automatic_lights
   class: BathroomNightLight
 
-Bathroom Smart Volume:
-  module: morning_routine
-  class: BathroomSmartVolume
+SmartBathroom:
+  module: smart_bathroom
+  class: SmartBathroom
 
 Washing Machine:
   module: washing_machine

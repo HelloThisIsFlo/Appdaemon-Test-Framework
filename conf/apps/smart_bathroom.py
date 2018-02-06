@@ -4,25 +4,32 @@ from entity_ids import ID
 
 BATHROOM_VOLUMES = {
     'fake_mute': 0.1,
-    'regular': 0.5,
+    'regular': 0.4,
     'shower': 0.7
 }
 
 DEFAULT_VOLUMES = {
     'kitchen': 0.37,
-    'living_room_soundbar': 0.2,
-    'living_room_controller': 0.32,
+    'living_room_soundbar': 0.25,
+    'living_room_controller': 0.37,
     'bathroom': BATHROOM_VOLUMES['fake_mute']
 }
 
-class BathroomSmartVolume(hass.Hass):
+class SmartBathroom(hass.Hass):
     def initialize(self):
+        # Reset state
+        # self.reset_all_volumes_at_4am([])
+
+        # Schedule call at 4AM
         self.run_daily(self.reset_all_volumes_at_4am, time(hour=4))
 
+        # Listen to Motion
         self.listen_event(self.new_motion_bathroom, 'motion', entity_id=ID['bathroom']['motion_sensor'])
         self.listen_event(self.new_motion_kitchen, 'motion', entity_id=ID['kitchen']['motion_sensor'])
         self.listen_event(self.new_motion_living_room, 'motion', entity_id=ID['living_room']['motion_sensor'])
         self.listen_state(self.no_more_motion_bathroom, ID['bathroom']['motion_sensor'], new='off')
+
+        self.some_variable = 0
 
         self.listen_event(
             self.debug,
@@ -31,8 +38,16 @@ class BathroomSmartVolume(hass.Hass):
         
     def debug(self, _e, data, _k):
         if data['click_type'] == 'single':
-            pass
-            # self.reset_all_volumes_at_4am()
+            self.call_service(
+                'xiaomi_aqara/play_ringtone',
+                ringtone_id=10001,
+                ringtone_vol=20)
+
+
+            self.some_variable += 1
+            self.log(self.some_variable)
+            self.reset_all_volumes_at_4am([])
+            # pass
         elif data['click_type'] == 'double':
             self._decrease_volume_bathroom()
 
