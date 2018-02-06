@@ -1,9 +1,6 @@
 Kitchen Light:
   module: automatic_lights
   class: KitchenLight
-Bathroom Night Light:
-  module: automatic_lights
-  class: BathroomNightLight
 
 SmartBathroom:
   module: smart_bathroom

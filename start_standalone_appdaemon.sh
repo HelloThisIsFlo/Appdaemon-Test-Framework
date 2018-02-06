@@ -2,7 +2,7 @@
 
 START_TIME='2016-06-06 03:59:50'
 # Uncomment for debug mode:
-DEBUG_MODE='-D DEBUG'
+#DEBUG_MODE='-D DEBUG'
 
 docker run \
   -it \
