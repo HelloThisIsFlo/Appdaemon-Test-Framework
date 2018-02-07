@@ -6,13 +6,30 @@
         {
             "label": "Watch tests",
             "type": "shell",
-            "command": "ptw -c",
+            "command": "ptw --beforerun='echo PYTEST-START-TAG' --afterrun='echo PYTEST-END-TAG' -- --tb=line",
+            "isBackground": true,
             "group": {
                 "kind": "test",
                 "isDefault": true
             },
             "presentation": {
-                "reveal": "always"
+                "reveal": "never",
+                "panel": "dedicated"
+            },
+            "problemMatcher": {
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+)? (.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "message": 4
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^PYTEST-START-TAG.*",
+                    "endsPattern": "^PYTEST-END-TAG.*"
+                }
             }
         }
     ]
