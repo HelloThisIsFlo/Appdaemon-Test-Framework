@@ -1,1 +1,3 @@
 appdaemon==3.0.0b2
+pytest==3.4.0
+pytest-watch==4.1.0
