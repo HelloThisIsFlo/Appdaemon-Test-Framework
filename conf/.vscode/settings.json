@@ -1,3 +1,4 @@
 {
     "python.pythonPath": "~/.virtualenvs/appdaemon/bin/python",
+    "python.linting.enabled": true,
 }

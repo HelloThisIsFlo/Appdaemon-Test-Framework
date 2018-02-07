@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import appdaemon.plugins.hass.hassapi as hass
 from datetime import time
-from apps.entity_ids import ID
+from entity_ids import ID
 
 FAKE_MUTE_VOLUME = 0.1
 BATHROOM_VOLUMES = {
