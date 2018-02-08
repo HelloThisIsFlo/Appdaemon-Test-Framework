@@ -4,6 +4,8 @@
     "version": "2.0.0",
     "tasks": [
         {
+            // NOTE: If problem launching the command: Start VSCode from terminal
+            //       => Go to directory -> `code .`
             "label": "Watch tests",
             "type": "shell",
             "command": "ptw --beforerun='echo PYTEST-START-TAG' --afterrun='echo PYTEST-END-TAG' -- --tb=line",
