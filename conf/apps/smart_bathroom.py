@@ -117,7 +117,9 @@ class SmartBathroom(hass.Hass):
         self.current_behavior.time_triggered(kwargs['hour'])
 
     def _new_motion_bathroom(self, _e, _d, _k):
-        self.current_behavior.new_motion_bathroom()
+        # TODO: Remove!!!!
+        self.turn_on_bathroom_light('red')
+        # self.current_behavior.new_motion_bathroom()
 
     def _new_motion_kitchen(self, _e, _d, _k):
         self.current_behavior.new_motion_kitchen_living_room()
@@ -286,8 +288,7 @@ Behavior Implementations
 
 class EmptyBehavior(BathroomBehavior):
     def new_motion_bathroom(self):
-        raise Exception('New Motion Artificial exception !!!!')
-        # pass
+        pass
 
     def new_motion_kitchen_living_room(self):
         pass
