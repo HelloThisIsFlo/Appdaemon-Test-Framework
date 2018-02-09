@@ -1,5 +1,5 @@
 import appdaemon.plugins.hass.hassapi as hass
-from entity_ids import ID
+from apps.entity_ids import ID
 
 class KitchenLight(hass.Hass):
     def initialize(self):

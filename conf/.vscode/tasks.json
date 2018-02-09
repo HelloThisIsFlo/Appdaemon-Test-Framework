@@ -6,7 +6,7 @@
         {
             // NOTE: If problem launching the command: Start VSCode from terminal
             //       => Go to directory -> `code .`
-            "label": "Watch tests",
+            "label": "Start Pytest VSCode integration",
             "type": "shell",
             "command": "ptw --beforerun='echo PYTEST-START-TAG' --afterrun='echo PYTEST-END-TAG' -- --tb=line",
             "isBackground": true,
@@ -32,6 +32,16 @@
                     "beginsPattern": "^PYTEST-START-TAG.*",
                     "endsPattern": "^PYTEST-END-TAG.*"
                 }
+            }
+        }, {
+            "label": "Watch tests",
+            "type": "shell",
+            "command": "ptw -c",
+            "isBackground": true,
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
             }
         }
     ]
