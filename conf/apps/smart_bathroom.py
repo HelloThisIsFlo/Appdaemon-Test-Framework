@@ -89,7 +89,7 @@ class SmartBathroom(hass.Hass):
         self.listen_event(self._new_motion_living_room, 'motion', entity_id=ID['living_room']['motion_sensor'])
         self.listen_state(self._no_more_motion_bathroom, ID['bathroom']['motion_sensor'], new='off')
 
-        # Debug remove 
+        # Debug remove
         self.listen_event( self.debug, 'flic_click', entity_id=ID['debug']['flic_black'])
 
     def debug(self, _e, data, _k):
@@ -103,7 +103,7 @@ class SmartBathroom(hass.Hass):
     def _time_triggered(self, kwargs):
         self.current_behavior.time_triggered(kwargs['hour'])
     def _new_motion_bathroom(self, _e, _d, _k):
-        self.current_behavior.new_motion_kitchen_living_room()
+        self.current_behavior.new_motion_bathroom()
     def _new_motion_kitchen(self, _e, _d, _k):
         self.current_behavior.new_motion_kitchen_living_room()
     def _new_motion_living_room(self, _e, _d, _k):
@@ -220,13 +220,13 @@ class SmartBathroom(hass.Hass):
         self.turn_off(ID['bathroom']['water_heater'])
     def turn_on_water_heater(self):
         self.turn_on(ID['bathroom']['water_heater'])
-    
+
     def play_notification_sound(self):
         self.call_service('xiaomi_aqara/play_ringtone', ringtone_id=10001, ringtone_vol=20)
 
     def _set_volume(self, entity_id, volume):
-        self.call_service('media_player/volume_set', 
-            entity_id=entity_id, 
+        self.call_service('media_player/volume_set',
+            entity_id=entity_id,
             volume_level=volume)
     def _is_media_casting(self, media_player_id):
         return self.get_state(media_player_id) != 'off'
@@ -260,7 +260,7 @@ class EmptyBehavior(BathroomBehavior):
 
 
 class NightBehavior(BathroomBehavior):
-    def __init__(self, 
+    def __init__(self,
             turn_off_bathroom_light_cb,
             reset_all_volumes_cb,
             start_morning_step1_behavior_cb):
@@ -409,7 +409,7 @@ class MorningStep3Behavior(BathroomBehavior):
 
 
 class DayBehavior(BathroomBehavior):
-    def __init__(self, 
+    def __init__(self,
             turn_on_bathroom_light_cb,
             turn_off_bathroom_light_cb,
             resume_media_playback_cb,
@@ -461,7 +461,7 @@ class DayBehavior(BathroomBehavior):
 
 
 class EveningBehavior(BathroomBehavior):
-    def __init__(self, 
+    def __init__(self,
             turn_on_bathroom_light_cb,
             turn_off_bathroom_light_cb,
             mute_bathroom_cb,
