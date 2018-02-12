@@ -22,24 +22,17 @@ def smart_bathroom(hass_functions):
 @pytest.fixture
 def smart_bathroom_trigger_new(smart_bathroom):
     class TriggerNew:
-        def __init__(self, smart_bathroom):
-            self.smart_bathroom = smart_bathroom
-
         def time(self, hour=None):
-            self.smart_bathroom._time_triggered(hour=hour)
-
+            smart_bathroom._time_triggered(hour=hour)
         def motion_bathroom(self):
-            self.smart_bathroom._new_motion_bathroom(None, None, None)
-
+            smart_bathroom._new_motion_bathroom(None, None, None)
         def motion_kitchen(self):
-            self.smart_bathroom._new_motion_kitchen(None, None, None)
-
+            smart_bathroom._new_motion_kitchen(None, None, None)
         def motion_living_room(self):
-            self.smart_bathroom._new_motion_living_room(None, None, None)
-        
+            smart_bathroom._new_motion_living_room(None, None, None)
         def debug(self):
-            self.smart_bathroom.debug(None, {'click_type': 'single'}, None)
-    return TriggerNew(smart_bathroom)
+            smart_bathroom.debug(None, {'click_type': 'single'}, None)
+    return TriggerNew()
 
 
 ## Fake Tests #######################################################################################

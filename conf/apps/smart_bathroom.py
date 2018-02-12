@@ -118,6 +118,7 @@ class SmartBathroom(hass.Hass):
 
     def _new_motion_bathroom(self, _e, _d, _k):
         # TODO: Remove!!!!
+        # pass
         self.turn_on_bathroom_light('red')
         # self.current_behavior.new_motion_bathroom()
 
