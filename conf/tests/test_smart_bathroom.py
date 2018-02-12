@@ -35,6 +35,7 @@ def when_new(smart_bathroom):
     return WhenNewWrapper()
 
 
+### Start at different times
 def test_automatic_lights_start_during_day(given_that, when_new, assert_that, smart_bathroom):
     given_that.time_is(time(hour=13))
     smart_bathroom.initialize()
@@ -47,4 +48,15 @@ def test_automatic_lights_start_during_night(given_that, when_new, assert_that, 
     when_new.motion_bathroom()
     assert_that(ID['bathroom']['led_light']).was_turned_on(color_name='RED')
 
-#####################################################################################################
+### For the rest of the tests, SmartBathroom was started at 3PM
+def tests_todo():
+    raise AssertionError("""
+    TESTS TO IMPLEMENT:
+
+    test_day_light_turn_on
+    test_day_light_turn_off
+    test_day_music_volume_unmute
+    test_day_nothing_playing_no_mute
+    test_day_music_volume_mute
+    ...
+    """)
