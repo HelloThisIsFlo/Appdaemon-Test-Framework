@@ -11,6 +11,8 @@ class ServiceOnAnyDomain:
         We just check that the SERVICE part is equal
         """
         return self.service in other
+    def __repr__(self):
+        return "'ANY_DOMAIN" + self.service + "'"
 
 
 class AnyString:

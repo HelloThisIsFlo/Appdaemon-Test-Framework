@@ -10,11 +10,11 @@ TODO: Add fixture to 'set_state' (will actually patch the 'get_state' method)
 """
 
 @pytest.fixture
-def smart_bathroom(hass_functions):
+def smart_bathroom(given_that):
     smart_bathroom = SmartBathroom(
         None, None, None, None, None, None, None, None)
     # Set initial time to 3PM
-    hass_functions['time'].return_value = time(hour=15)
+    given_that.time_is(time(hour=15))
     smart_bathroom.initialize()
     return smart_bathroom
 
@@ -35,18 +35,16 @@ def when_new(smart_bathroom):
     return WhenNewWrapper()
 
 
-## Fake Tests #######################################################################################
-# def test_turn_on_bathroom_light_on_motion(smart_bathroom_trigger_new, assert_that):
-#     smart_bathroom_trigger_new.motion_bathroom()
-#     assert_that(ID['bathroom']['led_light']).was_turned_on(color_name='red')
-
-# def test_debug(smart_bathroom_trigger_new, assert_that):
-#     smart_bathroom_trigger_new.debug()
-#     assert_that('xiaomi_aqara/play_ringtone').was_called_with(ringtone_id=10001, ringtone_vol=20)
-
-def test_automatic_lights_day(given_that, when_new, assert_that):
+def test_automatic_lights_start_during_day(given_that, when_new, assert_that, smart_bathroom):
     given_that.time_is(time(hour=13))
+    smart_bathroom.initialize()
     when_new.motion_bathroom()
     assert_that(ID['bathroom']['led_light']).was_turned_on(color_name='WHITE')
+
+def test_automatic_lights_start_during_night(given_that, when_new, assert_that, smart_bathroom):
+    given_that.time_is(time(hour=22))
+    smart_bathroom.initialize()
+    when_new.motion_bathroom()
+    assert_that(ID['bathroom']['led_light']).was_turned_on(color_name='RED')
 
 #####################################################################################################
