@@ -20,8 +20,8 @@ def smart_bathroom(hass_functions):
 
 
 @pytest.fixture
-def smart_bathroom_trigger_new(smart_bathroom):
-    class TriggerNew:
+def when_new(smart_bathroom):
+    class WhenNewWrapper:
         def time(self, hour=None):
             smart_bathroom._time_triggered(hour=hour)
         def motion_bathroom(self):
@@ -32,15 +32,21 @@ def smart_bathroom_trigger_new(smart_bathroom):
             smart_bathroom._new_motion_living_room(None, None, None)
         def debug(self):
             smart_bathroom.debug(None, {'click_type': 'single'}, None)
-    return TriggerNew()
+    return WhenNewWrapper()
 
 
 ## Fake Tests #######################################################################################
-def test_turn_on_bathroom_light_on_motion(smart_bathroom_trigger_new, assert_that):
-    smart_bathroom_trigger_new.motion_bathroom()
-    assert_that(ID['bathroom']['led_light']).was_turned_on(color_name='red')
+# def test_turn_on_bathroom_light_on_motion(smart_bathroom_trigger_new, assert_that):
+#     smart_bathroom_trigger_new.motion_bathroom()
+#     assert_that(ID['bathroom']['led_light']).was_turned_on(color_name='red')
 
-def test_debug(smart_bathroom_trigger_new, assert_that):
-    smart_bathroom_trigger_new.debug()
-    assert_that('xiaomi_aqara/play_ringtone').was_called_with(ringtone_id=10001, ringtone_vol=20)
+# def test_debug(smart_bathroom_trigger_new, assert_that):
+#     smart_bathroom_trigger_new.debug()
+#     assert_that('xiaomi_aqara/play_ringtone').was_called_with(ringtone_id=10001, ringtone_vol=20)
+
+def test_automatic_lights_day(given_that, when_new, assert_that):
+    given_that.time_is(time(hour=13))
+    when_new.motion_bathroom()
+    assert_that(ID['bathroom']['led_light']).was_turned_on(color_name='WHITE')
+
 #####################################################################################################

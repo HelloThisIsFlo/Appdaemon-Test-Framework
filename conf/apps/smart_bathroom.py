@@ -117,10 +117,7 @@ class SmartBathroom(hass.Hass):
         self.current_behavior.time_triggered(kwargs['hour'])
 
     def _new_motion_bathroom(self, _e, _d, _k):
-        # TODO: Remove!!!!
-        # pass
-        self.turn_on_bathroom_light('red')
-        # self.current_behavior.new_motion_bathroom()
+        self.current_behavior.new_motion_bathroom()
 
     def _new_motion_kitchen(self, _e, _d, _k):
         self.current_behavior.new_motion_kitchen_living_room()
@@ -140,9 +137,7 @@ class SmartBathroom(hass.Hass):
         if current_hour < 4 or current_hour > 21:
             self._start_evening_behavior()
         else:
-            pass
-            # TODO: Uncomment
-            # self._start_day_behavior()
+            self._start_day_behavior()
 
     def _start_night_behavior(self):
         self.log("Starting Night Behavior")

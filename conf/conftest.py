@@ -1,6 +1,6 @@
 import pytest
 from appdaemon_test_framework.assert_that import AssertThatWrapper
-from appdaemon_test_framework.given import GivenWrapper
+from appdaemon_test_framework.given_that import GivenThatWrapper
 from appdaemon_test_framework.setup_hass import patch_hass
 
 
@@ -12,8 +12,8 @@ def hass_functions(request):
 
 
 @pytest.fixture
-def given(hass_functions):
-    return GivenWrapper(hass_functions)
+def given_that(hass_functions):
+    return GivenThatWrapper(hass_functions)
 
 
 @pytest.fixture

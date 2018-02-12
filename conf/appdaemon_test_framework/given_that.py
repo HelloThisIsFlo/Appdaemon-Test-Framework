@@ -1,4 +1,4 @@
-class GivenWrapper:
+class GivenThatWrapper:
     def __init__(self, hass_functions):
         self.hass_functions = hass_functions
 

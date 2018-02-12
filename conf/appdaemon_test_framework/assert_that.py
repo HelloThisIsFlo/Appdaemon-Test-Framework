@@ -51,12 +51,12 @@ class AssertThatWrapper:
         entity_id = self.thing_to_check
 
         service_not_called = self._capture_assert_result(
-            lambda: self.hass_functions['call_service'].assert_called_once_with(
+            lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('turn_on'),
                 {'entity_id': entity_id, **service_specific_parameters}))
 
         turn_on_helper_not_called = self._capture_assert_result(
-            lambda: self.hass_functions['turn_on'].assert_called_once_with(
+            lambda: self.hass_functions['turn_on'].assert_any_call(
                 entity_id,
                 **service_specific_parameters))
 
@@ -69,12 +69,12 @@ class AssertThatWrapper:
         entity_id = self.thing_to_check
 
         service_not_called = self._capture_assert_result(
-            lambda: self.hass_functions['call_service'].assert_called_once_with(
+            lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('turn_off'),
                 entity_id=entity_id))
 
         turn_off_helper_not_called = self._capture_assert_result(
-            lambda: self.hass_functions['turn_off'].assert_called_once_with(
+            lambda: self.hass_functions['turn_off'].assert_any_call(
                 entity_id))
 
         if service_not_called and turn_off_helper_not_called:
