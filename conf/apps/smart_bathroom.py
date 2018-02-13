@@ -516,7 +516,7 @@ class DayBehavior(BathroomBehavior):
         self.mute_bathroom_cb()
 
     def time_triggered(self, hour_of_day):
-        if hour_of_day == 21:
+        if hour_of_day == 20:
             self.start_evening_behavior_cb()
 
     def click_on_bathroom_button(self):
