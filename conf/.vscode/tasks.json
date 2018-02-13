@@ -77,7 +77,7 @@
         {
             "label": "Watch tests",
             "type": "shell",
-            "command": "ptw -c",
+            "command": "ptw -c -- -v",
             "isBackground": true,
             "group": {
                 "kind": "test",
