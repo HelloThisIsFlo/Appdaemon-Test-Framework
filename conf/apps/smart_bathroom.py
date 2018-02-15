@@ -161,6 +161,7 @@ class SmartBathroom(hass.Hass):
             self.unmute_bathroom,
             self.is_media_casting_bathroom,
             self.turn_on_bathroom_light,
+            self.turn_off_bathroom_light,
             self._start_morning_step2_behavior)
 
     def _start_morning_step2_behavior(self):
@@ -348,12 +349,14 @@ class MorningStep1Behavior(BathroomBehavior):
                  unmute_bathroom_cb,
                  is_media_casting_bathroom_cb,
                  turn_on_bathroom_light_cb,
+                 turn_off_bathroom_light_cb,
                  start_morning_step2_behavior_cb):
         # Callbacks
         self.mute_bathroom_cb = mute_bathroom_cb
         self.unmute_bathroom_cb = unmute_bathroom_cb
         self.is_media_casting_bathroom_cb = is_media_casting_bathroom_cb
         self.turn_on_bathroom_light_cb = turn_on_bathroom_light_cb
+        self.turn_off_bathroom_light_cb = turn_off_bathroom_light_cb
         self.start_morning_step2_behavior_cb = start_morning_step2_behavior_cb
 
         # Initial state
@@ -366,6 +369,7 @@ class MorningStep1Behavior(BathroomBehavior):
         self.unmute_bathroom_cb = None
         self.is_media_casting_bathroom_cb = None
         self.turn_on_bathroom_light_cb = None
+        self.turn_off_bathroom_light_cb = None
         self.start_morning_step2_behavior_cb = None
 
     def new_motion_bathroom(self):
@@ -374,9 +378,11 @@ class MorningStep1Behavior(BathroomBehavior):
 
     def new_motion_kitchen_living_room(self):
         self.mute_bathroom_cb()
+        self.turn_off_bathroom_light_cb()
 
     def no_more_motion_bathroom(self):
         self.mute_bathroom_cb()
+        self.turn_off_bathroom_light_cb()
 
     def click_on_bathroom_button(self):
         self.start_morning_step2_behavior_cb()
