@@ -1,7 +1,13 @@
 from abc import ABC, abstractmethod
 import appdaemon.plugins.hass.hassapi as hass
 from datetime import time
-from apps.entity_ids import ID
+try:
+    # Module namespaces when Automation Modules are loaded in AppDaemon
+    # is different from the 'real' python one.
+    # Appdaemon doesn't seem to take into account packages
+    from apps.entity_ids import ID
+except ModuleNotFoundError:
+    from entity_ids import ID
 
 FAKE_MUTE_VOLUME = 0.1
 BATHROOM_VOLUMES = {
