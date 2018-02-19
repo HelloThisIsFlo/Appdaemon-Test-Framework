@@ -10,6 +10,8 @@ TODO: Add fixture to 'set_state' (will actually patch the 'get_state' method)
 """
 
 MORNING_STEP1_COLOR = 'BLUE'
+MORNING_STEP2_COLOR = 'GREEN'
+MORNING_STEP3_COLOR = 'YELLOW'
 DAY_COLOR = 'WHITE'
 EVENING_COLOR = 'RED'
 EVENING_HOUR = 20
@@ -58,6 +60,9 @@ def when_new(smart_bathroom):
         def no_more_motion_bathroom(self):
             smart_bathroom._no_more_motion_bathroom(
                 None,  None, None, None, None)
+        
+        def click_bathroom_button(self):
+            smart_bathroom._new_click_bathroom_button(None, None, None)
 
         def debug(self):
             smart_bathroom.debug(None, {'click_type': 'single'}, None)
@@ -253,7 +258,7 @@ class TestDuringNight:
 
     class TestMotionAnywhere:
         def test__activate_morning_step1(self, given_that, when_new, assert_that, start_night_mode):
-            def assert_morning_behavior_started():
+            def assert_morning_step1_started():
                 assert_that(ID['bathroom']['led_light']).was_turned_on(
                     color_name=MORNING_STEP1_COLOR)
             scenarios = [
@@ -264,9 +269,7 @@ class TestDuringNight:
             start_night_mode()
             for scenario in scenarios:
                 scenario()
-                assert_morning_behavior_started()
-
-
+                assert_morning_step1_started()
 
 class TestDuringMorningStep1:
     @pytest.fixture
@@ -336,9 +339,70 @@ class TestDuringMorningStep1:
                 assert_that(ID['bathroom']['led_light']).was_turned_off()
     
     class TestClickButton:
-        @pytest.mark.skip
-        def test__activate_morning_step2(self, given_that, when_new, assert_that):
-            raise Exception("Not implemented yet")
+        def test__activate_morning_step2(self, given_that, when_new, assert_that, start_morning_step1_mode):
+            def assert_morning_step2_started():
+                assert_that(ID['bathroom']['led_light']).was_turned_on(
+                    color_name=MORNING_STEP2_COLOR)
+
+            start_morning_step1_mode()
+            when_new.click_bathroom_button()
+            assert_morning_step2_started()
+
+class TestDuringMorningStep2:
+    @pytest.fixture
+    def start_morning_step2_mode(self, when_new, given_that):
+        # Switch to morning step2_mode mode
+        when_new.time(hour=EVENING_HOUR)
+        when_new.time(hour=RESET_NIGHT_HOUR)
+        when_new.motion_bathroom()
+        given_that.mock_functions_are_cleared()
+        return lambda: when_new.click_bathroom_button()
+
+    class TestAtStart:
+        def test_light_indicator(self, given_that, when_new, assert_that, start_morning_step2_mode):
+            start_morning_step2_mode()
+            assert_that(ID['bathroom']['led_light']).was_turned_on(
+                color_name=MORNING_STEP2_COLOR)
+        
+        def test_notif_sound(self, assert_that, start_morning_step2_mode):
+            notif_sound_id = 10001
+            volume = 20
+            start_morning_step2_mode()
+            assert_that('xiaomi_aqara/play_ringtone').was_called_with(ringtone_id=notif_sound_id, ringtone_vol=volume)
+
+        def test_mute_all_except_bathroom(self, given_that, assert_that, start_morning_step2_mode):
+            # Bug with sound bar firmware: Can only increase the volume by 10% at a time
+            # to prevent this being a problem, we're not muting it
+            all_speakers_except_bathroom = [
+                # ID['living_room']['soundbar'],
+                ID['kitchen']['speaker'],
+                ID['living_room']['controller']
+            ]
+
+            start_morning_step2_mode()
+            for speaker in all_speakers_except_bathroom:
+                assert_that('media_player/volume_set').was_called_with(
+                    entity_id=speaker,
+                    volume_level=FAKE_MUTE_VOLUME)
+
+        def test_set_shower_volume_bathroom(self, given_that, assert_that, start_morning_step2_mode):
+            start_morning_step2_mode()
+            assert_that('media_player/volume_set').was_called_with(
+                entity_id=ID['bathroom']['speaker'],
+                volume_level=BATHROOM_VOLUMES['shower'])
+    
+    class TestClickButton:
+        def test__activate_morning_step3(self, given_that, when_new, assert_that, start_morning_step2_mode):
+            def assert_morning_step3_started():
+                assert_that(ID['bathroom']['led_light']).was_turned_on(
+                    color_name=MORNING_STEP3_COLOR)
+
+            start_morning_step2_mode()
+            when_new.click_bathroom_button()
+            assert_morning_step3_started()
+
+
+
 
 
 

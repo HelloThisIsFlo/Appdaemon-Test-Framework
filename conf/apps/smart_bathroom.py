@@ -142,7 +142,7 @@ class SmartBathroom(hass.Hass):
         self.current_behavior.no_more_motion_bathroom()
     
     def _new_click_bathroom_button(self, _e, _d, _k):
-        pass
+        self.current_behavior.click_on_bathroom_button()
 
     """
     Start the different Behaviors

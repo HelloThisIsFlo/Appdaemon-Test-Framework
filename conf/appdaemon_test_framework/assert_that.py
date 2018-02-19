@@ -96,14 +96,14 @@ class AssertThatWrapper:
         """ Assert that a given service has been called with the given arguments"""
         service_full_name = self.thing_to_check
 
-        self.hass_functions['call_service'].assert_called_once_with(
+        self.hass_functions['call_service'].assert_any_call(
             service_full_name, **kwargs)
 
     def was_NOT_called_with(self, **kwargs):
         """ Assert that a given service has NOT been called with the given arguments"""
         service_full_name = self.thing_to_check
         service_not_called = self._capture_assert_failure_exception(
-            lambda: self.hass_functions['call_service'].assert_called_once_with(
+            lambda: self.hass_functions['call_service'].assert_any_call(
                 service_full_name, **kwargs))
         if not service_not_called:
             raise AssertionError("Service shoud NOT have been called with the given args: " + str(kwargs))
