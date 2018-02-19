@@ -65,24 +65,85 @@ def when_new(smart_bathroom):
 
 
 # Start at different times
-def test_automatic_lights_startstart_day_mode(given_that, when_new, assert_that, smart_bathroom):
-    given_that.time_is(time(hour=13))
-    smart_bathroom.initialize()
-    when_new.motion_bathroom()
-    assert_that(ID['bathroom']['led_light']
-                ).was_turned_on(color_name=DAY_COLOR)
+class TestInitialize:
+    def assert_bathroom_light_reacts_to_movement_with_color(self, color, when_new, assert_that):
+        when_new.motion_bathroom()
+        assert_that(ID['bathroom']['led_light']
+                    ).was_turned_on(color_name=color)
 
 
-def test_automatic_lights_startstart_night_mode(given_that, when_new, assert_that, smart_bathroom):
-    given_that.time_is(time(hour=22))
-    smart_bathroom.initialize()
-    when_new.motion_bathroom()
-    assert_that(ID['bathroom']['led_light']).was_turned_on(
-        color_name=EVENING_COLOR)
+    def test_start_during_day(self, given_that, when_new, assert_that, smart_bathroom):
+        # Given: Starting during the day
+        given_that.time_is(time(hour=13))
 
-# For the rest of the tests, SmartBathroom was started at 3PM
+        # When: SmartBathroom is initialized
+        smart_bathroom.initialize()
+
+        # Then: Day mode is started
+        self.assert_bathroom_light_reacts_to_movement_with_color(
+            DAY_COLOR,
+            when_new,
+            assert_that)
 
 
+    def test_start_during_evening(self, given_that, when_new, assert_that, smart_bathroom):
+        # Given: Starting during the day
+        given_that.time_is(time(hour=22))
+
+        # When: SmartBathroom is initialized
+        smart_bathroom.initialize()
+
+        # Then: Evening mode is started
+        self.assert_bathroom_light_reacts_to_movement_with_color(
+            EVENING_COLOR,
+            when_new,
+            assert_that)
+    
+    def test_callbacks_are_registered(self, smart_bathroom, hass_functions):
+        # Given: The mocked callback Appdaemon registration functions
+        listen_event = hass_functions['listen_event']
+        listen_state = hass_functions['listen_state']
+        run_daily    = hass_functions['run_daily']
+
+        # When: Calling `initialize`
+        smart_bathroom.initialize()
+        
+        # Then: callbacks are registered
+        listen_event.assert_any_call(
+            smart_bathroom._new_click_bathroom_button,
+            'click',
+            entity_id=ID['bathroom']['button'],
+            click_type='single')
+
+        listen_event.assert_any_call(
+            smart_bathroom._new_motion_bathroom,
+            'motion',
+            entity_id=ID['bathroom']['motion_sensor'])
+        listen_event.assert_any_call(
+            smart_bathroom._new_motion_kitchen,
+            'motion',
+            entity_id=ID['kitchen']['motion_sensor'])
+        listen_event.assert_any_call(
+            smart_bathroom._new_motion_living_room,
+            'motion',
+            entity_id=ID['living_room']['motion_sensor'])
+        listen_state.assert_any_call(
+            smart_bathroom._no_more_motion_bathroom,
+            ID['bathroom']['motion_sensor'],
+            new='off')
+
+        run_daily.assert_any_call(
+            smart_bathroom._time_triggered,
+            time(hour=RESET_NIGHT_HOUR),
+            hour=RESET_NIGHT_HOUR)
+        run_daily.assert_any_call(
+            smart_bathroom._time_triggered,
+            time(hour=EVENING_HOUR),
+            hour=EVENING_HOUR)
+
+
+
+# For the rest of the tests, SmartBathroom was started during the day (at 3PM)
 class TestsDuringDay:
     @pytest.fixture
     def start_day_mode(self):
@@ -275,6 +336,7 @@ class TestDuringMorningStep1:
                 assert_that(ID['bathroom']['led_light']).was_turned_off()
     
     class TestClickButton:
+        @pytest.mark.skip
         def test__activate_morning_step2(self, given_that, when_new, assert_that):
             raise Exception("Not implemented yet")
 

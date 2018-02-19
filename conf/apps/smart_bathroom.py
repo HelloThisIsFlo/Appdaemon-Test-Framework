@@ -94,9 +94,11 @@ class SmartBathroom(hass.Hass):
         self.current_behavior = EmptyBehavior()
         self._start_initial_behavior()
 
-        # Listen to Time / Motion
+        # Listen to Time
         self.run_daily(self._time_triggered, time(hour=4), hour=4)
-        self.run_daily(self._time_triggered, time(hour=21), hour=21)
+        self.run_daily(self._time_triggered, time(hour=20), hour=20)
+
+        # Listen to Motion
         self.listen_event(self._new_motion_bathroom, 'motion',
                           entity_id=ID['bathroom']['motion_sensor'])
         self.listen_event(self._new_motion_kitchen, 'motion',
@@ -105,6 +107,11 @@ class SmartBathroom(hass.Hass):
                           entity_id=ID['living_room']['motion_sensor'])
         self.listen_state(self._no_more_motion_bathroom,
                           ID['bathroom']['motion_sensor'], new='off')
+        
+        # Listen to button click
+        self.listen_event(self._new_click_bathroom_button, 'click',
+                          entity_id=ID['bathroom']['button'],
+                          click_type='single')
 
         # Debug remove
         self.listen_event(self.debug, 'flic_click',
@@ -133,6 +140,9 @@ class SmartBathroom(hass.Hass):
 
     def _no_more_motion_bathroom(self, _e, _a, _o, _n, _k):
         self.current_behavior.no_more_motion_bathroom()
+    
+    def _new_click_bathroom_button(self, _e, _d, _k):
+        pass
 
     """
     Start the different Behaviors

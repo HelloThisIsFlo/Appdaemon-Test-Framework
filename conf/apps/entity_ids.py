@@ -6,6 +6,7 @@ ID = {
     },
     'bathroom': {
         'motion_sensor': 'binary_sensor.motion_sensor_158d0001656bba',
+        'button': 'binary_sensor.switch_158d0001bd1767',
         'led_light': 'light.gateway_light_7811dcb356c9',
         'speaker': 'media_player.bathroom',
         'water_heater': 'switch.water_heater_switch'
