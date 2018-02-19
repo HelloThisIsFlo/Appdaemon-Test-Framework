@@ -1,5 +1,11 @@
 import appdaemon.plugins.hass.hassapi as hass
-from apps.entity_ids import ID
+try:
+    # Module namespaces when Automation Modules are loaded in AppDaemon
+    # is different from the 'real' python one.
+    # Appdaemon doesn't seem to take into account packages
+    from apps.entity_ids import ID
+except ModuleNotFoundError:
+    from entity_ids import ID
 
 class KitchenLight(hass.Hass):
     def initialize(self):
