@@ -145,61 +145,16 @@ class TestInitialize:
             hour=EVENING_HOUR)
 
 
-# For the rest of the tests, SmartBathroom was started during the day (at 3PM)
-class TestsDuringDay:
-    @pytest.fixture
-    def start_day_mode(self):
-        # By default SmartBathroom is started at 3PM
-        # it'll already be during the day
-        # So "start_day_mode" does nothing
-        return lambda: None
-
-    class TestEnterBathroom:
-        def test_light_turn_on(self, given_that, when_new, assert_that, start_day_mode):
-            start_day_mode()
-            when_new.motion_bathroom()
-            assert_that(ID['bathroom']['led_light']
-                        ).was_turned_on(color_name=DAY_COLOR)
-
-        def test__bathroom_playing__unmute(self, given_that, when_new, assert_that, start_day_mode):
-            start_day_mode()
-            given_that.state_of(ID['bathroom']['speaker']).is_set_to('playing')
-            when_new.motion_bathroom()
-            assert_bathroom_was_UNmuted(assert_that)
-
-        def test__entire_flat_playing__unmute(self, given_that, when_new, assert_that, start_day_mode):
-            start_day_mode()
-            given_that.state_of(
-                ID['cast_groups']['entire_flat']).is_set_to('playing')
-            when_new.motion_bathroom()
-            assert_bathroom_was_UNmuted(assert_that)
-
-        def test__nothing_playing__do_not_unmute(self, given_that, when_new, assert_that, start_day_mode):
-            start_day_mode()
-            when_new.motion_bathroom()
-            assert_that('media_player/volume_set').was_NOT_called_with(
-                entity_id=ID['bathroom']['speaker'],
-                volume_level=BATHROOM_VOLUMES['regular'])
-
-    class TestLeaveBathroom:
-        def test_mute_turn_off_light(self, given_that, when_new, assert_that, start_day_mode):
-            scenarios = [
-                when_new.motion_kitchen,
-                when_new.motion_living_room,
-                when_new.no_more_motion_bathroom
-            ]
-            for scenario in scenarios:
-                given_that.mock_functions_are_cleared()
-                start_day_mode()
-                scenario()
-                assert_bathroom_was_muted(assert_that)
-                assert_that(ID['bathroom']['led_light']).was_turned_off()
-
+##################################################################################
+## For the rest of the tests, SmartBathroom WAS STARTED DURING THE DAY (at 3PM) ##
+## For the rest of the tests, SmartBathroom WAS STARTED DURING THE DAY (at 3PM) ##
+## For the rest of the tests, SmartBathroom WAS STARTED DURING THE DAY (at 3PM) ##
+##################################################################################
 
 class TestDuringEvening:
     @pytest.fixture
     def start_evening_mode(self, when_new, given_that):
-        # Switch to evening mode
+        # Provide a trigger to switch to evening mode
         given_that.mock_functions_are_cleared()
         return lambda: when_new.time(hour=EVENING_HOUR)
 
@@ -461,6 +416,85 @@ class TestDuringMorningStep3:
             when_new.motion_living_room()
             assert_day_mode_started()
 
+class TestsDuringDay:
+    @pytest.fixture
+    def start_day_mode(self, when_new, given_that):
+        # Switch to Morning Step 3 and provide 
+        # a trigger to start the day mode
+
+        # SmartBathroom is started during the day by default (see fixture)
+        # Switch to: Evening mode
+        when_new.time(hour=EVENING_HOUR)
+        # Switch to: Night mode
+        when_new.time(hour=RESET_NIGHT_HOUR)
+        # Switch to: Morning Step 1
+        when_new.motion_bathroom()
+        # Switch to: Morning Step 2
+        when_new.click_bathroom_button()
+        # Switch to: Morning Step 3
+        when_new.click_bathroom_button()
+
+        given_that.mock_functions_are_cleared()
+        return lambda: when_new.motion_living_room()
+
+    class TestAtStart:
+        def test_turn_on_water_heater(self, assert_that, start_day_mode):
+            start_day_mode()
+            assert_that(ID['bathroom']['water_heater']).was_turned_on()
+
+        def test_turn_off_bathroom_light(self, assert_that, start_day_mode):
+            start_day_mode()
+            assert_that(ID['bathroom']['led_light']).was_turned_off()
+
+        def test_resume_podcast_playback(self, assert_that, start_day_mode):
+            start_day_mode()
+            for playback_device in [
+                    ID['bathroom']['speaker'],
+                    ID['cast_groups']['entire_flat']]:
+                assert_that('media_player/media_play').was_called_with(
+                    entity_id=playback_device)
+
+    class TestEnterBathroom:
+        def test_light_turn_on(self, given_that, when_new, assert_that, start_day_mode):
+            start_day_mode()
+            when_new.motion_bathroom()
+            assert_that(ID['bathroom']['led_light']
+                        ).was_turned_on(color_name=DAY_COLOR)
+
+        def test__bathroom_playing__unmute(self, given_that, when_new, assert_that, start_day_mode):
+            start_day_mode()
+            given_that.state_of(ID['bathroom']['speaker']).is_set_to('playing')
+            when_new.motion_bathroom()
+            assert_bathroom_was_UNmuted(assert_that)
+
+        def test__entire_flat_playing__unmute(self, given_that, when_new, assert_that, start_day_mode):
+            start_day_mode()
+            given_that.state_of(
+                ID['cast_groups']['entire_flat']).is_set_to('playing')
+            when_new.motion_bathroom()
+            assert_bathroom_was_UNmuted(assert_that)
+
+        def test__nothing_playing__do_not_unmute(self, given_that, when_new, assert_that, start_day_mode):
+            start_day_mode()
+            when_new.motion_bathroom()
+            assert_that('media_player/volume_set').was_NOT_called_with(
+                entity_id=ID['bathroom']['speaker'],
+                volume_level=BATHROOM_VOLUMES['regular'])
+
+    class TestLeaveBathroom:
+        def test_mute_turn_off_light(self, given_that, when_new, assert_that, start_day_mode):
+            scenarios = [
+                when_new.motion_kitchen,
+                when_new.motion_living_room,
+                when_new.no_more_motion_bathroom
+            ]
+            for scenario in scenarios:
+                given_that.mock_functions_are_cleared()
+                start_day_mode()
+                scenario()
+                assert_bathroom_was_muted(assert_that)
+                assert_that(ID['bathroom']['led_light']).was_turned_off()
+
 
 def assert_bathroom_was_muted(assert_that):
     assert_that('media_player/volume_set').was_called_with(
@@ -472,13 +506,3 @@ def assert_bathroom_was_UNmuted(assert_that):
     assert_that('media_player/volume_set').was_called_with(
         entity_id=ID['bathroom']['speaker'],
         volume_level=BATHROOM_VOLUMES['regular'])
-
-
-@pytest.mark.skip
-def tests_todo():
-    raise AssertionError("""
-    TESTS TO IMPLEMENT:
-
-    test_day_music_volume_unmute
-    ...
-    """)
