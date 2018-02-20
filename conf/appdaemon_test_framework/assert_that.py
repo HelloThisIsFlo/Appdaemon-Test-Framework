@@ -114,10 +114,24 @@ class WasNotWrapper(Was):
         self.was_wrapper = was_wrapper
 
     def turned_on(self, **service_specific_parameters):
-        pass
+        """ Assert that a given entity_id has NOT been turned ON w/ the given parameters"""
+        thing_not_turned_on_with_given_params = _capture_assert_failure_exception(
+            lambda: self.was_wrapper.turned_on(**service_specific_parameters))
+
+        if not thing_not_turned_on_with_given_params:
+            raise AssertionError(
+                "Should NOT have been turned ON w/ the given params: "
+                + str(self.was_wrapper.thing_to_check))
 
     def turned_off(self):
-        pass
+        """ Assert that a given entity_id has NOT been turned OFF """
+        thing_not_turned_off = _capture_assert_failure_exception(
+            lambda: self.was_wrapper.turned_off())
+
+        if not thing_not_turned_off:
+            raise AssertionError(
+                "Should NOT have been turned OFF: "
+                + str(self.was_wrapper.thing_to_check))
 
     def called_with(self, **kwargs):
         """ Assert that a given service has NOT been called with the given arguments"""
