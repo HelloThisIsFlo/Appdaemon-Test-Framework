@@ -388,11 +388,9 @@ class MorningStep1Behavior(BathroomBehavior):
 
     def new_motion_kitchen_living_room(self):
         self.mute_bathroom_cb()
-        self.turn_off_bathroom_light_cb()
 
     def no_more_motion_bathroom(self):
         self.mute_bathroom_cb()
-        self.turn_off_bathroom_light_cb()
 
     def click_on_bathroom_button(self):
         self.start_morning_step2_behavior_cb()

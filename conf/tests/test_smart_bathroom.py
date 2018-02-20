@@ -289,7 +289,7 @@ class TestDuringMorningStep1:
                 start_morning_step1_mode()
                 scenario()
                 assert_bathroom_was_muted(assert_that)
-                assert_that(ID['bathroom']['led_light']).was.turned_off()
+                assert_that(ID['bathroom']['led_light']).was_not.turned_off()
 
     class TestClickButton:
         def test__activate_morning_step2(self, given_that, when_new, assert_that, start_morning_step1_mode):
