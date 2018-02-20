@@ -202,6 +202,7 @@ class SmartBathroom(hass.Hass):
             self.turn_on_bathroom_light,
             self.turn_off_bathroom_light,
             self.resume_media_playback_entire_flat,
+            self.reset_all_volumes,
             self.mute_bathroom,
             self.unmute_bathroom,
             self.is_media_casting_bathroom,
@@ -492,6 +493,7 @@ class DayBehavior(BathroomBehavior):
                  turn_on_bathroom_light_cb,
                  turn_off_bathroom_light_cb,
                  resume_media_playback_cb,
+                 reset_all_volumes_cb,
                  mute_bathroom_cb,
                  unmute_bathroom_cb,
                  is_media_casting_bathroom_cb,
@@ -500,6 +502,7 @@ class DayBehavior(BathroomBehavior):
         self.turn_on_bathroom_light_cb = turn_on_bathroom_light_cb
         self.turn_off_bathroom_light_cb = turn_off_bathroom_light_cb
         self.resume_media_playback_cb = resume_media_playback_cb
+        self.reset_all_volumes_cb = reset_all_volumes_cb
         self.mute_bathroom_cb = mute_bathroom_cb
         self.unmute_bathroom_cb = unmute_bathroom_cb
         self.is_media_casting_bathroom_cb = is_media_casting_bathroom_cb
@@ -509,13 +512,14 @@ class DayBehavior(BathroomBehavior):
         # Initial state
         self.turn_on_water_heater_cb()
         self.turn_off_bathroom_light_cb()
-        self.mute_bathroom_cb()
         self.resume_media_playback_cb()
+        self.reset_all_volumes_cb()
 
     def detach_callbacks(self):
         self.turn_on_bathroom_light_cb = None
         self.turn_off_bathroom_light_cb = None
         self.resume_media_playback_cb = None
+        self.reset_all_volumes_cb = None
         self.mute_bathroom_cb = None
         self.unmute_bathroom_cb = None
         self.is_media_casting_bathroom_cb = None

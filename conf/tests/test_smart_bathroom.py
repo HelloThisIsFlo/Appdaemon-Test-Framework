@@ -208,6 +208,26 @@ class TestDuringNight:
         given_that.mock_functions_are_cleared()
         return lambda: when_new.time(hour=RESET_NIGHT_HOUR)
 
+    class TestAtStart:
+        def test_reset_volumes(self, assert_that, start_night_mode):
+            start_night_mode()
+            assert_that('media_player/volume_set').was.called_with(
+                entity_id=ID['bathroom']['speaker'],
+                volume_level=DEFAULT_VOLUMES['bathroom'])
+            assert_that('media_player/volume_set').was.called_with(
+                entity_id=ID['kitchen']['speaker'],
+                volume_level=DEFAULT_VOLUMES['kitchen'])
+            assert_that('media_player/volume_set').was.called_with(
+                entity_id=ID['living_room']['soundbar'],
+                volume_level=DEFAULT_VOLUMES['living_room_soundbar'])
+            assert_that('media_player/volume_set').was.called_with(
+                entity_id=ID['living_room']['controller'],
+                volume_level=DEFAULT_VOLUMES['living_room_controller'])
+
+        def test_turn_off_bathroom_light(self, assert_that, start_night_mode):
+            start_night_mode()
+            assert_that(ID['bathroom']['led_light']).was.turned_off()
+
     class TestMotionAnywhere:
         def test__activate_morning_step1(self, given_that, when_new, assert_that, start_night_mode):
             def assert_morning_step1_started():
@@ -416,10 +436,11 @@ class TestDuringMorningStep3:
             when_new.motion_living_room()
             assert_day_mode_started()
 
+
 class TestsDuringDay:
     @pytest.fixture
     def start_day_mode(self, when_new, given_that):
-        # Switch to Morning Step 3 and provide 
+        # Switch to Morning Step 3 and provide
         # a trigger to start the day mode
 
         # SmartBathroom is started during the day by default (see fixture)
@@ -453,6 +474,22 @@ class TestsDuringDay:
                     ID['cast_groups']['entire_flat']]:
                 assert_that('media_player/media_play').was.called_with(
                     entity_id=playback_device)
+
+        def test_reset_volumes(self, assert_that, start_day_mode):
+            pass
+            start_day_mode()
+            assert_that('media_player/volume_set').was.called_with(
+                entity_id=ID['bathroom']['speaker'],
+                volume_level=DEFAULT_VOLUMES['bathroom'])
+            assert_that('media_player/volume_set').was.called_with(
+                entity_id=ID['kitchen']['speaker'],
+                volume_level=DEFAULT_VOLUMES['kitchen'])
+            assert_that('media_player/volume_set').was.called_with(
+                entity_id=ID['living_room']['soundbar'],
+                volume_level=DEFAULT_VOLUMES['living_room_soundbar'])
+            assert_that('media_player/volume_set').was.called_with(
+                entity_id=ID['living_room']['controller'],
+                volume_level=DEFAULT_VOLUMES['living_room_controller'])
 
     class TestEnterBathroom:
         def test_light_turn_on(self, given_that, when_new, assert_that, start_day_mode):
