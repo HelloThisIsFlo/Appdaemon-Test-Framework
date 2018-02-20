@@ -1,4 +1,7 @@
+from abc import ABC, abstractmethod
 ### Custom Matchers ##################################################
+
+
 class ServiceOnAnyDomain:
     def __init__(self, service):
         self.service = ''.join(['/', service])
@@ -44,21 +47,35 @@ class EitherOrAssertionError(AssertionError):
 ######################################################################
 
 
-class AssertThatWrapper:
+class Was(ABC):
+    @abstractmethod
+    def turned_on(self, **service_specific_parameters):
+        pass
+
+    @abstractmethod
+    def turned_off(self):
+        pass
+
+    @abstractmethod
+    def called_with(self, **kwargs):
+        pass
+
+
+class WasWrapper(Was):
     def __init__(self, thing_to_check, hass_functions):
         self.thing_to_check = thing_to_check
         self.hass_functions = hass_functions
 
-    def was_turned_on(self, **service_specific_parameters):
+    def turned_on(self, **service_specific_parameters):
         """ Assert that a given entity_id has been turned on """
         entity_id = self.thing_to_check
 
-        service_not_called = self._capture_assert_failure_exception(
+        service_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('turn_on'),
                 {'entity_id': entity_id, **service_specific_parameters}))
 
-        turn_on_helper_not_called = self._capture_assert_failure_exception(
+        turn_on_helper_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['turn_on'].assert_any_call(
                 entity_id,
                 **service_specific_parameters))
@@ -67,16 +84,16 @@ class AssertThatWrapper:
             raise EitherOrAssertionError(
                 service_not_called, turn_on_helper_not_called)
 
-    def was_turned_off(self):
+    def turned_off(self):
         """ Assert that a given entity_id has been turned off """
         entity_id = self.thing_to_check
 
-        service_not_called = self._capture_assert_failure_exception(
+        service_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('turn_off'),
                 entity_id=entity_id))
 
-        turn_off_helper_not_called = self._capture_assert_failure_exception(
+        turn_off_helper_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['turn_off'].assert_any_call(
                 entity_id))
 
@@ -84,26 +101,44 @@ class AssertThatWrapper:
             raise EitherOrAssertionError(
                 service_not_called, turn_off_helper_not_called)
 
-    def _capture_assert_failure_exception(self, function_with_assertion):
-        """ Returns wether the assertion was successful or not. But does not throw """
-        try:
-            function_with_assertion()
-            return None
-        except AssertionError as failed_assert:
-            return failed_assert
-
-    def was_called_with(self, **kwargs):
+    def called_with(self, **kwargs):
         """ Assert that a given service has been called with the given arguments"""
         service_full_name = self.thing_to_check
 
         self.hass_functions['call_service'].assert_any_call(
             service_full_name, **kwargs)
 
-    def was_NOT_called_with(self, **kwargs):
+
+class WasNotWrapper(Was):
+    def __init__(self, was_wrapper):
+        self.was_wrapper = was_wrapper
+
+    def turned_on(self, **service_specific_parameters):
+        pass
+
+    def turned_off(self):
+        pass
+
+    def called_with(self, **kwargs):
         """ Assert that a given service has NOT been called with the given arguments"""
-        service_full_name = self.thing_to_check
-        service_not_called = self._capture_assert_failure_exception(
-            lambda: self.hass_functions['call_service'].assert_any_call(
-                service_full_name, **kwargs))
+        service_not_called = _capture_assert_failure_exception(
+            lambda: self.was_wrapper.called_with(**kwargs))
+
         if not service_not_called:
-            raise AssertionError("Service shoud NOT have been called with the given args: " + str(kwargs))
+            raise AssertionError(
+                "Service shoud NOT have been called with the given args: " + str(kwargs))
+
+
+class AssertThatWrapper:
+    def __init__(self, thing_to_check, hass_functions):
+        self.was = WasWrapper(thing_to_check, hass_functions)
+        self.was_not = WasNotWrapper(self.was)
+
+
+def _capture_assert_failure_exception(function_with_assertion):
+    """ Returns wether the assertion was successful or not. But does not throw """
+    try:
+        function_with_assertion()
+        return None
+    except AssertionError as failed_assert:
+        return failed_assert
