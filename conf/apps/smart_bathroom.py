@@ -58,47 +58,65 @@ DEFAULT_VOLUMES = {
   - Bathroom mute / un-mute when entering & leaving bathroom. If media playing
   - Light on-off RED
   ACTIVATE NEXT STEP: (Going back to Night Behavior) Time: 4AM
-
-TODO: Add logging when switching step
 """
 
 
-class BathroomBehavior(ABC):
-    @abstractmethod
+class BathroomBehavior:
+    def start(self):
+        pass
+
     def new_motion_bathroom(self):
         pass
 
-    @abstractmethod
     def new_motion_kitchen_living_room(self):
         pass
 
-    @abstractmethod
     def no_more_motion_bathroom(self):
         pass
 
-    @abstractmethod
     def click_on_bathroom_button(self):
         pass
 
-    @abstractmethod
     def time_triggered(self, hour_of_day):
-        pass
-
-    @abstractmethod
-    def detach_callbacks(self):
         pass
 
 
 class SmartBathroom(hass.Hass):
     def initialize(self):
-        self.current_behavior = EmptyBehavior()
+        self.behaviors = None
+        self._initialize_behaviors()
+
+        self.current_behavior = None
         self._start_initial_behavior()
 
-        # Listen to Time
+        self._register_time_callbacks()
+        self._register_motion_callbacks()
+        self._register_button_click_callback()
+
+        self._register_debug_callback()
+
+    def _initialize_behaviors(self):
+        self.behaviors = {
+            'night': NightBehavior(self),
+            'morning_step1': MorningStep1Behavior(self),
+            'morning_step2': MorningStep2Behavior(self),
+            'morning_step3': MorningStep3Behavior(self),
+            'evening': EveningBehavior(self),
+            'day': DayBehavior(self)
+        }
+
+    def _start_initial_behavior(self):
+        current_hour = self.time().hour
+        if current_hour < 4 or current_hour > 21:
+            self.start_behavior('evening')
+        else:
+            self.start_behavior('day')
+
+    def _register_time_callbacks(self):
         self.run_daily(self._time_triggered, time(hour=4), hour=4)
         self.run_daily(self._time_triggered, time(hour=20), hour=20)
 
-        # Listen to Motion
+    def _register_motion_callbacks(self):
         self.listen_event(self._new_motion_bathroom, 'motion',
                           entity_id=ID['bathroom']['motion_sensor'])
         self.listen_event(self._new_motion_kitchen, 'motion',
@@ -107,24 +125,28 @@ class SmartBathroom(hass.Hass):
                           entity_id=ID['living_room']['motion_sensor'])
         self.listen_state(self._no_more_motion_bathroom,
                           ID['bathroom']['motion_sensor'], new='off')
-        
-        # Listen to button click
+
+    def _register_button_click_callback(self):
         self.listen_event(self._new_click_bathroom_button, 'click',
                           entity_id=ID['bathroom']['button'],
                           click_type='single')
 
-        # Debug remove
-        self.listen_event(self.debug, 'flic_click',
+    def _register_debug_callback(self):
+        def _debug(self, _e, data, _k):
+            if data['click_type'] == 'single':
+                self.call_service('xiaomi_aqara/play_ringtone',
+                                  ringtone_id=10001, ringtone_vol=20)
+                # self.pause_media_entire_flat()
+                # self.turn_on_bathroom_light('blue')
+            elif data['click_type'] == 'double':
+                pass
+
+        self.listen_event(_debug, 'flic_click',
                           entity_id=ID['debug']['flic_black'])
 
-    def debug(self, _e, data, _k):
-        if data['click_type'] == 'single':
-            self.call_service('xiaomi_aqara/play_ringtone',
-                              ringtone_id=10001, ringtone_vol=20)
-            # self.pause_media_entire_flat()
-            # self.turn_on_bathroom_light('blue')
-        elif data['click_type'] == 'double':
-            pass
+    """
+    Callbacks
+    """
 
     def _time_triggered(self, kwargs):
         self.current_behavior.time_triggered(kwargs['hour'])
@@ -140,89 +162,18 @@ class SmartBathroom(hass.Hass):
 
     def _no_more_motion_bathroom(self, _e, _a, _o, _n, _k):
         self.current_behavior.no_more_motion_bathroom()
-    
+
     def _new_click_bathroom_button(self, _e, _d, _k):
         self.current_behavior.click_on_bathroom_button()
 
     """
-    Start the different Behaviors
+    SmartBathroom Services
     """
 
-    def _start_initial_behavior(self):
-        current_hour = self.time().hour
-        if current_hour < 4 or current_hour > 21:
-            self._start_evening_behavior()
-        else:
-            self._start_day_behavior()
-
-    def _start_night_behavior(self):
-        self.log("Starting Night Behavior")
-        self.current_behavior.detach_callbacks()
-        self.current_behavior = NightBehavior(
-            self.turn_off_bathroom_light,
-            self.reset_all_volumes,
-            self._start_morning_step1_behavior)
-
-    def _start_morning_step1_behavior(self):
-        self.log("Starting Morning Step1 Behavior")
-        self.current_behavior.detach_callbacks()
-        self.current_behavior = MorningStep1Behavior(
-            self.mute_bathroom,
-            self.unmute_bathroom,
-            self.is_media_casting_bathroom,
-            self.turn_on_bathroom_light,
-            self.turn_off_bathroom_light,
-            self._start_morning_step2_behavior)
-
-    def _start_morning_step2_behavior(self):
-        self.log("Starting Morning Step2 Behavior")
-        self.current_behavior.detach_callbacks()
-        self.current_behavior = MorningStep2Behavior(
-            self.set_shower_volume_bathroom,
-            self.mute_all_except_bathroom,
-            self.turn_on_bathroom_light,
-            self.play_notification_sound,
-            self._start_morning_step3_behavior)
-
-    def _start_morning_step3_behavior(self):
-        self.log("Starting Morning Step3 Behavior")
-        self.current_behavior.detach_callbacks()
-        self.current_behavior = MorningStep3Behavior(
-            self.mute_bathroom,
-            self.turn_off_water_heater,
-            self.pause_media_playback_entire_flat,
-            self.turn_on_bathroom_light,
-            self.play_notification_sound,
-            self._start_day_behavior)
-
-    def _start_day_behavior(self):
-        self.log("Starting Day Behavior")
-        self.current_behavior.detach_callbacks()
-        self.current_behavior = DayBehavior(
-            self.turn_on_bathroom_light,
-            self.turn_off_bathroom_light,
-            self.resume_media_playback_entire_flat,
-            self.reset_all_volumes,
-            self.mute_bathroom,
-            self.unmute_bathroom,
-            self.is_media_casting_bathroom,
-            self.turn_on_water_heater,
-            self._start_evening_behavior)
-
-    def _start_evening_behavior(self):
-        self.log("Starting Evening Behavior")
-        self.current_behavior.detach_callbacks()
-        self.current_behavior = EveningBehavior(
-            self.turn_on_bathroom_light,
-            self.turn_off_bathroom_light,
-            self.mute_bathroom,
-            self.unmute_bathroom,
-            self.is_media_casting_bathroom,
-            self._start_night_behavior)
-
-    """
-    Utility / Callback functions
-    """
+    def start_behavior(self, behavior):
+        self.log("Starting Behavior: " + behavior)
+        self.current_behavior = self.behaviors[behavior]
+        self.current_behavior.start()
 
     def reset_all_volumes(self):
         self._set_volume(ID['kitchen']['speaker'], DEFAULT_VOLUMES['kitchen'])
@@ -278,6 +229,10 @@ class SmartBathroom(hass.Hass):
         self.call_service('xiaomi_aqara/play_ringtone',
                           ringtone_id=10001, ringtone_vol=20)
 
+    """ 
+    Private functions
+    """
+
     def _set_volume(self, entity_id, volume):
         self.call_service('media_player/volume_set',
                           entity_id=entity_id,
@@ -300,292 +255,121 @@ Behavior Implementations
 """
 
 
-class EmptyBehavior(BathroomBehavior):
-    def new_motion_bathroom(self):
-        pass
-
-    def new_motion_kitchen_living_room(self):
-        pass
-
-    def no_more_motion_bathroom(self):
-        pass
-
-    def click_on_bathroom_button(self):
-        pass
-
-    def time_triggered(self, hour_of_day):
-        pass
-
-    def detach_callbacks(self):
-        pass
-
-
 class NightBehavior(BathroomBehavior):
-    def __init__(self,
-                 turn_off_bathroom_light_cb,
-                 reset_all_volumes_cb,
-                 start_morning_step1_behavior_cb):
-        self.turn_off_bathroom_light_cb = turn_off_bathroom_light_cb
-        self.reset_all_volumes_cb = reset_all_volumes_cb
-        self.start_morning_step1_behavior_cb = start_morning_step1_behavior_cb
+    def __init__(self, smart_bathroom):
+        self.smart_bathroom = smart_bathroom
 
-        # Initial state
-        self.reset_all_volumes_cb()
-        self.turn_off_bathroom_light_cb()
-
-    def detach_callbacks(self):
-        self.turn_off_bathroom_light_cb = None
-        self.reset_all_volumes_cb = None
-        self.start_morning_step1_behavior_cb = None
+    def start(self):
+        self.smart_bathroom.reset_all_volumes()
+        self.smart_bathroom.turn_off_bathroom_light()
 
     def new_motion_bathroom(self):
-        self.start_morning_step1_behavior_cb()
+        self.smart_bathroom.start_behavior('morning_step1')
 
     def new_motion_kitchen_living_room(self):
-        self.start_morning_step1_behavior_cb()
-
-    def no_more_motion_bathroom(self):
-        pass
-
-    def click_on_bathroom_button(self):
-        pass
-
-    def time_triggered(self, hour_of_day):
-        pass
+        self.smart_bathroom.start_behavior('morning_step1')
 
 
 class MorningStep1Behavior(BathroomBehavior):
-    def __init__(self,
-                 mute_bathroom_cb,
-                 unmute_bathroom_cb,
-                 is_media_casting_bathroom_cb,
-                 turn_on_bathroom_light_cb,
-                 turn_off_bathroom_light_cb,
-                 start_morning_step2_behavior_cb):
-        # Callbacks
-        self.mute_bathroom_cb = mute_bathroom_cb
-        self.unmute_bathroom_cb = unmute_bathroom_cb
-        self.is_media_casting_bathroom_cb = is_media_casting_bathroom_cb
-        self.turn_on_bathroom_light_cb = turn_on_bathroom_light_cb
-        self.turn_off_bathroom_light_cb = turn_off_bathroom_light_cb
-        self.start_morning_step2_behavior_cb = start_morning_step2_behavior_cb
+    def __init__(self, smart_bathroom):
+        self.smart_bathroom = smart_bathroom
 
-        # Initial state
-        self.turn_on_bathroom_light_cb('BLUE')
-        if self.is_media_casting_bathroom_cb():
-            self.unmute_bathroom_cb()
-
-    def detach_callbacks(self):
-        self.mute_bathroom_cb = None
-        self.unmute_bathroom_cb = None
-        self.is_media_casting_bathroom_cb = None
-        self.turn_on_bathroom_light_cb = None
-        self.turn_off_bathroom_light_cb = None
-        self.start_morning_step2_behavior_cb = None
+    def start(self):
+        self.smart_bathroom.turn_on_bathroom_light('BLUE')
+        if self.smart_bathroom.is_media_casting_bathroom():
+            self.smart_bathroom.unmute_bathroom()
 
     def new_motion_bathroom(self):
-        if self.is_media_casting_bathroom_cb():
-            self.unmute_bathroom_cb()
+        if self.smart_bathroom.is_media_casting_bathroom():
+            self.smart_bathroom.unmute_bathroom()
 
     def new_motion_kitchen_living_room(self):
-        self.mute_bathroom_cb()
+        self.smart_bathroom.mute_bathroom()
 
     def no_more_motion_bathroom(self):
-        self.mute_bathroom_cb()
+        self.smart_bathroom.mute_bathroom()
 
     def click_on_bathroom_button(self):
-        self.start_morning_step2_behavior_cb()
-
-    def time_triggered(self, hour_of_day):
-        pass
+        self.smart_bathroom.start_behavior('morning_step2')
 
 
 class MorningStep2Behavior(BathroomBehavior):
-    def __init__(self,
-                 set_shower_volume_bathroom_cb,
-                 mute_all_except_bathroom_cb,
-                 turn_on_bathroom_light_cb,
-                 play_notification_sound_cb,
-                 start_morning_step3_behavior_cb):
-        self.set_shower_volume_bathroom_cb = set_shower_volume_bathroom_cb
-        self.mute_all_except_bathroom_cb = mute_all_except_bathroom_cb
-        self.turn_on_bathroom_light_cb = turn_on_bathroom_light_cb
-        self.play_notification_sound_cb = play_notification_sound_cb
-        self.start_morning_step3_behavior_cb = start_morning_step3_behavior_cb
+    def __init__(self, smart_bathroom):
+        self.smart_bathroom = smart_bathroom
 
-        # Initial state
-        self.play_notification_sound_cb()
-        self.turn_on_bathroom_light_cb('GREEN')
-        self.set_shower_volume_bathroom_cb()
-        self.mute_all_except_bathroom_cb()
-
-    def detach_callbacks(self):
-        self.set_shower_volume_bathroom_cb = None
-        self.mute_all_except_bathroom_cb = None
-        self.turn_on_bathroom_light_cb = None
-        self.play_notification_sound_cb = None
-        self.start_morning_step3_behavior_cb = None
+    def start(self):
+        self.smart_bathroom.play_notification_sound()
+        self.smart_bathroom.turn_on_bathroom_light('GREEN')
+        self.smart_bathroom.set_shower_volume_bathroom()
+        self.smart_bathroom.mute_all_except_bathroom()
 
     def click_on_bathroom_button(self):
-        self.start_morning_step3_behavior_cb()
-
-    def new_motion_bathroom(self):
-        pass
-
-    def new_motion_kitchen_living_room(self):
-        pass
-
-    def no_more_motion_bathroom(self):
-        pass
-
-    def time_triggered(self, hour_of_day):
-        pass
+        self.smart_bathroom.start_behavior('morning_step3')
 
 
 class MorningStep3Behavior(BathroomBehavior):
-    def __init__(self,
-                 mute_bathroom_cb,
-                 turn_off_water_heater_cb,
-                 pause_media_cb,
-                 turn_on_bathroom_light_cb,
-                 play_notification_sound_cb,
-                 start_day_behavior_cb):
-        self.mute_bathroom_cb = mute_bathroom_cb
-        self.turn_off_water_heater_cb = turn_off_water_heater_cb
-        self.pause_media_cb = pause_media_cb
-        self.turn_on_bathroom_light_cb = turn_on_bathroom_light_cb
-        self.play_notification_sound_cb = play_notification_sound_cb
-        self.start_day_behavior_cb = start_day_behavior_cb
+    def __init__(self, smart_bathroom):
+        self.smart_bathroom = smart_bathroom
 
-        # Initial state
-        self.play_notification_sound_cb()
-        self.turn_on_bathroom_light_cb('YELLOW')
-        self.pause_media_cb()
-        self.mute_bathroom_cb()
-        self.turn_off_water_heater_cb()
-
-    def detach_callbacks(self):
-        self.mute_bathroom_cb = None
-        self.turn_off_water_heater_cb = None
-        self.pause_media_cb = None
-        self.turn_on_bathroom_light_cb = None
-        self.play_notification_sound_cb = None
-        self.start_day_behavior_cb = None
+    def start(self):
+        self.smart_bathroom.play_notification_sound()
+        self.smart_bathroom.turn_on_bathroom_light('YELLOW')
+        self.smart_bathroom.pause_media_playback_entire_flat()
+        self.smart_bathroom.mute_bathroom()
+        self.smart_bathroom.turn_off_water_heater()
 
     def new_motion_kitchen_living_room(self):
-        self.start_day_behavior_cb()
+        self.smart_bathroom.start_behavior('day')
 
     def no_more_motion_bathroom(self):
-        self.start_day_behavior_cb()
-
-    def new_motion_bathroom(self):
-        pass
-
-    def click_on_bathroom_button(self):
-        pass
-
-    def time_triggered(self, hour_of_day):
-        pass
+        self.smart_bathroom.start_behavior('day')
 
 
 class DayBehavior(BathroomBehavior):
-    def __init__(self,
-                 turn_on_bathroom_light_cb,
-                 turn_off_bathroom_light_cb,
-                 resume_media_playback_cb,
-                 reset_all_volumes_cb,
-                 mute_bathroom_cb,
-                 unmute_bathroom_cb,
-                 is_media_casting_bathroom_cb,
-                 turn_on_water_heater_cb,
-                 start_evening_behavior_cb):
-        self.turn_on_bathroom_light_cb = turn_on_bathroom_light_cb
-        self.turn_off_bathroom_light_cb = turn_off_bathroom_light_cb
-        self.resume_media_playback_cb = resume_media_playback_cb
-        self.reset_all_volumes_cb = reset_all_volumes_cb
-        self.mute_bathroom_cb = mute_bathroom_cb
-        self.unmute_bathroom_cb = unmute_bathroom_cb
-        self.is_media_casting_bathroom_cb = is_media_casting_bathroom_cb
-        self.turn_on_water_heater_cb = turn_on_water_heater_cb
-        self.start_evening_behavior_cb = start_evening_behavior_cb
+    def __init__(self, smart_bathroom):
+        self.smart_bathroom = smart_bathroom
 
-        # Initial state
-        self.turn_on_water_heater_cb()
-        self.turn_off_bathroom_light_cb()
-        self.resume_media_playback_cb()
-        self.reset_all_volumes_cb()
-
-    def detach_callbacks(self):
-        self.turn_on_bathroom_light_cb = None
-        self.turn_off_bathroom_light_cb = None
-        self.resume_media_playback_cb = None
-        self.reset_all_volumes_cb = None
-        self.mute_bathroom_cb = None
-        self.unmute_bathroom_cb = None
-        self.is_media_casting_bathroom_cb = None
-        self.turn_on_water_heater_cb = None
-        self.start_evening_behavior_cb = None
+    def start(self):
+        self.smart_bathroom.turn_on_water_heater()
+        self.smart_bathroom.turn_off_bathroom_light()
+        self.smart_bathroom.resume_media_playback_entire_flat()
+        self.smart_bathroom.reset_all_volumes()
 
     def new_motion_bathroom(self):
-        self.turn_on_bathroom_light_cb('WHITE')
-        if self.is_media_casting_bathroom_cb():
-            self.unmute_bathroom_cb()
+        self.smart_bathroom.turn_on_bathroom_light('WHITE')
+        if self.smart_bathroom.is_media_casting_bathroom():
+            self.smart_bathroom.unmute_bathroom()
 
     def new_motion_kitchen_living_room(self):
-        self.turn_off_bathroom_light_cb()
-        self.mute_bathroom_cb()
+        self.smart_bathroom.turn_off_bathroom_light()
+        self.smart_bathroom.mute_bathroom()
 
     def no_more_motion_bathroom(self):
-        self.turn_off_bathroom_light_cb()
-        self.mute_bathroom_cb()
+        self.smart_bathroom.turn_off_bathroom_light()
+        self.smart_bathroom.mute_bathroom()
 
     def time_triggered(self, hour_of_day):
         if hour_of_day == 20:
-            self.start_evening_behavior_cb()
-
-    def click_on_bathroom_button(self):
-        pass
+            self.smart_bathroom.start_behavior('evening')
 
 
 class EveningBehavior(BathroomBehavior):
-    def __init__(self,
-                 turn_on_bathroom_light_cb,
-                 turn_off_bathroom_light_cb,
-                 mute_bathroom_cb,
-                 unmute_bathroom_cb,
-                 is_media_casting_bathroom_cb,
-                 start_night_behavior_cb):
-        self.turn_on_bathroom_light_cb = turn_on_bathroom_light_cb
-        self.turn_off_bathroom_light_cb = turn_off_bathroom_light_cb
-        self.mute_bathroom_cb = mute_bathroom_cb
-        self.unmute_bathroom_cb = unmute_bathroom_cb
-        self.is_media_casting_bathroom_cb = is_media_casting_bathroom_cb
-        self.start_night_behavior_cb = start_night_behavior_cb
-
-    def detach_callbacks(self):
-        self.turn_on_bathroom_light_cb = None
-        self.turn_off_bathroom_light_cb = None
-        self.mute_bathroom_cb = None
-        self.unmute_bathroom_cb = None
-        self.is_media_casting_bathroom_cb = None
-        self.start_night_behavior_cb = None
+    def __init__(self, smart_bathroom):
+        self.smart_bathroom = smart_bathroom
 
     def new_motion_bathroom(self):
-        self.turn_on_bathroom_light_cb('RED')
-        if self.is_media_casting_bathroom_cb():
-            self.unmute_bathroom_cb()
+        self.smart_bathroom.turn_on_bathroom_light('RED')
+        if self.smart_bathroom.is_media_casting_bathroom():
+            self.smart_bathroom.unmute_bathroom()
 
     def new_motion_kitchen_living_room(self):
-        self.turn_off_bathroom_light_cb()
-        self.mute_bathroom_cb()
+        self.smart_bathroom.turn_off_bathroom_light()
+        self.smart_bathroom.mute_bathroom()
 
     def no_more_motion_bathroom(self):
-        self.turn_off_bathroom_light_cb()
-        self.mute_bathroom_cb()
+        self.smart_bathroom.turn_off_bathroom_light()
+        self.smart_bathroom.mute_bathroom()
 
     def time_triggered(self, hour_of_day):
         if hour_of_day == 4:
-            self.start_night_behavior_cb()
-
-    def click_on_bathroom_button(self):
-        pass
+            self.smart_bathroom.start_behavior('night')
