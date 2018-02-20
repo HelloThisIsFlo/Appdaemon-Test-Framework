@@ -21,7 +21,7 @@ ID = {
         'button': 'binary_sensor.switch_158d0001bd15b7'
     },
     'cast_groups': {
-        'entire_flat': 'media_player.entire_flat'
+        'entire_flat': 'media_player.the_entire_flat'
     },
     'debug': {
         'flic_black': 'flic_80e4da71a8b3'
