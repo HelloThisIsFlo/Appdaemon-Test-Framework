@@ -519,22 +519,32 @@ class TestsDuringDay:
                 volume_level=BATHROOM_VOLUMES['regular'])
 
     class TestLeaveBathroom:
-        def test_mute_turn_off_light(self, given_that, when_new, assert_that, start_day_mode):
+        def test__no_more_motion__mute_turn_off_light(self, given_that, when_new, assert_that, start_day_mode):
+            start_day_mode()
+            when_new.no_more_motion_bathroom()
+            assert_bathroom_was_muted(assert_that)
+            assert_that(ID['bathroom']['led_light']).was.turned_off()
+
+        def test__motion_anywhere_except_bathroom__do_NOT_mute_turn_off_light(self, given_that, when_new, assert_that, start_day_mode):
             scenarios = [
                 when_new.motion_kitchen,
-                when_new.motion_living_room,
-                when_new.no_more_motion_bathroom
+                when_new.motion_living_room
             ]
             for scenario in scenarios:
-                given_that.mock_functions_are_cleared()
                 start_day_mode()
+                given_that.mock_functions_are_cleared()
                 scenario()
-                assert_bathroom_was_muted(assert_that)
-                assert_that(ID['bathroom']['led_light']).was.turned_off()
+                assert_bathroom_was_NOT_muted(assert_that)
+                assert_that(ID['bathroom']['led_light']).was_not.turned_off()
 
 
 def assert_bathroom_was_muted(assert_that):
     assert_that('media_player/volume_set').was.called_with(
+        entity_id=ID['bathroom']['speaker'],
+        volume_level=FAKE_MUTE_VOLUME)
+
+def assert_bathroom_was_NOT_muted(assert_that):
+    assert_that('media_player/volume_set').was_not.called_with(
         entity_id=ID['bathroom']['speaker'],
         volume_level=FAKE_MUTE_VOLUME)
 

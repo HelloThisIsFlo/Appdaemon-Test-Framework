@@ -340,10 +340,6 @@ class DayBehavior(BathroomBehavior):
         if self.smart_bathroom.is_media_casting_bathroom():
             self.smart_bathroom.unmute_bathroom()
 
-    def new_motion_kitchen_living_room(self):
-        self.smart_bathroom.turn_off_bathroom_light()
-        self.smart_bathroom.mute_bathroom()
-
     def no_more_motion_bathroom(self):
         self.smart_bathroom.turn_off_bathroom_light()
         self.smart_bathroom.mute_bathroom()
