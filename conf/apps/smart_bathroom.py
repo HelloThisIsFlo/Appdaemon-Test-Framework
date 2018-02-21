@@ -262,6 +262,7 @@ class NightBehavior(BathroomBehavior):
     def start(self):
         self.smart_bathroom.reset_all_volumes()
         self.smart_bathroom.turn_off_bathroom_light()
+        self.smart_bathroom.turn_on_water_heater()
 
     def new_motion_bathroom(self):
         self.smart_bathroom.start_behavior('morning_step1')

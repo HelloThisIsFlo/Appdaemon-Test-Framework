@@ -228,6 +228,12 @@ class TestDuringNight:
             start_night_mode()
             assert_that(ID['bathroom']['led_light']).was.turned_off()
 
+        def test_turn_on_water_heater(self, assert_that, start_night_mode):
+            start_night_mode()
+            assert_that(ID['bathroom']['water_heater']).was.turned_on()
+
+        
+
     class TestMotionAnywhere:
         def test__activate_morning_step1(self, given_that, when_new, assert_that, start_night_mode):
             def assert_morning_step1_started():
