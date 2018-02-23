@@ -107,7 +107,7 @@ class SmartBathroom(hass.Hass):
 
     def _start_initial_behavior(self):
         current_hour = self.time().hour
-        if current_hour < 4 or current_hour > 21:
+        if current_hour < 4 or current_hour >= 20:
             self.start_behavior('evening')
         else:
             self.start_behavior('day')

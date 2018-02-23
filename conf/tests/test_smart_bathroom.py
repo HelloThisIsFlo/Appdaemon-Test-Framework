@@ -91,7 +91,7 @@ class TestInitialize:
 
     def test_start_during_evening(self, given_that, when_new, assert_that, smart_bathroom):
         # Given: Starting during the day
-        given_that.time_is(time(hour=22))
+        given_that.time_is(time(hour=20))
 
         # When: SmartBathroom is initialized
         smart_bathroom.initialize()
