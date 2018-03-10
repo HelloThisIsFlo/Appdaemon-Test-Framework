@@ -97,12 +97,12 @@ class SmartBathroom(hass.Hass):
 
     def _initialize_behaviors(self):
         self.behaviors = {
-            'night': NightBehavior(self),
             'morning_step1': MorningStep1Behavior(self),
-            'morning_step2': MorningStep2Behavior(self),
-            'morning_step3': MorningStep3Behavior(self),
+            'day': DayBehavior(self),
             'evening': EveningBehavior(self),
-            'day': DayBehavior(self)
+            'night': NightBehavior(self),
+            'shower': ShowerBehavior(self),
+            'after_shower': AfterShowerBehavior(self)
         }
 
     def _start_initial_behavior(self):
@@ -291,10 +291,10 @@ class MorningStep1Behavior(BathroomBehavior):
         self.smart_bathroom.mute_bathroom()
 
     def click_on_bathroom_button(self):
-        self.smart_bathroom.start_behavior('morning_step2')
+        self.smart_bathroom.start_behavior('shower')
 
 
-class MorningStep2Behavior(BathroomBehavior):
+class ShowerBehavior(BathroomBehavior):
     def __init__(self, smart_bathroom):
         self.smart_bathroom = smart_bathroom
 
@@ -305,10 +305,10 @@ class MorningStep2Behavior(BathroomBehavior):
         self.smart_bathroom.mute_all_except_bathroom()
 
     def click_on_bathroom_button(self):
-        self.smart_bathroom.start_behavior('morning_step3')
+        self.smart_bathroom.start_behavior('after_shower')
 
 
-class MorningStep3Behavior(BathroomBehavior):
+class AfterShowerBehavior(BathroomBehavior):
     def __init__(self, smart_bathroom):
         self.smart_bathroom = smart_bathroom
 
