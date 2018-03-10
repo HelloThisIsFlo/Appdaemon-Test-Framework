@@ -356,6 +356,9 @@ class DayBehavior(BathroomBehavior):
         if hour_of_day == 20:
             self.smart_bathroom.start_behavior('evening')
 
+    def click_on_bathroom_button(self):
+        self.smart_bathroom.start_behavior('shower')
+
 
 class EveningBehavior(BathroomBehavior):
     def __init__(self, smart_bathroom):

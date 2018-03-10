@@ -10,7 +10,7 @@ TODO: Add fixture to 'set_state' (will actually patch the 'get_state' method)
 """
 
 MORNING_STEP1_COLOR = 'BLUE'
-MORNING_STEP2_COLOR = 'GREEN'
+SHOWER_COLOR = 'GREEN'
 MORNING_STEP3_COLOR = 'YELLOW'
 DAY_COLOR = 'WHITE'
 EVENING_COLOR = 'RED'
@@ -71,36 +71,16 @@ def when_new(smart_bathroom):
 
 # Start at different times
 class TestInitialize:
-    def assert_bathroom_light_reacts_to_movement_with_color(self, color, when_new, assert_that):
-        when_new.motion_bathroom()
-        assert_that(ID['bathroom']['led_light']
-                    ).was.turned_on(color_name=color)
 
-    def test_start_during_day(self, given_that, when_new, assert_that, smart_bathroom):
-        # Given: Starting during the day
+    def test_start_during_day(self, given_that, when_new, assert_that, smart_bathroom, assert_day_mode_started):
         given_that.time_is(time(hour=13))
-
-        # When: SmartBathroom is initialized
         smart_bathroom.initialize()
+        assert_day_mode_started()
 
-        # Then: Day mode is started
-        self.assert_bathroom_light_reacts_to_movement_with_color(
-            DAY_COLOR,
-            when_new,
-            assert_that)
-
-    def test_start_during_evening(self, given_that, when_new, assert_that, smart_bathroom):
-        # Given: Starting during the day
+    def test_start_during_evening(self, given_that, when_new, assert_that, smart_bathroom, assert_evening_mode_started):
         given_that.time_is(time(hour=20))
-
-        # When: SmartBathroom is initialized
         smart_bathroom.initialize()
-
-        # Then: Evening mode is started
-        self.assert_bathroom_light_reacts_to_movement_with_color(
-            EVENING_COLOR,
-            when_new,
-            assert_that)
+        assert_evening_mode_started()
 
     def test_callbacks_are_registered(self, smart_bathroom, hass_functions):
         # Given: The mocked callback Appdaemon registration functions
@@ -213,7 +193,6 @@ class TestsDuringDay:
         # Trigger to switch to Day mode
         return lambda: when_new.time(hour=DAY_HOUR)
 
-
     class TestAtStart:
         def test_turn_on_water_heater(self, assert_that, start_day_mode):
             start_day_mode()
@@ -224,6 +203,7 @@ class TestsDuringDay:
             assert_that(ID['bathroom']['led_light']).was.turned_off()
 
         def test_resume_podcast_playback(self, assert_that, start_day_mode):
+            # TODO: Maybe migrate at end of AfterShower
             start_day_mode()
             for playback_device in [
                     ID['bathroom']['speaker'],
@@ -293,85 +273,16 @@ class TestsDuringDay:
                 assert_bathroom_was_NOT_muted(assert_that)
                 assert_that(ID['bathroom']['led_light']).was_not.turned_off()
 
-
-class TestDuringMorningStep1:
-    @pytest.fixture
-    def start_morning_step1_mode(self, when_new, given_that, smart_bathroom):
-        # # Switch to morning step1_mode mode
-        # when_new.time(hour=EVENING_HOUR)
-        # when_new.time(hour=DAY_HOUR)
-        # given_that.mock_functions_are_cleared()
-        # return lambda: when_new.motion_bathroom()
-        # TODO REMOVE temp hack
-        return lambda: smart_bathroom.start_behavior('morning_step1')
-
-    class TestAtStart:
-        def test_light_indicator(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            start_morning_step1_mode()
-            assert_that(ID['bathroom']['led_light']).was.turned_on(
-                color_name=MORNING_STEP1_COLOR)
-
-        def test__bathroom_playing__unmute(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            given_that.state_of(ID['bathroom']['speaker']).is_set_to('playing')
-            start_morning_step1_mode()
-            assert_bathroom_was_UNmuted(assert_that)
-
-        def test__entire_flat_playing__unmute(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            given_that.state_of(
-                ID['cast_groups']['entire_flat']).is_set_to('playing')
-            start_morning_step1_mode()
-            assert_bathroom_was_UNmuted(assert_that)
-
-        def test__nothing_playing__do_not_unmute(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            start_morning_step1_mode()
-            assert_that('media_player/volume_set').was_not.called_with(
-                entity_id=ID['bathroom']['speaker'],
-                volume_level=BATHROOM_VOLUMES['regular'])
-
-    class TestEnterBathroom:
-        def test__bathroom_playing__unmute(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            start_morning_step1_mode()
-            given_that.state_of(ID['bathroom']['speaker']).is_set_to('playing')
-            when_new.motion_bathroom()
-            assert_bathroom_was_UNmuted(assert_that)
-
-        def test__entire_flat_playing__unmute(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            start_morning_step1_mode()
-            given_that.state_of(
-                ID['cast_groups']['entire_flat']).is_set_to('playing')
-            when_new.motion_bathroom()
-            assert_bathroom_was_UNmuted(assert_that)
-
-        def test__nothing_playing__do_not_unmute(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            start_morning_step1_mode()
-            when_new.motion_bathroom()
-            assert_that('media_player/volume_set').was_not.called_with(
-                entity_id=ID['bathroom']['speaker'],
-                volume_level=BATHROOM_VOLUMES['regular'])
-
-    class TestLeaveBathroom:
-        def test__mute__do_not_turn_off_light(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            scenarios = [
-                when_new.motion_kitchen,
-                when_new.motion_living_room,
-                when_new.no_more_motion_bathroom
-            ]
-            for scenario in scenarios:
-                given_that.mock_functions_are_cleared()
-                start_morning_step1_mode()
-                scenario()
-                assert_bathroom_was_muted(assert_that)
-                assert_that(ID['bathroom']['led_light']).was_not.turned_off()
-
-    class TestClickButton:
-        def test__activate_shower(self, given_that, when_new, assert_that, start_morning_step1_mode):
-            def assert_shower_started():
-                assert_that(ID['bathroom']['led_light']).was.turned_on(
-                    color_name=MORNING_STEP2_COLOR)
-
-            start_morning_step1_mode()
+    class TestSwitchToNextState:
+        def test_click_activate_shower_state(self, start_day_mode, when_new, assert_shower_state_started):
+            start_day_mode()
             when_new.click_bathroom_button()
-            assert_shower_started()
+            assert_shower_state_started()
+
+        def test_8pm_activate_evening_state(self, start_day_mode, when_new, assert_evening_mode_started):
+            start_day_mode()
+            when_new.time(hour=EVENING_HOUR)
+            assert_evening_mode_started()
 
 
 class TestDuringShower:
@@ -390,7 +301,7 @@ class TestDuringShower:
         def test_light_indicator(self, given_that, when_new, assert_that, start_shower_mode):
             start_shower_mode()
             assert_that(ID['bathroom']['led_light']).was.turned_on(
-                color_name=MORNING_STEP2_COLOR)
+                color_name=SHOWER_COLOR)
 
         def test_notif_sound(self, assert_that, start_shower_mode):
             notif_sound_id = 10001
@@ -474,14 +385,6 @@ class TestDuringAfterShower:
             assert_that(ID['bathroom']['water_heater']).was.turned_off()
 
     class TestMotionAnywhereExceptBathroom:
-        @pytest.fixture
-        def assert_day_mode_started(self, when_new, assert_that):
-            def wrapped():
-                when_new.motion_bathroom()
-                assert_that(ID['bathroom']['led_light']
-                            ).was.turned_on(color_name=DAY_COLOR)
-            return wrapped
-
         def test__motion_kitchen__activate_day_mode(self, when_new, assert_day_mode_started, start_after_shower_mode):
             start_after_shower_mode()
             when_new.motion_kitchen()
@@ -498,6 +401,7 @@ def assert_bathroom_was_muted(assert_that):
         entity_id=ID['bathroom']['speaker'],
         volume_level=FAKE_MUTE_VOLUME)
 
+
 def assert_bathroom_was_NOT_muted(assert_that):
     assert_that('media_player/volume_set').was_not.called_with(
         entity_id=ID['bathroom']['speaker'],
@@ -508,3 +412,31 @@ def assert_bathroom_was_UNmuted(assert_that):
     assert_that('media_player/volume_set').was.called_with(
         entity_id=ID['bathroom']['speaker'],
         volume_level=BATHROOM_VOLUMES['regular'])
+
+
+def assert_bathroom_light_reacts_to_movement_with_color(color, when_new, assert_that):
+    when_new.motion_bathroom()
+    assert_that(ID['bathroom']['led_light']
+                ).was.turned_on(color_name=color)
+
+
+@pytest.fixture
+def assert_day_mode_started(when_new, assert_that):
+    return lambda: assert_bathroom_light_reacts_to_movement_with_color(
+        DAY_COLOR,
+        when_new,
+        assert_that)
+
+
+@pytest.fixture
+def assert_evening_mode_started(when_new, assert_that):
+    return lambda: assert_bathroom_light_reacts_to_movement_with_color(
+        EVENING_COLOR,
+        when_new,
+        assert_that)
+
+
+@pytest.fixture
+def assert_shower_state_started(assert_that):
+    return lambda: assert_that(ID['bathroom']['led_light']).was.turned_on(
+        color_name=SHOWER_COLOR)
