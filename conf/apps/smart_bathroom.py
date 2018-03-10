@@ -376,4 +376,4 @@ class EveningBehavior(BathroomBehavior):
 
     def time_triggered(self, hour_of_day):
         if hour_of_day == 4:
-            self.smart_bathroom.start_behavior('night')
+            self.smart_bathroom.start_behavior('day')

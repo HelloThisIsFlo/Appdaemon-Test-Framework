@@ -15,7 +15,7 @@ MORNING_STEP3_COLOR = 'YELLOW'
 DAY_COLOR = 'WHITE'
 EVENING_COLOR = 'RED'
 EVENING_HOUR = 20
-RESET_NIGHT_HOUR = 4
+DAY_HOUR = 4
 
 
 @pytest.fixture
@@ -137,8 +137,8 @@ class TestInitialize:
 
         run_daily.assert_any_call(
             smart_bathroom._time_triggered,
-            time(hour=RESET_NIGHT_HOUR),
-            hour=RESET_NIGHT_HOUR)
+            time(hour=DAY_HOUR),
+            hour=DAY_HOUR)
         run_daily.assert_any_call(
             smart_bathroom._time_triggered,
             time(hour=EVENING_HOUR),
@@ -154,8 +154,8 @@ class TestInitialize:
 class TestDuringEvening:
     @pytest.fixture
     def start_evening_mode(self, when_new, given_that):
-        # Provide a trigger to switch to evening mode
         given_that.mock_functions_are_cleared()
+        # Provide a trigger to switch to evening mode
         return lambda: when_new.time(hour=EVENING_HOUR)
 
     class TestEnterBathroom:
@@ -202,11 +202,10 @@ class TestDuringEvening:
 
 class TestDuringNight:
     @pytest.fixture
-    def start_night_mode(self, when_new, given_that):
-        # Switch to evening mode
-        when_new.time(hour=EVENING_HOUR)
-        given_that.mock_functions_are_cleared()
-        return lambda: when_new.time(hour=RESET_NIGHT_HOUR)
+    def start_night_mode(self, when_new, given_that, smart_bathroom):
+        # TODO: Remove hack and entire test class (night deprecated)
+        #       After ensuring all behavior replicated during day
+        return lambda: smart_bathroom.start_behavior('night')
 
     class TestAtStart:
         def test_reset_volumes(self, assert_that, start_night_mode):
@@ -252,12 +251,14 @@ class TestDuringNight:
 
 class TestDuringMorningStep1:
     @pytest.fixture
-    def start_morning_step1_mode(self, when_new, given_that):
-        # Switch to morning step1_mode mode
-        when_new.time(hour=EVENING_HOUR)
-        when_new.time(hour=RESET_NIGHT_HOUR)
-        given_that.mock_functions_are_cleared()
-        return lambda: when_new.motion_bathroom()
+    def start_morning_step1_mode(self, when_new, given_that, smart_bathroom):
+        # # Switch to morning step1_mode mode
+        # when_new.time(hour=EVENING_HOUR)
+        # when_new.time(hour=DAY_HOUR)
+        # given_that.mock_functions_are_cleared()
+        # return lambda: when_new.motion_bathroom()
+        # TODO REMOVE temp hack
+        return lambda: smart_bathroom.start_behavior('morning_step1')
 
     class TestAtStart:
         def test_light_indicator(self, given_that, when_new, assert_that, start_morning_step1_mode):
@@ -330,13 +331,15 @@ class TestDuringMorningStep1:
 
 class TestDuringShower:
     @pytest.fixture
-    def start_shower_mode(self, when_new, given_that):
-        # Switch to morning step2_mode mode
-        when_new.time(hour=EVENING_HOUR)
-        when_new.time(hour=RESET_NIGHT_HOUR)
-        when_new.motion_bathroom()
-        given_that.mock_functions_are_cleared()
-        return lambda: when_new.click_bathroom_button()
+    def start_shower_mode(self, when_new, given_that, smart_bathroom):
+        # # Switch to morning step2_mode mode
+        # when_new.time(hour=EVENING_HOUR)
+        # when_new.time(hour=DAY_HOUR)
+        # when_new.motion_bathroom()
+        # given_that.mock_functions_are_cleared()
+        # return lambda: when_new.click_bathroom_button()
+        # TODO: Remove hack
+        return lambda: smart_bathroom.start_behavior('shower')
 
     class TestAtStart:
         def test_light_indicator(self, given_that, when_new, assert_that, start_shower_mode):
@@ -385,12 +388,14 @@ class TestDuringShower:
 
 class TestDuringAfterShower:
     @pytest.fixture
-    def start_after_shower_mode(self, when_new, given_that):
-        # Switch to morning step2_mode mode and return callback to trigger step3
-        when_new.time(hour=EVENING_HOUR)
-        when_new.time(hour=RESET_NIGHT_HOUR)
-        when_new.motion_bathroom()
-        when_new.click_bathroom_button()
+    def start_after_shower_mode(self, when_new, given_that, smart_bathroom):
+        # # Switch to morning step2_mode mode and return callback to trigger step3
+        # when_new.time(hour=EVENING_HOUR)
+        # when_new.time(hour=DAY_HOUR)
+        # when_new.motion_bathroom()
+        # when_new.click_bathroom_button()
+        # TODO: Remove hack
+        smart_bathroom.start_behavior('shower')
         given_that.mock_functions_are_cleared()
         return lambda: when_new.click_bathroom_button()
 
@@ -446,23 +451,16 @@ class TestDuringAfterShower:
 class TestsDuringDay:
     @pytest.fixture
     def start_day_mode(self, when_new, given_that):
-        # Switch to Morning Step 3 and provide
-        # a trigger to start the day mode
+        # Switch to Evening mode and provide
+        # a trigger to start the Day mode
 
-        # SmartBathroom is started during the day by default (see fixture)
         # Switch to: Evening mode
         when_new.time(hour=EVENING_HOUR)
-        # Switch to: Night mode
-        when_new.time(hour=RESET_NIGHT_HOUR)
-        # Switch to: Morning Step 1
-        when_new.motion_bathroom()
-        # Switch to: Morning Step 2
-        when_new.click_bathroom_button()
-        # Switch to: Morning Step 3
-        when_new.click_bathroom_button()
-
         given_that.mock_functions_are_cleared()
-        return lambda: when_new.motion_living_room()
+
+        # Trigger to switch to Day mode
+        return lambda: when_new.time(hour=DAY_HOUR)
+
 
     class TestAtStart:
         def test_turn_on_water_heater(self, assert_that, start_day_mode):
