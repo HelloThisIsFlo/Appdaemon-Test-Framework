@@ -364,7 +364,7 @@ class TestDuringAfterShower:
             assert_that(ID['bathroom']['water_heater']).was.turned_off()
 
     class TestMotionAnywhereExceptBathroom:
-        def test_activate_day_mode_resume_podcast_playback(self, given_that, when_new, assert_that, assert_day_mode_started, start_after_shower_mode):
+        def test_resume_podcast_playback(self, given_that, when_new, assert_that, assert_day_mode_started, start_after_shower_mode):
             scenarios = [
                 when_new.motion_kitchen,
                 when_new.motion_living_room,
@@ -375,15 +375,36 @@ class TestDuringAfterShower:
                 start_after_shower_mode()
                 # When: Motion
                 scenario()
-                # Assert: Day mode started & playback resumed
-                assert_day_mode_started()
+                # Assert: Playback resumed
                 for playback_device in [
                         ID['bathroom']['speaker'],
                         ID['cast_groups']['entire_flat']]:
                     assert_that('media_player/media_play').was.called_with(
                         entity_id=playback_device)
 
+        def test_during_day_activate_day_mode(self, given_that, when_new, assert_that, assert_day_mode_started, start_after_shower_mode):
+            scenarios = [
+                when_new.motion_kitchen,
+                when_new.motion_living_room,
+                when_new.no_more_motion_bathroom
+            ]
+            for scenario in scenarios:
+                given_that.time_is(time(hour=14))
+                start_after_shower_mode()
+                scenario()
+                assert_day_mode_started()
 
+        def test_during_evening_activate_evening_mode(self, given_that, when_new, assert_that, assert_evening_mode_started, start_after_shower_mode):
+            scenarios = [
+                when_new.motion_kitchen,
+                when_new.motion_living_room,
+                when_new.no_more_motion_bathroom
+            ]
+            for scenario in scenarios:
+                given_that.time_is(time(hour=20))
+                start_after_shower_mode()
+                scenario()
+                assert_evening_mode_started()
 
 def assert_bathroom_was_muted(assert_that):
     assert_that('media_player/volume_set').was.called_with(

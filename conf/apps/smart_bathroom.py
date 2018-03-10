@@ -94,7 +94,7 @@ class SmartBathroom(hass.Hass):
         self._initialize_behaviors()
 
         self.current_behavior = None
-        self._start_initial_behavior()
+        self.start_initial_behavior()
 
         self._register_time_callbacks()
         self._register_motion_callbacks()
@@ -110,7 +110,7 @@ class SmartBathroom(hass.Hass):
             'after_shower': AfterShowerBehavior(self)
         }
 
-    def _start_initial_behavior(self):
+    def start_initial_behavior(self):
         current_hour = self.time().hour
         if current_hour < 4 or current_hour >= 20:
             self.start_behavior('evening')
@@ -286,12 +286,15 @@ class AfterShowerBehavior(BathroomBehavior):
         self.smart_bathroom.turn_off_water_heater()
 
     def new_motion_kitchen_living_room(self):
-        self.smart_bathroom.resume_media_playback_entire_flat()
-        self.smart_bathroom.start_behavior('day')
+        self._activate_next_state()
 
     def no_more_motion_bathroom(self):
+        self._activate_next_state()
+
+    def _activate_next_state(self):
         self.smart_bathroom.resume_media_playback_entire_flat()
-        self.smart_bathroom.start_behavior('day')
+        self.smart_bathroom.start_initial_behavior()
+
 
 
 class DayBehavior(BathroomBehavior):
