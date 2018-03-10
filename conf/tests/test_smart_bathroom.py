@@ -288,9 +288,10 @@ class TestDuringShower:
         def test_notif_sound(self, assert_that, start_shower_mode):
             notif_sound_id = 10001
             volume = 20
+            xiaomi_gateway_mac_address = ID['bathroom']['gateway_mac_address']
             start_shower_mode()
             assert_that('xiaomi_aqara/play_ringtone').was.called_with(
-                ringtone_id=notif_sound_id, ringtone_vol=volume)
+                ringtone_id=notif_sound_id, ringtone_vol=volume, gw_mac=xiaomi_gateway_mac_address)
 
         def test_mute_all_except_bathroom(self, given_that, assert_that, start_shower_mode):
             # Bug with sound bar firmware: Can only increase the volume by 10% at a time
@@ -343,9 +344,10 @@ class TestDuringAfterShower:
         def test_notif_sound(self, assert_that, start_after_shower_mode):
             notif_sound_id = 10001
             volume = 20
+            xiaomi_gateway_mac_address = ID['bathroom']['gateway_mac_address']
             start_after_shower_mode()
             assert_that('xiaomi_aqara/play_ringtone').was.called_with(
-                ringtone_id=notif_sound_id, ringtone_vol=volume)
+                ringtone_id=notif_sound_id, ringtone_vol=volume, gw_mac=xiaomi_gateway_mac_address)
 
         def test_pause_podcast(self, assert_that, start_after_shower_mode):
             start_after_shower_mode()

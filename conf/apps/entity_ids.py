@@ -10,7 +10,8 @@ ID = {
         'button': 'binary_sensor.bathroom_button',
         'led_light': 'light.bathroom_gateway_light',
         'speaker': 'media_player.bathroom_speaker',
-        'water_heater': 'switch.water_heater'
+        'water_heater': 'switch.water_heater',
+        'gateway_mac_address': '78:11:DC:B3:56:C9'
     },
     'living_room': {
         'motion_sensor': 'binary_sensor.living_room_motion',

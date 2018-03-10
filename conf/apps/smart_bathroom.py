@@ -232,7 +232,7 @@ class SmartBathroom(hass.Hass):
 
     def play_notification_sound(self):
         self.call_service('xiaomi_aqara/play_ringtone',
-                          ringtone_id=10001, ringtone_vol=20)
+                          ringtone_id=10001, ringtone_vol=20, gw_mac=ID['bathroom']['gateway_mac_address'])
 
     """ 
     Private functions
