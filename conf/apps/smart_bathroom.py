@@ -104,10 +104,8 @@ class SmartBathroom(hass.Hass):
 
     def _initialize_behaviors(self):
         self.behaviors = {
-            'morning_step1': MorningStep1Behavior(self),
             'day': DayBehavior(self),
             'evening': EveningBehavior(self),
-            'night': NightBehavior(self),
             'shower': ShowerBehavior(self),
             'after_shower': AfterShowerBehavior(self)
         }
@@ -260,45 +258,6 @@ class SmartBathroom(hass.Hass):
 """
 Behavior Implementations
 """
-
-
-class NightBehavior(BathroomBehavior):
-    def __init__(self, smart_bathroom):
-        self.smart_bathroom = smart_bathroom
-
-    def start(self):
-        self.smart_bathroom.reset_all_volumes()
-        self.smart_bathroom.turn_off_bathroom_light()
-        self.smart_bathroom.turn_on_water_heater()
-
-    def new_motion_bathroom(self):
-        self.smart_bathroom.start_behavior('morning_step1')
-
-    def new_motion_kitchen_living_room(self):
-        self.smart_bathroom.start_behavior('morning_step1')
-
-
-class MorningStep1Behavior(BathroomBehavior):
-    def __init__(self, smart_bathroom):
-        self.smart_bathroom = smart_bathroom
-
-    def start(self):
-        self.smart_bathroom.turn_on_bathroom_light('BLUE')
-        if self.smart_bathroom.is_media_casting_bathroom():
-            self.smart_bathroom.unmute_bathroom()
-
-    def new_motion_bathroom(self):
-        if self.smart_bathroom.is_media_casting_bathroom():
-            self.smart_bathroom.unmute_bathroom()
-
-    def new_motion_kitchen_living_room(self):
-        self.smart_bathroom.mute_bathroom()
-
-    def no_more_motion_bathroom(self):
-        self.smart_bathroom.mute_bathroom()
-
-    def click_on_bathroom_button(self):
-        self.smart_bathroom.start_behavior('shower')
 
 
 class ShowerBehavior(BathroomBehavior):
