@@ -21,43 +21,50 @@ DEFAULT_VOLUMES = {
     'bathroom': FAKE_MUTE_VOLUME
 }
 """
-6 Behaviors:
+4 Behaviors as States of a State Machine:
 
-* Night: NO LIGHT - Awaiting Wakeup - INITIAL BEHAVIOR
-  - Reset volumes at startup
-  - Wait for any movement to trigger Step 1
-  ACTIVATE NEXT STEP: First movement anywhere
+* Day: The normal mode
+* Evening: Same as Day. Using red light instead.
+* Shower: Volume up, it's shower time!
+* AfterShower: Turn off all devices while using the HairDryer
 
-* Morning - Step 1: BLUE - First lights
-  - Light always on BLUE
-  - Bathroom mute / un-mute when entering & leaving bathroom. If media playing. Mute always
-  ACTIVATE NEXT STEP: Button bathroom click
 
-* Morning - Step 2: GREEN - Shower time
+Detail of each State:
+
+* Day: Normal mode - Activated at 4AM by EveningState
+  - Light on-off WHITE
+  - Bathroom mute / un-mute when entering & leaving bathroom. If media playing
+  - Water heater back on
+  ACTIVATE NEXT STEP: 
+   - 8PM => EveningState
+     - TODO: Will use luminosity instead of time in the future
+   - Click => ShowerState
+
+* Evening: Evening Mode
+  - Light on-off RED
+  - Bathroom mute / un-mute when entering & leaving bathroom. If media playing
+  ACTIVATE NEXT STEP: 
+   - 4AM => DayState
+   - Click => ShowerState
+
+* Shower: GREEN - Shower time
   - Sound notif at start
   - Light always on GREEN
   - Volume 70% Bathroom
   - Volume 0% everywhere else
   - Do not react to motion
-  ACTIVATE NEXT STEP: Button bathroom click
+  ACTIVATE NEXT STEP: 
+   - Click => AfterShower
 
-* Morning - Step 3: YELLOW - Using Hair dryer :)
+* AfterShower: YELLOW - Using Hair dryer :)
   - Sound notif at start
   - Light always on YELLOW
   - Volume 'fake mute'
   - Water heater off
   - Music / podcast paused
-  ACTIVATE NEXT STEP: Movement anywhere but bathroom, or no more movement bathroom
-
-* Day: NO LIGHT - During the Day
-  - Water heater back on
-  - Light on-off WHITE
-  ACTIVATE NEXT STEP: Time: 9PM (for now) TODO: Activate using luminosity in living room.
-
-* Evening: NO LIGHT - Evening
-  - Bathroom mute / un-mute when entering & leaving bathroom. If media playing
-  - Light on-off RED
-  ACTIVATE NEXT STEP: (Going back to Night Behavior) Time: 4AM
+  ACTIVATE NEXT STEP: 
+   - MABB & Time  in [8PM, 4AM[ => EveningState
+   - MABB & Time out [8PM, 4AM[ => DayState
 """
 
 
