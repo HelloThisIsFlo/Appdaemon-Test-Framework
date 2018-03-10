@@ -5,10 +5,6 @@ import pytest
 from datetime import time
 from apps.entity_ids import ID
 
-"""
-TODO: Add fixture to 'set_state' (will actually patch the 'get_state' method)
-"""
-
 MORNING_STEP1_COLOR = 'BLUE'
 SHOWER_COLOR = 'GREEN'
 MORNING_STEP3_COLOR = 'YELLOW'
@@ -202,15 +198,6 @@ class TestsDuringDay:
             start_day_mode()
             assert_that(ID['bathroom']['led_light']).was.turned_off()
 
-        def test_resume_podcast_playback(self, assert_that, start_day_mode):
-            # TODO: Maybe migrate at end of AfterShower
-            start_day_mode()
-            for playback_device in [
-                    ID['bathroom']['speaker'],
-                    ID['cast_groups']['entire_flat']]:
-                assert_that('media_player/media_play').was.called_with(
-                    entity_id=playback_device)
-
         def test_reset_volumes(self, assert_that, start_day_mode):
             pass
             start_day_mode()
@@ -340,12 +327,12 @@ class TestDuringShower:
 class TestDuringAfterShower:
     @pytest.fixture
     def start_after_shower_mode(self, when_new, given_that):
-        # Switch to morning Shower mode 
-        when_new.click_bathroom_button()
-        given_that.mock_functions_are_cleared()
-
         # Return callback to trigger AfterShower mode
-        return lambda: when_new.click_bathroom_button()
+        def trigger_after_shower_mode():
+            when_new.click_bathroom_button()
+            given_that.mock_functions_are_cleared()
+            when_new.click_bathroom_button()
+        return trigger_after_shower_mode
 
     class TestAtStart:
         def test_light_indicator(self, given_that, when_new, assert_that, start_after_shower_mode):
@@ -377,15 +364,25 @@ class TestDuringAfterShower:
             assert_that(ID['bathroom']['water_heater']).was.turned_off()
 
     class TestMotionAnywhereExceptBathroom:
-        def test__motion_kitchen__activate_day_mode(self, when_new, assert_day_mode_started, start_after_shower_mode):
-            start_after_shower_mode()
-            when_new.motion_kitchen()
-            assert_day_mode_started()
+        def test_activate_day_mode_resume_podcast_playback(self, given_that, when_new, assert_that, assert_day_mode_started, start_after_shower_mode):
+            scenarios = [
+                when_new.motion_kitchen,
+                when_new.motion_living_room,
+                when_new.no_more_motion_bathroom
+            ]
+            for scenario in scenarios:
+                # Given: In shower mode
+                start_after_shower_mode()
+                # When: Motion
+                scenario()
+                # Assert: Day mode started & playback resumed
+                assert_day_mode_started()
+                for playback_device in [
+                        ID['bathroom']['speaker'],
+                        ID['cast_groups']['entire_flat']]:
+                    assert_that('media_player/media_play').was.called_with(
+                        entity_id=playback_device)
 
-        def test__motion_living_room__activate_day_mode(self, when_new, assert_day_mode_started, start_after_shower_mode):
-            start_after_shower_mode()
-            when_new.motion_living_room()
-            assert_day_mode_started()
 
 
 def assert_bathroom_was_muted(assert_that):

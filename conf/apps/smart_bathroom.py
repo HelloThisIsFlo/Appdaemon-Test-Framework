@@ -327,9 +327,11 @@ class AfterShowerBehavior(BathroomBehavior):
         self.smart_bathroom.turn_off_water_heater()
 
     def new_motion_kitchen_living_room(self):
+        self.smart_bathroom.resume_media_playback_entire_flat()
         self.smart_bathroom.start_behavior('day')
 
     def no_more_motion_bathroom(self):
+        self.smart_bathroom.resume_media_playback_entire_flat()
         self.smart_bathroom.start_behavior('day')
 
 
@@ -340,7 +342,6 @@ class DayBehavior(BathroomBehavior):
     def start(self):
         self.smart_bathroom.turn_on_water_heater()
         self.smart_bathroom.turn_off_bathroom_light()
-        self.smart_bathroom.resume_media_playback_entire_flat()
         self.smart_bathroom.reset_all_volumes()
 
     def new_motion_bathroom(self):
