@@ -294,55 +294,6 @@ class TestsDuringDay:
                 assert_that(ID['bathroom']['led_light']).was_not.turned_off()
 
 
-class TestDuringNight:
-    @pytest.fixture
-    def start_night_mode(self, when_new, given_that, smart_bathroom):
-        # TODO: Remove hack and entire test class (night deprecated)
-        #       After ensuring all behavior replicated during day
-        return lambda: smart_bathroom.start_behavior('night')
-
-    class TestAtStart:
-        def test_reset_volumes(self, assert_that, start_night_mode):
-            start_night_mode()
-            assert_that('media_player/volume_set').was.called_with(
-                entity_id=ID['bathroom']['speaker'],
-                volume_level=DEFAULT_VOLUMES['bathroom'])
-            assert_that('media_player/volume_set').was.called_with(
-                entity_id=ID['kitchen']['speaker'],
-                volume_level=DEFAULT_VOLUMES['kitchen'])
-            assert_that('media_player/volume_set').was.called_with(
-                entity_id=ID['living_room']['soundbar'],
-                volume_level=DEFAULT_VOLUMES['living_room_soundbar'])
-            assert_that('media_player/volume_set').was.called_with(
-                entity_id=ID['living_room']['controller'],
-                volume_level=DEFAULT_VOLUMES['living_room_controller'])
-
-        def test_turn_off_bathroom_light(self, assert_that, start_night_mode):
-            start_night_mode()
-            assert_that(ID['bathroom']['led_light']).was.turned_off()
-
-        def test_turn_on_water_heater(self, assert_that, start_night_mode):
-            start_night_mode()
-            assert_that(ID['bathroom']['water_heater']).was.turned_on()
-
-        
-
-    class TestMotionAnywhere:
-        def test__activate_morning_step1(self, given_that, when_new, assert_that, start_night_mode):
-            def assert_morning_step1_started():
-                assert_that(ID['bathroom']['led_light']).was.turned_on(
-                    color_name=MORNING_STEP1_COLOR)
-            scenarios = [
-                when_new.motion_bathroom,
-                when_new.motion_kitchen,
-                when_new.motion_living_room
-            ]
-            start_night_mode()
-            for scenario in scenarios:
-                scenario()
-                assert_morning_step1_started()
-
-
 class TestDuringMorningStep1:
     @pytest.fixture
     def start_morning_step1_mode(self, when_new, given_that, smart_bathroom):
