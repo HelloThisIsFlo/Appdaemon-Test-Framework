@@ -17,7 +17,7 @@ BATHROOM_VOLUMES = {
 DEFAULT_VOLUMES = {
     'kitchen': 0.37,
     'living_room_soundbar': 0.25,
-    'living_room_controller': 0.37,
+    'living_room_controller': 0.52,
     'bathroom': FAKE_MUTE_VOLUME
 }
 """
@@ -35,7 +35,7 @@ Detail of each State:
   - Light on-off WHITE
   - Bathroom mute / un-mute when entering & leaving bathroom. If media playing
   - Water heater back on
-  ACTIVATE NEXT STEP: 
+  ACTIVATE NEXT STEP:
    - 8PM => EveningState
      - TODO: Will use luminosity instead of time in the future
    - Click => ShowerState
@@ -43,7 +43,7 @@ Detail of each State:
 * Evening: Evening Mode
   - Light on-off RED
   - Bathroom mute / un-mute when entering & leaving bathroom. If media playing
-  ACTIVATE NEXT STEP: 
+  ACTIVATE NEXT STEP:
    - 4AM => DayState
    - Click => ShowerState
 
@@ -53,7 +53,7 @@ Detail of each State:
   - Volume 70% Bathroom
   - Volume 0% everywhere else
   - Do not react to motion
-  ACTIVATE NEXT STEP: 
+  ACTIVATE NEXT STEP:
    - Click => AfterShower
 
 * AfterShower: YELLOW - Using Hair dryer :)
@@ -62,7 +62,7 @@ Detail of each State:
   - Volume 'fake mute'
   - Water heater off
   - Music / podcast paused
-  ACTIVATE NEXT STEP: 
+  ACTIVATE NEXT STEP:
    - MABB & Time  in [8PM, 4AM[ => EveningState
    - MABB & Time out [8PM, 4AM[ => DayState
 """
@@ -234,7 +234,7 @@ class SmartBathroom(hass.Hass):
         self.call_service('xiaomi_aqara/play_ringtone',
                           ringtone_id=10001, ringtone_vol=20, gw_mac=ID['bathroom']['gateway_mac_address'])
 
-    """ 
+    """
     Private functions
     """
 
