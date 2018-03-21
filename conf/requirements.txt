@@ -3,5 +3,6 @@ pytest==3.4.0
 mock==2.0.0
 pytest-watch==4.1.0
 pytest-mock==1.6.3
+pytest-only==1.1.0
 rope==0.10.7
 pylint==1.8.2
