@@ -15,9 +15,9 @@ BATHROOM_VOLUMES = {
     'shower': 0.7
 }
 DEFAULT_VOLUMES = {
-    'kitchen': 0.37,
+    'kitchen': 0.40,
     'living_room_soundbar': 0.25,
-    'living_room_controller': 0.52,
+    'living_room_controller': 0.57,
     'bathroom': FAKE_MUTE_VOLUME
 }
 """
