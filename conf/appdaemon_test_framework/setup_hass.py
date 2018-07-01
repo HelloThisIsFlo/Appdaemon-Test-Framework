@@ -11,11 +11,11 @@ def patch_hass():
     #### Non-actionable functions ####
     # Patch the __init__ method to skip Hass initialisation
     patch___init__ = mock.patch.object(Hass, '__init__')
-    patched___init__ = patch___init__.__enter__()
+    patched___init__ = patch___init__.start()
     patched___init__.return_value = None
     # Path the log method
     patch_log = mock.patch.object(Hass, 'log')
-    _patched_log = patch_log.__enter__()
+    _patched_log = patch_log.start()
 
     #### Actionable functions ####
     # Callback registrations functions
@@ -31,28 +31,28 @@ def patch_hass():
     patch_turn_off = mock.patch.object(Hass, 'turn_off')
 
     ## Initialize patches
-    patched_run_daily = patch_run_daily.__enter__()
-    patched_listen_event = patch_listen_event.__enter__()
-    patched_listen_state = patch_listen_state.__enter__()
-    patched_get_state = patch_get_state.__enter__()
-    patched_time = patch_time.__enter__()
-    patched_call_service = patch_call_service.__enter__()
-    patched_turn_on = patch_turn_on.__enter__()
-    patched_turn_off = patch_turn_off.__enter__()
+    patched_run_daily = patch_run_daily.start()
+    patched_listen_event = patch_listen_event.start()
+    patched_listen_state = patch_listen_state.start()
+    patched_get_state = patch_get_state.start()
+    patched_time = patch_time.start()
+    patched_call_service = patch_call_service.start()
+    patched_turn_on = patch_turn_on.start()
+    patched_turn_off = patch_turn_off.start()
 
     ## Setup un-patch callback
     def unpatch_callback():
-        patch___init__.__exit__()
-        patch_log.__exit__()
+        patch___init__.stop()
+        patch_log.stop()
 
-        patch_run_daily.__exit__()
-        patch_listen_event.__exit__()
-        patch_listen_state.__exit__()
-        patch_get_state.__exit__()
-        patch_time.__exit__()
-        patch_call_service.__exit__()
-        patch_turn_off.__exit__()
-        patch_turn_on.__exit__()
+        patch_run_daily.stop()
+        patch_listen_event.stop()
+        patch_listen_state.stop()
+        patch_get_state.stop()
+        patch_time.stop()
+        patch_call_service.stop()
+        patch_turn_off.stop()
+        patch_turn_on.stop()
 
     return ({
         'run_daily': patched_run_daily,
