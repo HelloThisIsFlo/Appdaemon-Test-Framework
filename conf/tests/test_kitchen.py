@@ -1,26 +1,26 @@
-from apps.automatic_lights import KitchenLight
+from apps.kitchen import Kitchen
 import pytest
 from mock import patch, MagicMock
 from apps.entity_ids import ID
 
 
 @pytest.fixture
-def kitchen_light(given_that):
-    kitchen_light = KitchenLight(
+def kitchen(given_that):
+    kitchen = Kitchen(
         None, None, None, None, None, None, None, None)
-    kitchen_light.initialize()
+    kitchen.initialize()
 
     given_that.mock_functions_are_cleared()
-    return kitchen_light
+    return kitchen
 
 @pytest.fixture
-def when_new(kitchen_light):
+def when_new(kitchen):
     class WhenNewWrapper:
         def motion(self):
-            kitchen_light._new_motion(None, None, None)
+            kitchen._new_motion(None, None, None)
 
         def no_more_motion(self):
-            kitchen_light._no_more_motion(
+            kitchen._no_more_motion(
                 None,  None, None, None, None)
 
     return WhenNewWrapper()

@@ -1,6 +1,6 @@
-Kitchen Light:
-  module: automatic_lights
-  class: KitchenLight
+Kitchen:
+  module: kitchen
+  class: Kitchen
 
 Bathroom:
   module: bathroom
