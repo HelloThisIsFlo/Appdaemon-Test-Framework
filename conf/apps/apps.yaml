@@ -2,9 +2,9 @@ Kitchen Light:
   module: automatic_lights
   class: KitchenLight
 
-SmartBathroom:
-  module: smart_bathroom
-  class: SmartBathroom
+Bathroom:
+  module: bathroom
+  class: Bathroom
 
 Washing Machine:
   module: washing_machine

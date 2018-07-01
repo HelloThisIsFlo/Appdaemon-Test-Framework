@@ -1,4 +1,4 @@
-from apps.smart_bathroom import SmartBathroom, BATHROOM_VOLUMES, DEFAULT_VOLUMES, FAKE_MUTE_VOLUME
+from apps.bathroom import Bathroom, BATHROOM_VOLUMES, DEFAULT_VOLUMES, FAKE_MUTE_VOLUME
 from appdaemon.plugins.hass.hassapi import Hass
 from mock import patch, MagicMock
 import pytest
@@ -15,7 +15,7 @@ DAY_HOUR = 4
 
 
 @pytest.fixture
-def smart_bathroom(given_that):
+def bathroom(given_that):
     # Set initial state
     speakers = [
         ID['bathroom']['speaker'],
@@ -29,102 +29,102 @@ def smart_bathroom(given_that):
 
     given_that.time_is(time(hour=15))
 
-    smart_bathroom = SmartBathroom(
+    bathroom = Bathroom(
         None, None, None, None, None, None, None, None)
-    smart_bathroom.initialize()
+    bathroom.initialize()
 
     # Clear calls recorded during initialisation
     given_that.mock_functions_are_cleared()
-    return smart_bathroom
+    return bathroom
 
 
 @pytest.fixture
-def when_new(smart_bathroom):
+def when_new(bathroom):
     class WhenNewWrapper:
         def time(self, hour=None):
-            smart_bathroom._time_triggered({'hour': hour})
+            bathroom._time_triggered({'hour': hour})
 
         def motion_bathroom(self):
-            smart_bathroom._new_motion_bathroom(None, None, None)
+            bathroom._new_motion_bathroom(None, None, None)
 
         def motion_kitchen(self):
-            smart_bathroom._new_motion_kitchen(None, None, None)
+            bathroom._new_motion_kitchen(None, None, None)
 
         def motion_living_room(self):
-            smart_bathroom._new_motion_living_room(None, None, None)
+            bathroom._new_motion_living_room(None, None, None)
 
         def no_more_motion_bathroom(self):
-            smart_bathroom._no_more_motion_bathroom(
+            bathroom._no_more_motion_bathroom(
                 None,  None, None, None, None)
 
         def click_bathroom_button(self):
-            smart_bathroom._new_click_bathroom_button(None, None, None)
+            bathroom._new_click_bathroom_button(None, None, None)
 
         def debug(self):
-            smart_bathroom.debug(None, {'click_type': 'single'}, None)
+            bathroom.debug(None, {'click_type': 'single'}, None)
     return WhenNewWrapper()
 
 
 # Start at different times
 class TestInitialize:
 
-    def test_start_during_day(self, given_that, when_new, assert_that, smart_bathroom, assert_day_mode_started):
+    def test_start_during_day(self, given_that, when_new, assert_that, bathroom, assert_day_mode_started):
         given_that.time_is(time(hour=13))
-        smart_bathroom.initialize()
+        bathroom.initialize()
         assert_day_mode_started()
 
-    def test_start_during_evening(self, given_that, when_new, assert_that, smart_bathroom, assert_evening_mode_started):
+    def test_start_during_evening(self, given_that, when_new, assert_that, bathroom, assert_evening_mode_started):
         given_that.time_is(time(hour=20))
-        smart_bathroom.initialize()
+        bathroom.initialize()
         assert_evening_mode_started()
 
-    def test_callbacks_are_registered(self, smart_bathroom, hass_functions):
+    def test_callbacks_are_registered(self, bathroom, hass_functions):
         # Given: The mocked callback Appdaemon registration functions
         listen_event = hass_functions['listen_event']
         listen_state = hass_functions['listen_state']
         run_daily = hass_functions['run_daily']
 
         # When: Calling `initialize`
-        smart_bathroom.initialize()
+        bathroom.initialize()
 
         # Then: callbacks are registered
         listen_event.assert_any_call(
-            smart_bathroom._new_click_bathroom_button,
+            bathroom._new_click_bathroom_button,
             'click',
             entity_id=ID['bathroom']['button'],
             click_type='single')
 
         listen_event.assert_any_call(
-            smart_bathroom._new_motion_bathroom,
+            bathroom._new_motion_bathroom,
             'motion',
             entity_id=ID['bathroom']['motion_sensor'])
         listen_event.assert_any_call(
-            smart_bathroom._new_motion_kitchen,
+            bathroom._new_motion_kitchen,
             'motion',
             entity_id=ID['kitchen']['motion_sensor'])
         listen_event.assert_any_call(
-            smart_bathroom._new_motion_living_room,
+            bathroom._new_motion_living_room,
             'motion',
             entity_id=ID['living_room']['motion_sensor'])
         listen_state.assert_any_call(
-            smart_bathroom._no_more_motion_bathroom,
+            bathroom._no_more_motion_bathroom,
             ID['bathroom']['motion_sensor'],
             new='off')
 
         run_daily.assert_any_call(
-            smart_bathroom._time_triggered,
+            bathroom._time_triggered,
             time(hour=DAY_HOUR),
             hour=DAY_HOUR)
         run_daily.assert_any_call(
-            smart_bathroom._time_triggered,
+            bathroom._time_triggered,
             time(hour=EVENING_HOUR),
             hour=EVENING_HOUR)
 
 
 ##################################################################################
-## For the rest of the tests, SmartBathroom WAS STARTED DURING THE DAY (at 3PM) ##
-## For the rest of the tests, SmartBathroom WAS STARTED DURING THE DAY (at 3PM) ##
-## For the rest of the tests, SmartBathroom WAS STARTED DURING THE DAY (at 3PM) ##
+## For the rest of the tests, Bathroom WAS STARTED DURING THE DAY (at 3PM) ##
+## For the rest of the tests, Bathroom WAS STARTED DURING THE DAY (at 3PM) ##
+## For the rest of the tests, Bathroom WAS STARTED DURING THE DAY (at 3PM) ##
 ##################################################################################
 
 class TestDuringEvening:
