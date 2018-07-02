@@ -20,6 +20,7 @@ def patch_hass():
     #### Actionable functions ####
     # Callback registrations functions
     patch_run_daily = mock.patch.object(Hass, 'run_daily')
+    patch_run_in = mock.patch.object(Hass, 'run_in')
     patch_listen_event = mock.patch.object(Hass, 'listen_event')
     patch_listen_state = mock.patch.object(Hass, 'listen_state')
     # State functions
@@ -32,6 +33,7 @@ def patch_hass():
 
     ## Initialize patches
     patched_run_daily = patch_run_daily.start()
+    patched_run_in = patch_run_in.start()
     patched_listen_event = patch_listen_event.start()
     patched_listen_state = patch_listen_state.start()
     patched_get_state = patch_get_state.start()
@@ -46,6 +48,7 @@ def patch_hass():
         patch_log.stop()
 
         patch_run_daily.stop()
+        patch_run_in.stop()
         patch_listen_event.stop()
         patch_listen_state.stop()
         patch_get_state.stop()
@@ -56,6 +59,7 @@ def patch_hass():
 
     return ({
         'run_daily': patched_run_daily,
+        'run_in': patched_run_in,
         'listen_event': patched_listen_event,
         'listen_state': patched_listen_state,
         'get_state': patched_get_state,
