@@ -5,7 +5,3 @@ Kitchen:
 Bathroom:
   module: bathroom
   class: Bathroom
-
-Washing Machine:
-  module: washing_machine
-  class: WashingMachine
