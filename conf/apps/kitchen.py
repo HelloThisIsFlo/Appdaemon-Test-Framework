@@ -38,7 +38,7 @@ class Kitchen(hass.Hass):
         self.run_in(self._after_delay,
                     DELAY_IN_MINUTES_BEFORE_TURNING_BACK_ON_WATER_HEATER * 60)
 
-    def _after_delay(self, **_kwargs):
+    def _after_delay(self, _kwargs):
         self.turn_on(ID['bathroom']['water_heater'])
         self.call_service('notify/pushbullet',
                           target=PHONE_PUSHBULLET_ID, message=TURNED_ON_MSG)
