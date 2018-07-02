@@ -41,4 +41,5 @@ class TimeTravelWrapper:
 
             for registered_callback in all_registered_callbacks:
                 if registered_callback['delay_in_s'] <= seconds_to_fast_forward:
-                    registered_callback['callback_function']()
+                    kwargs_to_pass_to_callback = {} #TODO: Add support!
+                    registered_callback['callback_function'](kwargs_to_pass_to_callback)
