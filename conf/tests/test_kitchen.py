@@ -4,7 +4,8 @@ from mock import patch, MagicMock
 from apps.entity_ids import ID
 
 # TODO: Put this in config (through apps.yml, check doc)
-PHONE_PUSHBULLET_ID="OnePlus 5T"
+PHONE_PUSHBULLET_ID = "OnePlus 5T"
+
 
 @pytest.fixture
 def kitchen(given_that):
@@ -30,6 +31,7 @@ def when_new(kitchen):
             kitchen._new_button_click(None, None, None)
 
     return WhenNewWrapper()
+
 
 class TestInitialization:
     def test_callbacks_are_registered(self, kitchen, hass_functions):
@@ -68,20 +70,31 @@ class TestAutomaticLights:
         assert_that(ID['kitchen']['light']).was.turned_off()
 
 
+DELAY_IN_MINUTES_BEFORE_TURNING_BACK_ON_WATER_HEATER = 10
+
+
 class TestClickOnButton:
     def test_turn_off_water_heater(self, when_new, assert_that):
         when_new.click_button()
         assert_that(ID['bathroom']['water_heater']).was.turned_off()
 
-    def test_send_notification(self, when_new, assert_that):  # TODO
+    def test_send_notification(self, when_new, assert_that):
         when_new.click_button()
         assert_that('notify/pushbullet').was.called_with(
-                message="Water Heater was turned OFF",
-                target="OnePlus 5T")
+            message="Water Heater was turned OFF",
+            target="OnePlus 5T")
 
     class TestAfterDelay:
-        def test_turn_water_heater_back_on(self, when_new, assert_that):  # TODO
-            pass
+        def test_turn_water_heater_back_on(self, when_new, time_travel, assert_that):
+            when_new.click_button()
+            time_travel.fast_forward(
+                DELAY_IN_MINUTES_BEFORE_TURNING_BACK_ON_WATER_HEATER).minutes()
+            assert_that(ID['bathroom']['water_heater']).was.turned_on()
 
-        def test_send_notification(self, when_new, assert_that):  # TODO
-            pass
+        def test_send_notification(self, when_new, time_travel, assert_that):
+            when_new.click_button()
+            time_travel.fast_forward(
+                DELAY_IN_MINUTES_BEFORE_TURNING_BACK_ON_WATER_HEATER).minutes()
+            assert_that('notify/pushbullet').was.called_with(
+                message="Water Heater was turned back ON",
+                target="OnePlus 5T")

@@ -1,6 +1,7 @@
 import pytest
 from appdaemon_test_framework.assert_that import AssertThatWrapper
 from appdaemon_test_framework.given_that import GivenThatWrapper
+from appdaemon_test_framework.time_travel import TimeTravelWrapper
 from appdaemon_test_framework.setup_hass import patch_hass
 
 
@@ -19,3 +20,7 @@ def given_that(hass_functions):
 @pytest.fixture
 def assert_that(hass_functions):
     return lambda thing_to_check: AssertThatWrapper(thing_to_check, hass_functions)
+
+@pytest.fixture
+def time_travel(hass_functions):
+    return TimeTravelWrapper(hass_functions)

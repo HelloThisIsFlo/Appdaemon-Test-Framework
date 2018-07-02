@@ -3,6 +3,7 @@ ID = {
         'motion_sensor': 'binary_sensor.kitchen_motion',
         'light': 'light.kitchen_light',
         'speaker': 'media_player.kitchen_speaker',
+        'button': 'binary_sensor.kitchen_button',
         'temperature': 'sensor.kitchen_temperature'
     },
     'bathroom': {
@@ -20,7 +21,6 @@ ID = {
         'temperature': 'sensor.living_room_temperature'
     },
     'outside': {
-        'button': 'binary_sensor.washing_machine_button',
         'temperature': 'sensor.outside_temperature'
     },
     'cast_groups': {
