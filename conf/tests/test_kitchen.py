@@ -82,7 +82,7 @@ class TestClickOnButton:
         when_new.click_button()
         assert_that('notify/pushbullet').was.called_with(
             message="Water Heater was turned OFF",
-            target="OnePlus 5T")
+            target=PHONE_PUSHBULLET_ID)
 
     class TestAfterDelay:
         def test_turn_water_heater_back_on(self, when_new, time_travel, assert_that):
@@ -97,4 +97,4 @@ class TestClickOnButton:
                 DELAY_IN_MINUTES_BEFORE_TURNING_BACK_ON_WATER_HEATER).minutes()
             assert_that('notify/pushbullet').was.called_with(
                 message="Water Heater was turned back ON",
-                target="OnePlus 5T")
+                target=PHONE_PUSHBULLET_ID)
