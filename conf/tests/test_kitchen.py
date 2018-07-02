@@ -4,7 +4,7 @@ from mock import patch, MagicMock
 from apps.entity_ids import ID
 
 # TODO: Put this in config (through apps.yml, check doc)
-PHONE_PUSHBULLET_ID = "OnePlus 5T"
+PHONE_PUSHBULLET_ID = "device/OnePlus 5T"
 
 
 @pytest.fixture

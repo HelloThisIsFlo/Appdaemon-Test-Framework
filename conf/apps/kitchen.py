@@ -8,7 +8,7 @@ except ModuleNotFoundError:
     from entity_ids import ID
 
 # TODO: Put this in config (through apps.yml, check doc)
-PHONE_PUSHBULLET_ID = "OnePlus 5T"
+PHONE_PUSHBULLET_ID = "device/OnePlus 5T"
 
 TURNED_OFF_MSG = "Water Heater was turned OFF"
 TURNED_ON_MSG = "Water Heater was turned back ON"
