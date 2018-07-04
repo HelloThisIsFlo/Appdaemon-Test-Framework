@@ -27,8 +27,12 @@ def when_new(kitchen):
             kitchen._no_more_motion(
                 None,  None, None, None, None)
 
-        def click_button(self):
-            kitchen._new_button_click(None, None, None)
+        def click_button(self, type='single'):
+            {
+                'single': kitchen._new_button_click,
+                'double': kitchen._new_button_double_click,
+                'long': kitchen._new_button_long_press
+            }[type](None, None, None)
 
     return WhenNewWrapper()
 
@@ -48,6 +52,12 @@ class TestInitialization:
             'click',
             entity_id=ID['kitchen']['button'],
             click_type='single')
+
+        listen_event.assert_any_call(
+            kitchen._new_button_double_click,
+            'click',
+            entity_id=ID['kitchen']['button'],
+            click_type='double')
 
         listen_event.assert_any_call(
             kitchen._new_motion,
@@ -70,8 +80,9 @@ class TestAutomaticLights:
         assert_that(ID['kitchen']['light']).was.turned_off()
 
 
-SHORT_DELAY=10
-LONG_DELAY=30
+SHORT_DELAY = 10
+LONG_DELAY = 30
+
 
 class TestSingleClickOnButton:
     def test_turn_off_water_heater(self, when_new, assert_that):
@@ -94,6 +105,47 @@ class TestSingleClickOnButton:
         def test_send_notification(self, when_new, time_travel, assert_that):
             when_new.click_button()
             time_travel.fast_forward(SHORT_DELAY).minutes()
+            assert_that('notify/pushbullet').was.called_with(
+                title="Water Heater",
+                message="was turned back on",
+                target=PHONE_PUSHBULLET_ID)
+
+
+class TestDoubleClickOnButton:
+    def test_turn_off_water_heater(self, when_new, assert_that):
+        when_new.click_button(type='double')
+        assert_that(ID['bathroom']['water_heater']).was.turned_off()
+
+    def test_send_notification(self, when_new, assert_that):
+        when_new.click_button(type='double')
+        assert_that('notify/pushbullet').was.called_with(
+            title="Water Heater",
+            message=f"was turned off for {LONG_DELAY} minutes",
+            target=PHONE_PUSHBULLET_ID)
+
+    class TestAfterShortDelay:
+        def test_DOES_NOT_turn_water_heater_back_on(self, when_new, time_travel, assert_that):
+            when_new.click_button(type='double')
+            time_travel.fast_forward(SHORT_DELAY).minutes()
+            assert_that(ID['bathroom']['water_heater']).was_not.turned_on()
+
+        def test_DOES_NOT_send_notification(self, when_new, time_travel, assert_that):
+            when_new.click_button(type='double')
+            time_travel.fast_forward(SHORT_DELAY).minutes()
+            assert_that('notify/pushbullet').was_not.called_with(
+                title="Water Heater",
+                message="was turned back on",
+                target=PHONE_PUSHBULLET_ID)
+
+    class TestAfterLongDelay:
+        def test_turn_water_heater_back_on(self, when_new, time_travel, assert_that):
+            when_new.click_button(type='double')
+            time_travel.fast_forward(LONG_DELAY).minutes()
+            assert_that(ID['bathroom']['water_heater']).was.turned_on()
+
+        def test_send_notification(self, when_new, time_travel, assert_that):
+            when_new.click_button(type='double')
+            time_travel.fast_forward(LONG_DELAY).minutes()
             assert_that('notify/pushbullet').was.called_with(
                 title="Water Heater",
                 message="was turned back on",
