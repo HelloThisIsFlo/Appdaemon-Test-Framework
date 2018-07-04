@@ -195,9 +195,8 @@ class TestClickCancellation:
             when_new.click_button()
             time_travel.fast_forward(2).minutes()
             when_new.click_button()
-            time_travel.fast_forward(2).minutes()
 
-            time_travel.assert_current_time(6).minutes()
+            time_travel.assert_current_time(4).minutes()
 
             # When 1/2:
             # Fast forwarding up until 1 min before reactivation
@@ -223,9 +222,8 @@ class TestClickCancellation:
             when_new.click_button(type='double')
             time_travel.fast_forward(2).minutes()
             when_new.click_button(type='double')
-            time_travel.fast_forward(2).minutes()
 
-            time_travel.assert_current_time(6).minutes()
+            time_travel.assert_current_time(4).minutes()
 
             # When 1/2:
             # Fast forwarding up until 1 min before reactivation
