@@ -64,12 +64,12 @@ class RunInMock:
         self.all_registered_callbacks = []
         self.now = 0
 
-    def __call__(self, callback, delay_in_s):
+    def __call__(self, callback, delay_in_s, **kwargs):
         self.all_registered_callbacks.append({
             'callback_function': callback,
             'delay_in_s': delay_in_s,
-            'registered_at': self.now
-            # TODO: Add support for kwargs
+            'registered_at': self.now,
+            'kwargs': kwargs
         })
 
     def fast_forward(self, seconds):
@@ -88,8 +88,8 @@ class RunInMock:
             return scheduled_now_or_before
 
         def _run(callback_registration):
-            kwargs_to_pass_to_callback = {}  # TODO: Add support!
-            registration['callback_function'](kwargs_to_pass_to_callback)
+            kwargs = registration['kwargs']
+            registration['callback_function'](kwargs)
 
         def _remove(callback_registration):
             self.all_registered_callbacks.remove(callback_registration)
