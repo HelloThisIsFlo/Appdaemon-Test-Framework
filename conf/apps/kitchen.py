@@ -9,12 +9,13 @@ except ModuleNotFoundError:
 
 # TODO: Put this in config (through apps.yml, check doc)
 PHONE_PUSHBULLET_ID = "device/OnePlus 5T"
+SHORT_DELAY = 10
+LONG_DELAY = 10
 
-TURNED_OFF_MSG = "Water Heater was turned OFF"
-TURNED_ON_MSG = "Water Heater was turned back ON"
-
-DELAY_IN_MINUTES_BEFORE_TURNING_BACK_ON_WATER_HEATER = 10
-
+MSG_TITLE = "Water Heater"
+MSG_SHORT_OFF = f"was turned off for {SHORT_DELAY} minutes"
+MSG_LONG_OFF =  f"was turned off for {LONG_DELAY} minutes"
+MSG_ON = "was turned back on"
 
 class Kitchen(hass.Hass):
     def initialize(self):
@@ -34,11 +35,14 @@ class Kitchen(hass.Hass):
     def _new_button_click(self, _e, _d, _k):
         self.turn_off(ID['bathroom']['water_heater'])
         self.call_service('notify/pushbullet',
-                          target=PHONE_PUSHBULLET_ID, message=TURNED_OFF_MSG)
-        self.run_in(self._after_delay,
-                    DELAY_IN_MINUTES_BEFORE_TURNING_BACK_ON_WATER_HEATER * 60)
+                          target=PHONE_PUSHBULLET_ID, 
+                          title=MSG_TITLE,
+                          message=MSG_SHORT_OFF)
+        self.run_in(self._after_delay, SHORT_DELAY * 60)
 
     def _after_delay(self, _kwargs):
         self.turn_on(ID['bathroom']['water_heater'])
         self.call_service('notify/pushbullet',
-                          target=PHONE_PUSHBULLET_ID, message=TURNED_ON_MSG)
+                          target=PHONE_PUSHBULLET_ID,
+                          title=MSG_TITLE,
+                          message=MSG_ON)
