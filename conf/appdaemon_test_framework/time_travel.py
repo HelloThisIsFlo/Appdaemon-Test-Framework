@@ -78,6 +78,8 @@ class RunInMock:
         self._run_callbacks()
 
     def _run_callbacks(self):
+        callback_run = []
+
         def _should_run(callback_registration):
             delay_in_s = callback_registration['delay_in_s']
             registered_at = callback_registration['registered_at']
@@ -90,11 +92,14 @@ class RunInMock:
         def _run(callback_registration):
             kwargs = registration['kwargs']
             registration['callback_function'](kwargs)
+            callback_run.append(registration)
 
-        def _remove(callback_registration):
-            self.all_registered_callbacks.remove(callback_registration)
+        def _remove_all_run():
+            for registration in callback_run:
+                self.all_registered_callbacks.remove(registration)
 
         for registration in self.all_registered_callbacks:
             if _should_run(registration):
                 _run(registration)
-                _remove(registration)
+
+        _remove_all_run()
