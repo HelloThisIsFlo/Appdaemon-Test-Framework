@@ -1,4 +1,5 @@
 import appdaemon.plugins.hass.hassapi as hass
+from uuid import uuid4
 try:
     # Module namespaces when Automation Modules are loaded in AppDaemon
     # is different from the 'real' python one.
@@ -29,7 +30,7 @@ class Kitchen(hass.Hass):
         self.listen_event(self._new_button_double_click, 'click',
                           entity_id=ID['kitchen']['button'], click_type='double')
 
-        self.clicked_X_times = 0
+        self.scheduled_callbacks_uuids = []
 
     def _new_motion(self, _event, _data, _kwargs):
         self.turn_on(ID['kitchen']['light'])
@@ -38,12 +39,10 @@ class Kitchen(hass.Hass):
         self.turn_off(ID['kitchen']['light'])
 
     def _new_button_click(self, _e, _d, _k):
-        self.clicked_X_times += 1
         self._turn_off_water_heater_for_X_minutes(SHORT_DELAY)
         self._send_water_heater_notification(MSG_SHORT_OFF)
 
     def _new_button_double_click(self, _e, _d, _k):
-        self.clicked_X_times += 1
         self._turn_off_water_heater_for_X_minutes(LONG_DELAY)
         self._send_water_heater_notification(MSG_LONG_OFF)
 
@@ -52,7 +51,9 @@ class Kitchen(hass.Hass):
 
     def _turn_off_water_heater_for_X_minutes(self, minutes):
         self.turn_off(ID['bathroom']['water_heater'])
-        self.run_in(self._after_delay, minutes * 60)
+        callback_uuid = uuid4()
+        self.run_in(self._after_delay, minutes * 60, unique_id=callback_uuid)
+        self.scheduled_callbacks_uuids.append(callback_uuid)
 
     def _send_water_heater_notification(self, message):
         self.call_service('notify/pushbullet',
@@ -60,9 +61,11 @@ class Kitchen(hass.Hass):
                           title=MSG_TITLE,
                           message=message)
 
-    def _after_delay(self, _kwargs):
-        if self.clicked_X_times > 1:
-            self.clicked_X_times -= 1
-        else:
+    def _after_delay(self, kwargs):
+        last_callback_uuid = self.scheduled_callbacks_uuids[-1]
+        this_callback_uuid = kwargs['unique_id']
+        if this_callback_uuid == last_callback_uuid:
             self.turn_on(ID['bathroom']['water_heater'])
             self._send_water_heater_notification(MSG_ON)
+        else:
+            self.scheduled_callbacks_uuids.remove(this_callback_uuid)

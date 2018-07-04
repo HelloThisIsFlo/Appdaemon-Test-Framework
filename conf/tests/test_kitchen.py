@@ -252,10 +252,7 @@ class TestClickCancellation:
             time_travel.fast_forward(1).minutes()
             assert_that(ID['bathroom']['water_heater']).was.turned_on()
 
-        @pytest.mark.skip
         def test_long_then_short_keep_latest(self, when_new, time_travel, assert_that):
-            print("")
-            print("BEGIN DEBUG")
             when_new.click_button(type='double')
             time_travel.fast_forward(2).minutes()
             when_new.click_button()
@@ -264,5 +261,3 @@ class TestClickCancellation:
             assert_that(ID['bathroom']['water_heater']).was_not.turned_on()
             time_travel.fast_forward(1).minutes()
             assert_that(ID['bathroom']['water_heater']).was.turned_on()
-            print("END DEBUG")
-            print("")
