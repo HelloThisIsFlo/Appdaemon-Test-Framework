@@ -84,17 +84,35 @@ SHORT_DELAY = 10
 LONG_DELAY = 30
 
 
+@pytest.fixture
+def assert_water_heater_notif_sent(assert_that):
+    def assert_water_heater_sent_wrapper(message):
+        assert_that('notify/pushbullet').was.called_with(
+                    title="Water Heater",
+                    message=message,
+                    target=PHONE_PUSHBULLET_ID)
+
+    return assert_water_heater_sent_wrapper
+
+@pytest.fixture
+def assert_water_heater_notif_NOT_sent(assert_that):
+    def assert_water_heater_NOT_sent_wrapper(message):
+        assert_that('notify/pushbullet').was_not.called_with(
+                    title="Water Heater",
+                    message=message,
+                    target=PHONE_PUSHBULLET_ID)
+
+    return assert_water_heater_NOT_sent_wrapper
+
+
 class TestSingleClickOnButton:
     def test_turn_off_water_heater(self, when_new, assert_that):
         when_new.click_button()
         assert_that(ID['bathroom']['water_heater']).was.turned_off()
 
-    def test_send_notification(self, when_new, assert_that):
+    def test_send_notification(self, when_new, assert_water_heater_notif_sent):
         when_new.click_button()
-        assert_that('notify/pushbullet').was.called_with(
-            title="Water Heater",
-            message=f"was turned off for {SHORT_DELAY} minutes",
-            target=PHONE_PUSHBULLET_ID)
+        assert_water_heater_notif_sent(f"was turned off for {SHORT_DELAY} minutes")
 
     class TestAfterDelay:
         def test_turn_water_heater_back_on(self, when_new, time_travel, assert_that):
@@ -102,13 +120,10 @@ class TestSingleClickOnButton:
             time_travel.fast_forward(SHORT_DELAY).minutes()
             assert_that(ID['bathroom']['water_heater']).was.turned_on()
 
-        def test_send_notification(self, when_new, time_travel, assert_that):
+        def test_send_notification(self, when_new, time_travel, assert_water_heater_notif_sent):
             when_new.click_button()
             time_travel.fast_forward(SHORT_DELAY).minutes()
-            assert_that('notify/pushbullet').was.called_with(
-                title="Water Heater",
-                message="was turned back on",
-                target=PHONE_PUSHBULLET_ID)
+            assert_water_heater_notif_sent("was turned back on")
 
 
 class TestDoubleClickOnButton:
@@ -116,12 +131,9 @@ class TestDoubleClickOnButton:
         when_new.click_button(type='double')
         assert_that(ID['bathroom']['water_heater']).was.turned_off()
 
-    def test_send_notification(self, when_new, assert_that):
+    def test_send_notification(self, when_new, assert_water_heater_notif_sent):
         when_new.click_button(type='double')
-        assert_that('notify/pushbullet').was.called_with(
-            title="Water Heater",
-            message=f"was turned off for {LONG_DELAY} minutes",
-            target=PHONE_PUSHBULLET_ID)
+        assert_water_heater_notif_sent(f"was turned off for {LONG_DELAY} minutes")
 
     class TestAfterShortDelay:
         def test_DOES_NOT_turn_water_heater_back_on(self, when_new, time_travel, assert_that):
@@ -129,13 +141,10 @@ class TestDoubleClickOnButton:
             time_travel.fast_forward(SHORT_DELAY).minutes()
             assert_that(ID['bathroom']['water_heater']).was_not.turned_on()
 
-        def test_DOES_NOT_send_notification(self, when_new, time_travel, assert_that):
+        def test_DOES_NOT_send_notification(self, when_new, time_travel, assert_water_heater_notif_NOT_sent):
             when_new.click_button(type='double')
             time_travel.fast_forward(SHORT_DELAY).minutes()
-            assert_that('notify/pushbullet').was_not.called_with(
-                title="Water Heater",
-                message="was turned back on",
-                target=PHONE_PUSHBULLET_ID)
+            assert_water_heater_notif_NOT_sent("was turned back on")
 
     class TestAfterLongDelay:
         def test_turn_water_heater_back_on(self, when_new, time_travel, assert_that):
@@ -143,10 +152,7 @@ class TestDoubleClickOnButton:
             time_travel.fast_forward(LONG_DELAY).minutes()
             assert_that(ID['bathroom']['water_heater']).was.turned_on()
 
-        def test_send_notification(self, when_new, time_travel, assert_that):
+        def test_send_notification(self, when_new, time_travel, assert_water_heater_notif_sent):
             when_new.click_button(type='double')
             time_travel.fast_forward(LONG_DELAY).minutes()
-            assert_that('notify/pushbullet').was.called_with(
-                title="Water Heater",
-                message="was turned back on",
-                target=PHONE_PUSHBULLET_ID)
+            assert_water_heater_notif_sent("was turned back on")
