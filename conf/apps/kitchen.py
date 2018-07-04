@@ -29,6 +29,8 @@ class Kitchen(hass.Hass):
         self.listen_event(self._new_button_double_click, 'click',
                           entity_id=ID['kitchen']['button'], click_type='double')
 
+        self.clicked_X_times = 0
+
     def _new_motion(self, _event, _data, _kwargs):
         self.turn_on(ID['kitchen']['light'])
 
@@ -36,10 +38,12 @@ class Kitchen(hass.Hass):
         self.turn_off(ID['kitchen']['light'])
 
     def _new_button_click(self, _e, _d, _k):
+        self.clicked_X_times += 1
         self._turn_off_water_heater_for_X_minutes(SHORT_DELAY)
         self._send_water_heater_notification(MSG_SHORT_OFF)
 
     def _new_button_double_click(self, _e, _d, _k):
+        self.clicked_X_times += 1
         self._turn_off_water_heater_for_X_minutes(LONG_DELAY)
         self._send_water_heater_notification(MSG_LONG_OFF)
 
@@ -57,5 +61,8 @@ class Kitchen(hass.Hass):
                           message=message)
 
     def _after_delay(self, _kwargs):
-        self.turn_on(ID['bathroom']['water_heater'])
-        self._send_water_heater_notification(MSG_ON)
+        if self.clicked_X_times > 1:
+            self.clicked_X_times -= 1
+        else:
+            self.turn_on(ID['bathroom']['water_heater'])
+            self._send_water_heater_notification(MSG_ON)
