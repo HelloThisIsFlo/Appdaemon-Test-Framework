@@ -1,5 +1,5 @@
 import pytest
-from appdaemon_test_framework import patch_hass, AssertThatWrapper, GivenThatWrapper, TimeTravelWrapper
+from appdaemontestframework import patch_hass, AssertThatWrapper, GivenThatWrapper, TimeTravelWrapper
 
 
 @pytest.fixture
