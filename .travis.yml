@@ -1,0 +1,14 @@
+language: python
+
+python:
+  - '3.6'
+
+install:
+  - echo "Do nothing for install step"
+script:
+  - echo "No tests, just deploy!"
+deploy:
+  provider: pypi
+  user: FlorianKempenich
+  password:
+    secure: VgBpCuh65r/mE27Dk0Hmfgry8W6i+tB7Yy1j4Ir06/k/kDqPCds0dxtslI2UX2OAnXjB/hNUYkXIOTsHejHrvB5Xs7bPQTCRefyfzn9A4f4mMphz4qTDUXXfC5e5J22tJkbuk5/enz6HvoxCFyMb7vASX4vbNBNhgnsQqG6eJewqCYXpf6hZGMPq/PcMXSltDfvPUEohuql3OYpTnTS5wLd04Yxidrl/TNNYsiSZkXkZZ9KboXdKByw+XF5aOAUiqekg843gnaEsgJWag1YPaRkz14pqDAhtr09pq5oSH+Skyl4Xx7HhSyCyPJyVpk5bCsTKZ1u2kQixE5vIZKt9rL0Pyg6GUilQVSBdi42X6cvB2IGi9N/z9Tn44S9bPzncf4iyF3grood5AoGAthn01IFms32+Tvrrf6dYvQbOkjziGQDvjw9bkgTEKYIhaiWfoznkQZm5IGKNIZL1fvl4NJ8uqxRRRlKzN2reTPC99fQIhkIljdgL77URIaQWtZWEYgMW3en0HEELCDPoLw9gL8Mq8ZwdX9noPj5h0b0JkTmMvYNj+6/VzoQSNVBudy57D1tzDP7ide8/9f8gtFitFPrXoyqV4HLhiW/Ds5geAd9e06CCqsqZWZ/yx+iqa6IXr0iJltg/DmRaTsGiFt8dexXzpxh62F1E6GLHDboGFW8=
