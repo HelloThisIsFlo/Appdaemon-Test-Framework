@@ -25,7 +25,8 @@ setup(
     packages=['appdaemontestframework'],
     license='MIT',
     install_requires=[
-        'appdaemon'
+        'appdaemon',
+        'mock'
     ],
     include_package_data=True
 )
