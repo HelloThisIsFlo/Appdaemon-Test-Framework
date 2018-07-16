@@ -1,3 +1,4 @@
+import textwrap
 from abc import ABC, abstractmethod
 ### Custom Matchers ##################################################
 
@@ -142,11 +143,34 @@ class WasNotWrapper(Was):
             raise AssertionError(
                 "Service shoud NOT have been called with the given args: " + str(kwargs))
 
+NOT_INIT_ERROR = textwrap.dedent("""\
+        AssertThat has not been initialized!
 
+        Call `assert_that(THING_TO_CHECK).was.ASSERTION`
+        And NOT `assert_that.was.ASSERTION`
+        """)
 class AssertThatWrapper:
-    def __init__(self, thing_to_check, hass_functions):
-        self.was = WasWrapper(thing_to_check, hass_functions)
-        self.was_not = WasNotWrapper(self.was)
+    def __init__(self, hass_functions):
+        self.hass_functions = hass_functions
+        self._was = None
+        self._was_not = None
+
+    def __call__(self, thing_to_check):
+        self._was = WasWrapper(thing_to_check, self.hass_functions)
+        self._was_not = WasNotWrapper(self.was)
+        return self
+
+    @property
+    def was(self):
+        if self._was is None:
+            raise NOT_INIT_ERROR
+        return self._was
+
+    @property
+    def was_not(self):
+        if self._was_not is None:
+            raise Exception(NOT_INIT_ERROR)
+        return self._was_not
 
 
 def _capture_assert_failure_exception(function_with_assertion):

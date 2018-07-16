@@ -6,10 +6,10 @@ from appdaemon_test_framework.setup_hass import patch_hass
 
 
 @pytest.fixture
-def hass_functions(request):
+def hass_functions():
     patched_hass_functions, unpatch_callback = patch_hass()
-    request.addfinalizer(unpatch_callback)
-    return patched_hass_functions
+    yield patched_hass_functions
+    unpatch_callback()
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def given_that(hass_functions):
 
 @pytest.fixture
 def assert_that(hass_functions):
-    return lambda thing_to_check: AssertThatWrapper(thing_to_check, hass_functions)
+    return AssertThatWrapper(hass_functions)
 
 @pytest.fixture
 def time_travel(hass_functions):
