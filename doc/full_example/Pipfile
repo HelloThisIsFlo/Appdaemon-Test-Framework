@@ -1,0 +1,28 @@
+# This Pipfile is used to do ANY kind of developpement in the entire project.
+# One Pipfile to rule them all :)
+
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+appdaemon = "*"
+
+
+[dev-packages]
+mock = "*"
+
+pytest = "*"
+pytest-watch = "*"
+pytest-mock = "*"
+pytest-only = "*"
+
+rope = "*"
+pylint = "*"
+autopep8 = "*"
+
+
+[requires]
+python_version = "3.6"
