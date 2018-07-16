@@ -16,7 +16,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Topic :: Utilities',
-        'Topic :: Home Automation'
+        'Topic :: Home Automation',
         'Topic :: Software Development :: Testing'
     ],
     url='https://floriankempenich.github.io/Appdaemon-Test-Framework',
