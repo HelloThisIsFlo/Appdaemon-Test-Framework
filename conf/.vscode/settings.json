@@ -1,6 +1,0 @@
-{
-    "python.unitTest.pyTestEnabled": true,
-    "python.pythonPath": "~/.virtualenvs/appdaemon/bin/python",
-    "python.linting.enabled": true,
-    "python.formatting.provider": "autopep8"
-}
