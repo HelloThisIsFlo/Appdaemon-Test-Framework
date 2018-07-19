@@ -2,6 +2,10 @@ import unittest
 from appdaemontestframework import patch_hass, GivenThatWrapper, AssertThatWrapper, TimeTravelWrapper
 from myrooms import LivingRoom
 
+# Important:
+# This class is equivalent to the setup done in the `conftest.py` on the pytest version.
+# Do not forget to inherint from it in all your XXXTestCase classes.
+# See below in `LivingRoomTestCase`
 class AppdaemonTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
