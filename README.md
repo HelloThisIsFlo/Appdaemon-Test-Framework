@@ -39,7 +39,8 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`  
 <!-- We called the class `LivingRoom`. Since it's an Appdaemon automation its lifecycle is handled  -->
 
-1.    **Initialize** the Automation Under Test in a pytest fixture:
+1. **Initialize** the Automation Under Test in a pytest fixture:
+   ##### Test
     1. **Create** the instance 
        * `living_room = LivingRoom((None, None, None, None, None, None, None, None)`
        * Don't worry about all these `None` dependencies, they're mocked by the framework
@@ -48,25 +49,24 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
        ```python
        given_that.mock_functions_are_cleared()
       ```
+  ##### Complete initialization fixture
+  ```python
+  @pytest.fixture
+  def living_room(given_that):
+       living_room = LivingRoom(None, None, None, None, None, None, None, None)
+       living_room.initialize()
+       given_that.mock_functions_are_cleared()
+       return living_room
+  ```
 
-    ##### Complete initialization fixture
-       ```python
-        @pytest.fixture
-        def living_room(given_that):
-            living_room = LivingRoom(None, None, None, None, None, None, None, None)
-            living_room.initialize()
-            given_that.mock_functions_are_cleared()
-            return living_room
-       ```
-
-1.    **Write your first test:**
-    ##### Our first unit test
-    ```python
-    def test_during_night_light_turn_on(given_that, living_room, assert_that):
-        given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
-        living_room._new_motion(None, None, None)
-        assert_that('light.living_room').was.turned_on()
-    ```
+1. **Write your first test:**
+   ##### Our first unit test
+   ```python
+   def test_during_night_light_turn_on(given_that, living_room, assert_that):
+       given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
+       living_room._new_motion(None, None, None)
+       assert_that('light.living_room').was.turned_on()
+   ```
 
     > **The following fixtures are injected by pytest** using the `conftest.py` file and the initialisation fixture created at **Step 1**:
     > * `living_room`
