@@ -40,7 +40,16 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
 <!-- We called the class `LivingRoom`. Since it's an Appdaemon automation its lifecycle is handled  -->
 
 1. **Initialize** the Automation Under Test in a pytest fixture:
-   ##### Test
+   ##### Complete initialization fixture
+   ```python
+   @pytest.fixture
+   def living_room(given_that):
+        living_room = LivingRoom(None, None, None, None, None, None, None, None)
+        living_room.initialize()
+        given_that.mock_functions_are_cleared()
+        return living_room
+   ```
+   ##### Steps breakdown
     1. **Create** the instance 
        * `living_room = LivingRoom((None, None, None, None, None, None, None, None)`
        * Don't worry about all these `None` dependencies, they're mocked by the framework
@@ -49,15 +58,6 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
        ```python
        given_that.mock_functions_are_cleared()
       ```
-  ##### Complete initialization fixture
-  ```python
-  @pytest.fixture
-  def living_room(given_that):
-       living_room = LivingRoom(None, None, None, None, None, None, None, None)
-       living_room.initialize()
-       given_that.mock_functions_are_cleared()
-       return living_room
-  ```
 
 1. **Write your first test:**
    ##### Our first unit test
