@@ -58,7 +58,6 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
        ```python
        given_that.mock_functions_are_cleared()
       ```
-
 1. **Write your first test:**
    ##### Our first unit test
    ```python
