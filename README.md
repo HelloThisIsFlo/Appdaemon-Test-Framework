@@ -54,10 +54,8 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
        * `living_room = LivingRoom((None, None, None, None, None, None, None, None)`
        * Don't worry about all these `None` dependencies, they're mocked by the framework
     1. **Replicate Appdaemon lifecycle** by calling `living_room.initialize()`
-    1. **Reset mock functions** that might have been called during the previous step:
-       ```python
-       given_that.mock_functions_are_cleared()
-      ```
+    1. **Reset mock functions** that might have been called during the previous step:  
+       `given_that.mock_functions_are_cleared()`
 1. **Write your first test:**
    ##### Our first unit test
    ```python
