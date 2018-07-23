@@ -73,23 +73,151 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
 
 
 ---
-## Available commands
-### `given_that`
-* `asdfads`
-* `asdfads`
-* `asdfads`
-### `assert_that`
-* `asdfads`
-* `asdfads`
-### `time_travel`
-* `asdfads`
-* `asdfads`
+## General Test Flow and Available helpers
+### 1. Set the stage to prepare for the test: `given_that`
+*    #### State
+     ```python
+     # Command
+     given_that.state_of(ENTITY_ID).is_set_to(STATE_TO_SET)
+
+     # Example
+     given_that.state_of(media_player.speaker).is_set_to('playing')
+     ```
+
+*    #### Time
+     ```python
+     # Command
+     given_that.time_is(TIME_AS_DATETIME)
+
+     # Example
+     given_that.time_is(time(hour=20))
+     ```
+
+*    #### Extra
+     ```python
+     # Clear all calls recorded on the mocks
+     given_that.mock_functions_are_cleared()
+
+     # To also clear all mocked state, use the option: 'clear_mock_states'
+     given_that.mock_functions_are_cleared(clear_mock_states=True)
+     ```
+
+### 2. Trigger action on your automation
+The way Automations work in Appdaemon is: 
+* First you **register callback methods** during the `initialize()` phase
+* At some point **Appdaemon will trigger these callback**
+* Your Automation **reacts to the call on the callback**
+
+To **trigger actions** on your automation, simply **call one of the registered callbacks**.
+#### Example
+##### `LivingRoom.py`
+```python
+class LivingRoom(hass.Hass):
+    def initialize(self):
+        ...
+        self.listen_event(
+                self._new_motion, 
+                'motion',
+                entity_id='binary_sensor.bathroom_motion')
+        ...
+
+    def _new_motion(self, event_name, data, kwargs):
+        < Handle motion here >
+```
+##### `LivingRoomTest.py`
+```python
+def test_during_night_light_turn_on(given_that, living_room, assert_that):
+   ...
+   living_room._new_motion(None, None, None)
+   ...
+```
+
+> #### Note
+> It is best practice to have an initial test that will test the callbacks
+> are _actually_ registered as expected during the `initialize()` phase.  
+>
+> _For now you need to use direct call to the mocked `hass_functions`_  
+> _See: [Full example - Kitchen](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py) & [Direct call to `hass_functions`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py)_
+
+
+
+### 3. Assert on your way out: `assert_that`
+
+*    #### Entities
+     ```python
+     # Available commmands
+     assert_that(ENTITY_ID).was.turned_on(OPTIONAL_KWARGS)
+     assert_that(ENTITY_ID).was.turned_off()
+     assert_that(ENTITY_ID).was_not.turned_on(OPTIONAL_KWARGS)
+     assert_that(ENTITY_ID).was_not.turned_off()
+
+     # Examples
+     assert_that('light.living_room').was.turned_on()
+     assert_that('light.living_room').was.turned_on(color_name=SHOWER_COLOR)
+     assert_that('light.living_room').was_not.turned_off()
+     ```
+
+*    #### Services
+     ```python
+     # Available commmands
+     assert_that(SERVICE).was.called_with(OPTIONAL_KWARGS)
+     assert_that(SERVICE).was_not.called_with(OPTIONAL_KWARGS)
+
+     # Examples
+     assert_that('notify/pushbullet').was.called_with(
+                         message='Hello :)', 
+                         target='My Phone')
+     
+     assert_that('media_player/volume_set').was.called_with(
+                         entity_id='media_player.bathroom_speaker',
+                         volume_level=0.6)
+     ```
+
+
+### Bonus - Travel in Time: `time_travel`
+This helper simulate going forward in time.
+
+It will run the callbacks registered with the `run_in`function of Appdaemon:
+* **Order** is kept
+* **Callback is run only if due** at current simulated time
+* **Multiples calls** can be made in the same test
+* Automatically **resets between each test** _(with default config)_
+
+
+ ```python
+# Available commmands
+
+## Simulate time
+time_travel.fast_forward(MINUTES).minutes()
+time_travel.fast_forward(SECONDS).seconds()
+
+## Assert time in test - Only useful for sanity check
+time_travel.assert_current_time(MINUTES).minutes()
+time_travel.assert_current_time(SECONDS).seconds()
+
+
+
+# Example
+
+# 2 services:
+#   * 'first/service': Should be called at T=3min
+#   * 'second/service': Should be called at T=5min
+time_travel.assert_current_time(0).minutes()
+
+time_travel.fast_forward(3).minutes()
+assert_that('some/service').was.called()
+assert_that('some_other/service').was_not.called()
+
+time_travel.fast_forward(2).minutes()
+assert_that('some_other/service').was.called()
+```
+
 
 ---
 ## Under The Hood
-EXPLAIN HERE HOW IT WORKS
-EXPLAIN HERE HOW IT WORKS
-EXPLAIN HERE HOW IT WORKS
+EXPLAIN HERE HOW IT WORKS  
+EXPLAIN HERE HOW IT WORKS  
+EXPLAIN HERE HOW IT WORKS  
 
 ---
 ## Advanced Usage
