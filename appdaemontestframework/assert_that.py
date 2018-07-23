@@ -61,6 +61,9 @@ class Was(ABC):
     def called_with(self, **kwargs):
         pass
 
+    def called(self):
+        self.called_with()
+
 
 class WasWrapper(Was):
     def __init__(self, thing_to_check, hass_functions):
