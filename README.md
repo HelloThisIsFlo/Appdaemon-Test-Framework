@@ -139,7 +139,7 @@ class LivingRoom(hass.Hass):
 > are _actually_ registered as expected during the `initialize()` phase.  
 >
 > _For now you need to use direct call to the mocked `hass_functions`_  
-> _See: [Full example — Kitchen](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py#L41) & [Direct call to `hass_functions`](TODO ADD LINK)_
+> _See: [Full example — Kitchen](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py#L41) & [Direct call to `hass_functions`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework#direct-call-to-mocked-functions)_
 
 
 
