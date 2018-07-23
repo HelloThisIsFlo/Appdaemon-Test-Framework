@@ -28,12 +28,28 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 ```
 
 ---
+## Table of Contents
+
+- [**5-Minutes Quick Start Guide**](#5-minutes-quick-start-guide)
+  * [**Initial Setup**](#initial-setup)
+  * [**Write you first unit test**](#write-you-first-unit-test)
+  * [**Result**](#result)
+- [**General Test Flow and Available helpers**](#general-test-flow-and-available-helpers)
+  * [**1. Set the stage to prepare for the test: `given_that`**](#1-set-the-stage-to-prepare-for-the-test-given_that)
+  * [**2. Trigger action on your automation**](#2-trigger-action-on-your-automation)
+  * [**3. Assert on your way out: `assert_that`**](#3-assert-on-your-way-out-assert_that)
+  * [**Bonus — resetsresets Travel in Time: `time_travel`**](#bonus--resetsresets-travel-in-time-time_travel)
+- [**Examples**](#examples)
+- [**Under The Hood**](#under-the-hood)
+- [**Advanced Usage**](#advanced-usage)
+- [**Author Information**](#author-information)
+---
 
 ## 5-Minutes Quick Start Guide
 ### Initial Setup
 1. Install **pytest**: `pip install pytest`
-1. Install **framework**: `pip install appdaemontestframework`
-1. Copy [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) at the **root** of your project
+1. Install the **framework**: `pip install appdaemontestframework`
+1. Copy [**`conftest.py`**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) at the **root** of your project
 
 ### Write you first unit test
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`  
@@ -70,6 +86,30 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
    > * `given_that`
    > * `assert_that`
    > * `time_travel` (Optionally)
+
+### Result
+```python
+# Important:
+# For this example to work, do not forget to copy the `conftest.py` file.
+
+@pytest.fixture
+def living_room(given_that):
+    living_room = LivingRoom(None, None, None, None, None, None, None, None)
+    living_room.initialize()
+    given_that.mock_functions_are_cleared()
+    return living_room
+
+
+def test_during_night_light_turn_on(given_that, living_room, assert_that):
+    given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
+    living_room._new_motion(None, None, None)
+    assert_that('light.living_room').was.turned_on()
+
+def test_during_day_light_DOES_NOT_turn_on(given_that, living_room, assert_that):
+    given_that.state_of('sensor.living_room_illumination').is_set_to(1000) # 1000lm == sunlight
+    living_room._new_motion(None, None, None)
+    assert_that('light.living_room').was_not.turned_on()
+```
 
 
 ---
