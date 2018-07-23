@@ -30,19 +30,20 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 ---
 ## Table of Contents
 
-- [**5-Minutes Quick Start Guide**](#5-minutes-quick-start-guide)
-  * [**Initial Setup**](#initial-setup)
-  * [**Write you first unit test**](#write-you-first-unit-test)
-  * [**Result**](#result)
-- [**General Test Flow and Available helpers**](#general-test-flow-and-available-helpers)
-  * [**1. Set the stage to prepare for the test: `given_that`**](#1-set-the-stage-to-prepare-for-the-test-given_that)
-  * [**2. Trigger action on your automation**](#2-trigger-action-on-your-automation)
-  * [**3. Assert on your way out: `assert_that`**](#3-assert-on-your-way-out-assert_that)
-  * [**Bonus — resetsresets Travel in Time: `time_travel`**](#bonus--resetsresets-travel-in-time-time_travel)
-- [**Examples**](#examples)
-- [**Under The Hood**](#under-the-hood)
-- [**Advanced Usage**](#advanced-usage)
-- [**Author Information**](#author-information)
+- [5-Minutes Quick Start Guide](#5-minutes-quick-start-guide)
+  * [Initial Setup](#initial-setup)
+  * [Write you first unit test](#write-you-first-unit-test)
+  * [Result](#result)
+- [General Test Flow and Available helpers](#general-test-flow-and-available-helpers)
+  * [1. Set the stage to prepare for the test: `given_that`](#1-set-the-stage-to-prepare-for-the-test-given_that)
+  * [2. Trigger action on your automation](#2-trigger-action-on-your-automation)
+  * [3. Assert on your way out: `assert_that`](#3-assert-on-your-way-out-assert_that)
+  * [Bonus — Travel in Time: `time_travel`](#bonus--travel-in-time-time_travel)
+- [Examples](#examples)
+- [Under The Hood](#under-the-hood)
+- [Advanced Usage](#advanced-usage)
+- [Author Information](#author-information)
+
 ---
 
 ## 5-Minutes Quick Start Guide
@@ -216,7 +217,7 @@ class LivingRoom(hass.Hass):
      ```
 
 
-### Bonus — resetsresets Travel in Time: `time_travel`
+### Bonus — Travel in Time: `time_travel`
 This helper simulate going forward in time.
 
 It will run the callbacks registered with the `run_in`function of Appdaemon:
