@@ -21,7 +21,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
     time_travel.fast_forward(4).minutes()    
     assert_that('light.bathroom').was_not.turned_off()
 
-    # At T=5min light should been have turned off
+    # At T=5min light should have been turned off
     time_travel.fast_forward(1).minutes()    
     time_travel.assert_current_time(5).minutes()
     assert_that('light.bathroom').was.turned_off()
@@ -37,7 +37,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 
 ### Write you first unit test
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`  
-<!-- We called the class `LivingRoom`. Since it's an Appdaemon automation its lifecycle is handled  -->
+<!-- We called the class `LivingRoom`. Since it's an Appdaemon automation, its lifecycle is handled  -->
 
 1. **Initialize** the Automation Under Test in a pytest fixture:
    ##### Complete initialization fixture
@@ -105,12 +105,21 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
 ### 2. Trigger action on your automation
 The way Automations work in Appdaemon is: 
 * First you **register callback methods** during the `initialize()` phase
-* At some point **Appdaemon will trigger these callback**
+* At some point **Appdaemon will trigger these callbacks**
 * Your Automation **reacts to the call on the callback**
 
 To **trigger actions** on your automation, simply **call one of the registered callbacks**.
 #### Example
-##### `LivingRoom.py`
+
+##### `LivingRoomTest.py`
+```python
+def test_during_night_light_turn_on(given_that, living_room, assert_that):
+   ...
+   living_room._new_motion(None, None, None)
+   ...
+```
+
+##### With `LivingRoom.py`
 ```python
 class LivingRoom(hass.Hass):
     def initialize(self):
@@ -124,20 +133,13 @@ class LivingRoom(hass.Hass):
     def _new_motion(self, event_name, data, kwargs):
         < Handle motion here >
 ```
-##### `LivingRoomTest.py`
-```python
-def test_during_night_light_turn_on(given_that, living_room, assert_that):
-   ...
-   living_room._new_motion(None, None, None)
-   ...
-```
 
 > #### Note
-> It is best practice to have an initial test that will test the callbacks
+> It is best-practice to have an initial test that will test the callbacks
 > are _actually_ registered as expected during the `initialize()` phase.  
 >
 > _For now you need to use direct call to the mocked `hass_functions`_  
-> _See: [Full example - Kitchen](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py) & [Direct call to `hass_functions`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py)_
+> _See: [Full example — Kitchen](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py#L41) & [Direct call to `hass_functions`](TODO ADD LINK)_
 
 
 
@@ -174,12 +176,12 @@ def test_during_night_light_turn_on(given_that, living_room, assert_that):
      ```
 
 
-### Bonus - Travel in Time: `time_travel`
+### Bonus — resetsresets Travel in Time: `time_travel`
 This helper simulate going forward in time.
 
 It will run the callbacks registered with the `run_in`function of Appdaemon:
 * **Order** is kept
-* **Callback is run only if due** at current simulated time
+* Callback is run **only if due** at current simulated time
 * **Multiples calls** can be made in the same test
 * Automatically **resets between each test** _(with default config)_
 
@@ -191,7 +193,7 @@ It will run the callbacks registered with the `run_in`function of Appdaemon:
 time_travel.fast_forward(MINUTES).minutes()
 time_travel.fast_forward(SECONDS).seconds()
 
-## Assert time in test - Only useful for sanity check
+## Assert time in test — Only useful for sanity check
 time_travel.assert_current_time(MINUTES).minutes()
 time_travel.assert_current_time(SECONDS).seconds()
 
@@ -212,24 +214,86 @@ time_travel.fast_forward(2).minutes()
 assert_that('some_other/service').was.called()
 ```
 
+---
+## Examples
+### Simple
+*  [**Pytest**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/pytest_example.py)
+*  [**Unittest**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
+
+### [Complete Project](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/tree/master/doc/full_example)
+* **Kitchen**
+  * [**Automation**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/apps/kitchen.py)
+  * [**Tests**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py)
+* **Bathroom**
+  * [**Automation**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/apps/bathroom.py)
+  * [**Tests**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_bathroom.py)
 
 ---
+
 ## Under The Hood
-EXPLAIN HERE HOW IT WORKS  
-EXPLAIN HERE HOW IT WORKS  
-EXPLAIN HERE HOW IT WORKS  
+> This section is **entirely optional**   
+> For a guide on how to use the framework, see the above sections!
 
----
+### Understand the motivation
+**Why a test framework dedicated for Appdaemon?**  
+_The way Appdaemon allow the user to implement automations is based on inheritance.
+This makes testing not so trivial.
+This test framework abstracts away all that complexity, allowing for a smooth TDD experience._
+
+**Couldn't we just use the MVP pattern with clear interfaces at the boundaries?**  
+_Yes we could... but would we?  
+Let's be pragmatic, with that kind of project we're developing for our home, and we're a team of one.
+While being a huge proponent for [clean architecture](https://floriankempenich.com/post/11), I believe using such a complex architecture for such a simple project would only result in bringing more complexity than necessary._
+
+### Enjoy the simplicity
+
+Every Automation in Appdaemon follows the same model:
+* **Inherit** from **`hass.Hass`**
+* **Call** Appdaemon API through **`self`**
+
+**AppdaemonTestFramework** captures all calls to the API and helpers make use of the information to implement common functionality needed in our tests.
+
+Methods from the `hass.Hass` class are patched globally, and injected in the helper classes.
+This is done with the `patch_hass()` wich returns a tuple containing:
+
+1. **`hass_functions`**: **dictionary** with all patched functions
+1. **`unpatch_callback`**: **callback** to un-patch all patched functions
+
+**`hass_functions`** are injected in the helpers when creating their instances.
+After all tests, **`unpatch_callback`** is used to un-patch all patched functions.
+
+Setup and teardown are handled in the [`conftest.py` file](https://docs.pytest.org/en/latest/fixture.html?highlight=conftest#conftest-py-sharing-fixture-functions)
+
+
+#### Appdaemon Test Framework flow
+###### 1. Setup
+* **Patch** `hass.Hass` functions
+* **Inject** `hass_functions` in helpers: `given_that`, `assert_that`, `time_travel`
+###### 2. Test run
+* **Run** the test suite
+###### 3. Teardown
+* **Un-patch** `hass.Hass` functions
+
+
 ## Advanced Usage
-### No `pytest`
-asdfasd
+### Without `pytest`
+If you do no wish to use `pytest`, first maybe reconsider, `pytest` is awesome :)  
+If you're really set on using something else, worry not it's pretty straighforward too ;)
+
+What the `conftest.py` file is doing is simply handling the setup & teardown, as well as providing the helpers as injectable fixtures.
+It is pretty easy to replicate the same behavior with your test framework of choice. For instance, with `unittest` a base `TestCase` can replace pytest `conftest.py`. See the [Unittest Example](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
 
 ### Direct call to mocked functions
-Inject `hass_functions` bla bla bla
+> /!\ WARNING — EXPERIMENTAL /!\
+
+**Want a functionality not implemented by the helpers?**  
+You can inject `hass_functions` directly in your tests, patched functions are `MagicMocks`.
+The list of patched functions can be found in the [**`init_framework` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/init_framework.py#L60).
 
 
-# TODO
+
+
 ---
-**Notes:**
-Explanation of `conftest.py`: https://docs.pytest.org/en/latest/fixture.html?highlight=conftest#conftest-py-sharing-fixture-functions
-
+## Author Information
+Follow me on Twitter: [@ThisIsFlorianK](https://twitter.com/ThisIsFlorianK)  
+Find out more about my work: [Florian Kempenich — Personal Website](https://floriankempenich.com)
