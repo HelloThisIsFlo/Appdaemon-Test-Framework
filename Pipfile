@@ -9,7 +9,6 @@ mock = "*"
 pylint = "*"
 "autopep8" = "*"
 pytest = "*"
-appdaemontestframework = "*"
 
 [dev-packages]
 
