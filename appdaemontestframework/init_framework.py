@@ -23,9 +23,10 @@ def patch_hass():
     patch_run_in = mock.patch.object(Hass, 'run_in')
     patch_listen_event = mock.patch.object(Hass, 'listen_event')
     patch_listen_state = mock.patch.object(Hass, 'listen_state')
-    # State functions
+    # State functions / attr
     patch_get_state = mock.patch.object(Hass, 'get_state')
     patch_time = mock.patch.object(Hass, 'time')
+    patch_passed_args = mock.patch.object(Hass, 'args', create=True)
     # Interactions functions
     patch_call_service = mock.patch.object(Hass, 'call_service')
     patch_turn_on = mock.patch.object(Hass, 'turn_on')
@@ -38,6 +39,7 @@ def patch_hass():
     patched_listen_state = patch_listen_state.start()
     patched_get_state = patch_get_state.start()
     patched_time = patch_time.start()
+    patched_passed_args = patch_passed_args.start()
     patched_call_service = patch_call_service.start()
     patched_turn_on = patch_turn_on.start()
     patched_turn_off = patch_turn_off.start()
@@ -53,6 +55,7 @@ def patch_hass():
         patch_listen_state.stop()
         patch_get_state.stop()
         patch_time.stop()
+        patch_passed_args.stop()
         patch_call_service.stop()
         patch_turn_off.stop()
         patch_turn_on.stop()
@@ -64,6 +67,7 @@ def patch_hass():
         'listen_state': patched_listen_state,
         'get_state': patched_get_state,
         'time': patched_time,
+        'passed_args': patched_passed_args,
         'call_service': patched_call_service,
         'turn_on': patched_turn_on,
         'turn_off': patched_turn_off

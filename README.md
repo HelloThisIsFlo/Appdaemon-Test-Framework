@@ -116,6 +116,16 @@ def test_during_day_light_DOES_NOT_turn_on(given_that, living_room, assert_that)
 ---
 ## General Test Flow and Available helpers
 ### 1. Set the stage to prepare for the test: `given_that`
+*    #### Simulate args passed via `apps.yaml` config
+     See: [Appdaemon - Passing arguments to Apps](http://appdaemon.readthedocs.io/en/latest/APPGUIDE.html#passing-arguments-to-apps)
+     ```python
+     # Command
+     given_that.passed_arg(ARG_KEY).is_set_to(ARG_VAL)
+
+     # Example
+     given_that.passed_arg('color').is_set_to('blue')
+     ```
+
 *    #### State
      ```python
      # Command
@@ -141,6 +151,9 @@ def test_during_day_light_DOES_NOT_turn_on(given_that, living_room, assert_that)
 
      # To also clear all mocked state, use the option: 'clear_mock_states'
      given_that.mock_functions_are_cleared(clear_mock_states=True)
+
+     # To also clear all mocked passed args, use the option: 'clear_mock_passed_args'
+     given_that.mock_functions_are_cleared(clear_mock_passed_args=True)
      ```
 
 ### 2. Trigger action on your automation

@@ -9,6 +9,7 @@ mock = "*"
 pylint = "*"
 "autopep8" = "*"
 pytest = "*"
+pytest-watch = "*"
 
 [dev-packages]
 
