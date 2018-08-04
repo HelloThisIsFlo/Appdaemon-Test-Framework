@@ -19,7 +19,6 @@ pytest-watch = "*"
 pytest-mock = "*"
 pytest-only = "*"
 
-rope = "*"
 pylint = "*"
 autopep8 = "*"
 
