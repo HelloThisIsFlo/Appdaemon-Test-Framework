@@ -24,6 +24,7 @@ def patch_hass():
     patch_listen_event = mock.patch.object(Hass, 'listen_event')
     patch_listen_state = mock.patch.object(Hass, 'listen_state')
     # State functions / attr
+    patch_set_state = mock.patch.object(Hass, 'set_state')
     patch_get_state = mock.patch.object(Hass, 'get_state')
     patch_time = mock.patch.object(Hass, 'time')
     patch_passed_args = mock.patch.object(Hass, 'args', create=True)
@@ -37,6 +38,7 @@ def patch_hass():
     patched_run_in = patch_run_in.start()
     patched_listen_event = patch_listen_event.start()
     patched_listen_state = patch_listen_state.start()
+    patched_set_state = patch_set_state.start()
     patched_get_state = patch_get_state.start()
     patched_time = patch_time.start()
     patched_passed_args = patch_passed_args.start()
@@ -65,6 +67,7 @@ def patch_hass():
         'run_in': patched_run_in,
         'listen_event': patched_listen_event,
         'listen_state': patched_listen_state,
+        'set_state': patched_set_state,
         'get_state': patched_get_state,
         'time': patched_time,
         'passed_args': patched_passed_args,
