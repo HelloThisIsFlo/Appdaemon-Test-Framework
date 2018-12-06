@@ -32,6 +32,8 @@ def patch_hass():
     patch_call_service = mock.patch.object(Hass, 'call_service')
     patch_turn_on = mock.patch.object(Hass, 'turn_on')
     patch_turn_off = mock.patch.object(Hass, 'turn_off')
+    # Custom callback functions
+    patch_register_constraint = mock.patch.object(Hass, 'register_constraint')
 
     ## Initialize patches
     patched_run_daily = patch_run_daily.start()
@@ -45,6 +47,7 @@ def patch_hass():
     patched_call_service = patch_call_service.start()
     patched_turn_on = patch_turn_on.start()
     patched_turn_off = patch_turn_off.start()
+    patched_register_constraint = patch_register_constraint.start()
 
     ## Setup un-patch callback
     def unpatch_callback():
@@ -61,6 +64,7 @@ def patch_hass():
         patch_call_service.stop()
         patch_turn_off.stop()
         patch_turn_on.stop()
+        patch_register_constraint.stop()
 
     return ({
         'run_daily': patched_run_daily,
@@ -73,5 +77,6 @@ def patch_hass():
         'passed_args': patched_passed_args,
         'call_service': patched_call_service,
         'turn_on': patched_turn_on,
-        'turn_off': patched_turn_off
+        'turn_off': patched_turn_off,
+        'register_constraint': patched_register_constraint
     }, unpatch_callback)
