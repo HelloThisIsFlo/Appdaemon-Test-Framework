@@ -349,6 +349,39 @@ The list of patched functions can be found in the [**`init_framework` module**](
 
 
 
+---
+## Contribution
+
+* **All contributions are welcome!**
+* **All PR must be accompanied with some tests showcasing the new feature**
+* **For new feature, a short discussion will take place to argue whether the feature makes sense and if this is the best place to implement**
+
+* **Then the process goes as follow:**  
+  * Is readable? ✅
+  * Passes the tests? ✅
+  * I'm merging 🎉🎉
+  
+
+> PR simply patching new functions in `hass_functions`
+>   * Will be merged almost immediately
+>   * Are exempt of the _"must have tests"_ rule, although there is rarely too much tests 😉
+
+Thanks for your contribution 😀 👍 
+  
+
+### Tests
+
+> **Note on the current state of tests:**  
+> The funny thing with this project is: it's the offspring of a test suite I was building as I worked on my home automation project. I ended up extracting these functions and published them online for others, like you, to use. Which means . . . most of the project itself doesn't have any unit tests 😮 That being said, there are _some_ tests.
+
+
+Two types of tests can be found:
+- Unit tests for recent features
+- Integration tests using the framework in a real-life scenario
+
+While it most likely isn't sufficient to guarantee a behavior coverage to fully rely on, it still provides some nice backwards compatility safety 🙂
+
+When adding new feature, you can TDD it, add unit tests later, or only rely on integration tests. Whichever way you go is totally fine for this project, but new features will need to have at least some sort of tests, even if they're super basic 🙂
 
 ---
 ## Author Information
