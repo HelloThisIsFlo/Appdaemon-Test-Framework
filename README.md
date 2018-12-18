@@ -25,6 +25,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
     time_travel.fast_forward(1).minutes()    
     time_travel.assert_current_time(5).minutes()
     assert_that('light.bathroom').was.turned_off()
+    
 ```
 
 ---
@@ -80,6 +81,14 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
        given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
        living_room._new_motion(None, None, None)
        assert_that('light.living_room').was.turned_on()
+       
+       # Change entity states 
+       given_that.state_of('device_tracker.person).is_set_to('away')
+       given_that.mock_functions_are_cleared()
+       
+       living_room._new_motion(None, None, None)
+       assert_that('light.living_room').was_not.turned_on()
+       
    ```
    > ##### Note
    > The following fixtures are **injected** by pytest using the **[`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) file** and the **initialisation fixture created at Step 1**:
@@ -296,7 +305,7 @@ This test framework abstracts away all that complexity, allowing for a smooth TD
 
 **Couldn't we just use the MVP pattern with clear interfaces at the boundaries?**  
 _Yes we could... but would we?  
-Let's be pragmatic, with that kind of project we're developing for our home, and we're a team of one.
+Let's be pragmatic, with what kind of project we're developing for our home, and we're a team of one.
 While being a huge proponent for [clean architecture](https://floriankempenich.com/post/11), I believe using such a complex architecture for such a simple project would only result in bringing more complexity than necessary._
 
 ### Enjoy the simplicity
