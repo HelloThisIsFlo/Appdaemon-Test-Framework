@@ -44,6 +44,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 - [Examples](#examples)
 - [Under The Hood](#under-the-hood)
 - [Advanced Usage](#advanced-usage)
+- [Contributing](#contributing)
 - [Author Information](#author-information)
 
 ---
@@ -350,7 +351,7 @@ The list of patched functions can be found in the [**`init_framework` module**](
 
 
 ---
-## Contribution
+## Contributing
 
 * **All contributions are welcome!**
 * **All PR must be accompanied with some tests showcasing the new feature**
