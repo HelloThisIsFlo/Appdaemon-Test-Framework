@@ -1,4 +1,6 @@
 # Appdaemon Test Framework
+[![Travis](https://img.shields.io/travis/FlorianKempenich/Appdaemon-Test-Framework.svg)](https://travis-ci.org/FlorianKempenich/Appdaemon-Test-Framework) [![PyPI](https://img.shields.io/pypi/v/appdaemontestframework.svg)](https://pypi.org/project/appdaemontestframework/)
+
 Clean, human-readable tests for your Appdaemon automations.
 
 * Totally transparent, No code modification is needed.
