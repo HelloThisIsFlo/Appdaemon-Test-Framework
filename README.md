@@ -305,7 +305,7 @@ This test framework abstracts away all that complexity, allowing for a smooth TD
 
 **Couldn't we just use the MVP pattern with clear interfaces at the boundaries?**  
 _Yes we could... but would we?  
-Let's be pragmatic, with what kind of project we're developing for our home, and we're a team of one.
+Let's be pragmatic, with this kind of project we're developing for our home, and we're a team of one.
 While being a huge proponent for [clean architecture](https://floriankempenich.com/post/11), I believe using such a complex architecture for such a simple project would only result in bringing more complexity than necessary._
 
 ### Enjoy the simplicity
