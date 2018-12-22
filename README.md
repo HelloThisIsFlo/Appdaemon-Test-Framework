@@ -80,15 +80,7 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
    def test_during_night_light_turn_on(given_that, living_room, assert_that):
        given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
        living_room._new_motion(None, None, None)
-       assert_that('light.living_room').was.turned_on()
-       
-       # Change entity states 
-       given_that.state_of('device_tracker.person).is_set_to('away')
-       given_that.mock_functions_are_cleared()
-       
-       living_room._new_motion(None, None, None)
-       assert_that('light.living_room').was_not.turned_on()
-       
+       assert_that('light.living_room').was.turned_on()      
    ```
    > ##### Note
    > The following fixtures are **injected** by pytest using the **[`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) file** and the **initialisation fixture created at Step 1**:
