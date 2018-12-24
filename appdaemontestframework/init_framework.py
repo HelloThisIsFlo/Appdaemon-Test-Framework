@@ -34,7 +34,8 @@ def patch_hass():
     patch_turn_off = mock.patch.object(Hass, 'turn_off')
     # Custom callback functions
     patch_register_constraint = mock.patch.object(Hass, 'register_constraint')
-
+    patch_now_is_between = mock.patch.object(Hass, 'now_is_between')
+    
     ## Initialize patches
     patched_run_daily = patch_run_daily.start()
     patched_run_in = patch_run_in.start()
@@ -48,7 +49,8 @@ def patch_hass():
     patched_turn_on = patch_turn_on.start()
     patched_turn_off = patch_turn_off.start()
     patched_register_constraint = patch_register_constraint.start()
-
+    patched_now_is_between = patch_now_is_between.start()
+    
     ## Setup un-patch callback
     def unpatch_callback():
         patch___init__.stop()
@@ -65,7 +67,8 @@ def patch_hass():
         patch_turn_off.stop()
         patch_turn_on.stop()
         patch_register_constraint.stop()
-
+        patch_now_is_between.stop()
+        
     return ({
         'run_daily': patched_run_daily,
         'run_in': patched_run_in,
@@ -78,5 +81,6 @@ def patch_hass():
         'call_service': patched_call_service,
         'turn_on': patched_turn_on,
         'turn_off': patched_turn_off,
-        'register_constraint': patched_register_constraint
+        'register_constraint': patched_register_constraint,
+        'now_is_between': patched_now_is_between
     }, unpatch_callback)
