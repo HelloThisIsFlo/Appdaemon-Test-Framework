@@ -1,9 +1,17 @@
-from mock import patch, MagicMock
 import pytest
+from mock import patch, MagicMock
 
 """
 Class hierarchy to patch
 """
+
+DEBUG = False
+
+
+def print(msg):
+    if DEBUG:
+        import builtins
+        builtins.print(msg)
 
 
 class MotherClass():
@@ -32,22 +40,20 @@ class UnrelatedClass():
         child = ChildClass()
         child.call_the_exploding_of_mother()
 
+
 ###################################################
 
 
-@pytest.mark.skip
 class TestVanillaClasses:
     def test_without_mocking(self):
         child = ChildClass()
         with pytest.raises(Exception, message='Exploding method!!'):
             child.call_the_exploding_of_mother()
 
-
     def test_without_mocking_2(self):
         child = ChildClass()
         with pytest.raises(Exception, message='Exploding method!!hellooooo'):
             child.call_the_exploding_of_mother_with_args()
-
 
     @patch('tests.test_vanilla_file.MotherClass.exploding_method')
     def test_mocking_exploding(self, exploding_method):
@@ -55,13 +61,11 @@ class TestVanillaClasses:
         child = ChildClass()
         assert child.call_the_exploding_of_mother() == 'moooooooocked'
 
-
     @patch.object(MotherClass, 'exploding_method')
     def test_mocking_exploding_via_object(self, exploding_method):
         exploding_method.return_value = 'moooooooocked'
         child = ChildClass()
         assert child.call_the_exploding_of_mother() == 'moooooooocked'
-
 
     @patch.object(MotherClass, 'exploding_method')
     def test_mocking_exploding_via_object_2(self, exploding_method):
