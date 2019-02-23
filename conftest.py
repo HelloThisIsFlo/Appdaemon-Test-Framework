@@ -1,6 +1,7 @@
 import pytest
 from appdaemontestframework import patch_hass, AssertThatWrapper, GivenThatWrapper, TimeTravelWrapper
 
+pytest_plugins = 'pytester'
 
 @pytest.fixture
 def hass_functions():
