@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 appdaemon = "*"
 mock = "*"
+coverage = "*"
 
 [dev-packages]
 pytest = "*"
