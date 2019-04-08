@@ -13,6 +13,7 @@ pytest = "*"
 pytest-watch = "*"
 pylint = "*"
 "autopep8" = "*"
+tox = "*"
 
 [requires]
 python_version = "3.6"
