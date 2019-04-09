@@ -12,6 +12,7 @@ appdaemon = "*"
 
 
 [dev-packages]
+appdaemontestframework = "*"
 mock = "*"
 
 pytest = "*"
