@@ -1,14 +1,10 @@
 from setuptools import setup
 
-def readme():
-    with open('README.md') as f:
-        return f.read()
-
 setup(
     name='appdaemontestframework',
-    version='2.0.1',
+    version='2.0.2',
     description='Clean, human-readable tests for Appdaemon',
-    long_description=readme(),
+    long_description='See: https://floriankempenich.github.io/Appdaemon-Test-Framework/',
     keywords='appdaemon homeassistant test tdd clean-code home-automation',
     classifiers=[
         'Environment :: Console',
