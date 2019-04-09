@@ -38,7 +38,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
   * [Write you first unit test](#write-you-first-unit-test)
   * [Result](#result)
 - [General Test Flow and Available helpers](#general-test-flow-and-available-helpers)
-  * [0. Initialize the automation: `@automation_fixture`](#1-set-the-stage-to-prepare-for-the-test-given_that) TODO: Add link
+  * [0. Initialize the automation: `@automation_fixture`](#0-initialize-the-automation-automation_fixture)
   * [1. Set the stage to prepare for the test: `given_that`](#1-set-the-stage-to-prepare-for-the-test-given_that)
   * [2. Trigger action on your automation](#2-trigger-action-on-your-automation)
   * [3. Assert on your way out: `assert_that`](#3-assert-on-your-way-out-assert_that)
