@@ -55,7 +55,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 ### Initial Setup
 1. Install **pytest**: `pip install pytest`
 1. Install the **framework**: `pip install appdaemontestframework`
-1. Copy [**`conftest.py`**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) at the **root** of your project
+1. Copy [**`conftest.py`**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) at the **root** of your project
 
 ### Write you first unit test
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`  
@@ -76,7 +76,7 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
        assert_that('light.living_room').was.turned_on()      
    ```
    > ##### Note
-   > The following fixtures are **injected** by pytest using the **[`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) file** and the **initialisation fixture created at Step 1**:
+   > The following fixtures are **injected** by pytest using the **[`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file** and the **initialisation fixture created at Step 1**:
    > * `living_room`
    > * `given_that`
    > * `assert_that`
@@ -326,7 +326,7 @@ This is done with the `patch_hass()` wich returns a tuple containing:
 **`hass_functions`** are injected in the helpers when creating their instances.
 After all tests, **`unpatch_callback`** is used to un-patch all patched functions.
 
-Setup and teardown are handled in the [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) file.
+Setup and teardown are handled in the [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file.
 
 
 #### Appdaemon Test Framework flow
@@ -441,8 +441,8 @@ def living_room():
 If you do no wish to use `pytest`, first maybe reconsider, `pytest` is awesome :)  
 If you're really set on using something else, worry not it's pretty straighforward too ;)
 
-What the [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) file is doing is simply handling the setup & teardown, as well as providing the helpers as injectable fixtures.
-It is pretty easy to replicate the same behavior with your test framework of choice. For instance, with `unittest` a base `TestCase` can replace pytest [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py). See the [Unittest Example](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
+What the [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file is doing is simply handling the setup & teardown, as well as providing the helpers as injectable fixtures.
+It is pretty easy to replicate the same behavior with your test framework of choice. For instance, with `unittest` a base `TestCase` can replace pytest [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py). See the [Unittest Example](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
 
 ### Direct call to mocked functions
 > /!\ WARNING — EXPERIMENTAL /!\
