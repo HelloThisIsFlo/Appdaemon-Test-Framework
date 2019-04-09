@@ -7,6 +7,8 @@ name = "pypi"
 appdaemon = "*"
 mock = "*"
 coverage = "*"
+pyyaml = ">=4.2b1"
+requests = ">=2.20.0"
 
 [dev-packages]
 pytest = "*"
