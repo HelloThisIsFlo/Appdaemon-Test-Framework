@@ -6,7 +6,7 @@ def readme():
 
 setup(
     name='appdaemontestframework',
-    version='1.2.5',
+    version='2.0.0',
     description='Clean, human-readable tests for Appdaemon',
     long_description=readme(),
     keywords='appdaemon homeassistant test tdd clean-code home-automation',
