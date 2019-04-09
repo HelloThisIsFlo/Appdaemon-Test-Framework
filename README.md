@@ -38,6 +38,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
   * [Write you first unit test](#write-you-first-unit-test)
   * [Result](#result)
 - [General Test Flow and Available helpers](#general-test-flow-and-available-helpers)
+  * [0. Initialize the automation: `@automation_fixture`](#1-set-the-stage-to-prepare-for-the-test-given_that) TODO: Add link
   * [1. Set the stage to prepare for the test: `given_that`](#1-set-the-stage-to-prepare-for-the-test-given_that)
   * [2. Trigger action on your automation](#2-trigger-action-on-your-automation)
   * [3. Assert on your way out: `assert_that`](#3-assert-on-your-way-out-assert_that)
@@ -60,23 +61,12 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`  
 <!-- We called the class `LivingRoom`. Since it's an Appdaemon automation, its lifecycle is handled  -->
 
-1. **Initialize** the Automation Under Test in a pytest fixture:
-   ##### Complete initialization fixture
+1. **Initialize** the Automation Under Test with the `@automation_fixture` decorator:
    ```python
-   @pytest.fixture
-   def living_room(given_that):
-        living_room = LivingRoom(None, None, None, None, None, None, None, None)
-        living_room.initialize()
-        given_that.mock_functions_are_cleared()
-        return living_room
+   @automation_fixture(LivingRoom)
+   def living_room():
+     pass
    ```
-   > ##### Steps breakdown
-   >  1. **Create** the instance 
-   >     * `living_room = LivingRoom((None, None, None, None, None, None, None, None)`
-   >     * Don't worry about all these `None` dependencies, they're mocked by the framework
-   >  1. **Replicate Appdaemon lifecycle** by calling `living_room.initialize()`
-   >  1. **Reset mock functions** that might have been called during the previous step:  
-   >     `given_that.mock_functions_are_cleared()`
 1. **Write your first test:**
    ##### Our first unit test
    ```python
@@ -90,20 +80,16 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
    > * `living_room`
    > * `given_that`
    > * `assert_that`
-   > * `time_travel` (Optionally)
+   > * `time_travel`
 
 ### Result
 ```python
 # Important:
 # For this example to work, do not forget to copy the `conftest.py` file.
 
-@pytest.fixture
-def living_room(given_that):
-    living_room = LivingRoom(None, None, None, None, None, None, None, None)
-    living_room.initialize()
-    given_that.mock_functions_are_cleared()
-    return living_room
-
+@automation_fixture(LivingRoom)
+def living_room():
+    pass
 
 def test_during_night_light_turn_on(given_that, living_room, assert_that):
     given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
@@ -119,6 +105,26 @@ def test_during_day_light_DOES_NOT_turn_on(given_that, living_room, assert_that)
 
 ---
 ## General Test Flow and Available helpers
+### 0. Initialize the automation: `@automation_fixture`
+```python
+# Command
+@automation_fixture(AUTOMATION_CLASS)
+def FIXTURE_NAME():
+    pass
+  
+# Example
+@automation_fixture(LivingRoom)
+def living_room():
+    pass
+```
+The automation given to the fixture will be: 
+* **Created**  
+  _Using the required mocks provided by the framework_
+* **Initialized**  
+  _By calling the `initialize()` function_
+* **Made available as an injectable fixture**  
+   _Just like a regular `@pytest.fixture`_
+
 ### 1. Set the stage to prepare for the test: `given_that`
 *    #### Simulate args passed via `apps.yaml` config
      See: [Appdaemon - Passing arguments to Apps](http://appdaemon.readthedocs.io/en/latest/APPGUIDE.html#passing-arguments-to-apps)
@@ -323,7 +329,6 @@ After all tests, **`unpatch_callback`** is used to un-patch all patched function
 Setup and teardown are handled in the [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/conftest.py) file.
 
 
-
 #### Appdaemon Test Framework flow
 ###### 1. Setup
 * **Patch** `hass.Hass` functions
@@ -333,8 +338,105 @@ Setup and teardown are handled in the [`conftest.py`](https://github.com/Florian
 ###### 3. Teardown
 * **Un-patch** `hass.Hass` functions
 
+### Feature focus
+#### `@automation_fixture`
+
+To be able to test an Appdaemon automation, the automation needs to be created **after** the framework has been 
+initialized. This could be done with a regular `@pytest.fixture` by injecting `given_that` (or any other helper) before 
+creating the automation. This would invoke the helper which would initialize the framework beforehand and the correct
+functions would be patched before the automation is created:
+```python
+@pytest.fixture
+def living_room(given_that):
+    # `None` dependencies are mocked by the framework
+    living_room = LivingRoom(None, None, None, None, None, None, None, None)
+    return living_room
+```
+
+Also, for convenience, we could initialize the automation with its `initialize()` method to make it available in tests
+as it would be in production once Appdaemon is started, making sure the mocks are clear of any calls when the fixture 
+is injected:
+```python
+@pytest.fixture
+def living_room(given_that):
+    living_room = LivingRoom(None, None, None, None, None, None, None, None)
+    living_room.initialize()
+    given_that.mock_functions_are_cleared()
+    return living_room
+```
+
+However, since this code would have to be repeated for every single automation, it was creating un-necessary clutter.
+For that reason, the `@automation_fixture` was introduced. It is simple syntactic sugar, and performs the exact same 
+steps as the fixture above in much fewer lines:
+
+```python
+@automation_fixture(LivingRoom)
+def living_room():
+    pass
+```
+
 
 ## Advanced Usage
+
+### `@automation_fixture` - Extra features
+* #### Pre-initialization setup
+  For some automations, the `initialize()` step requires some pre-configuration of the global state.
+  Maybe it requires time to be setup, or maybe it needs some sensors to have a particular state. 
+  Such pre-initialization setup is possible with the `@automation_fixture`. The fixture can be injected with the 
+  following 2 arguments:
+  * `given_that` _- For configuring the state_
+  * `hass_functions` _- For more complex setup steps_
+  
+  Any code written in the fixture will be executed **before** initializing the automation. That way your
+  `initialize()` function can safely rely on the Appdaemon framework and call some of its methods, all you 
+  have to do is setup the context in the fixture.
+  
+  ##### Example
+  Let's imagine an automation, `Terasse`, that turns on the light at night. During the `initialize()` phase, `Terasse`
+  checks the current time to know if it should immediately turn on the light (for instance, if appdaemon is started 
+  during the night).  
+  Without mocking the time **before** the call to `initialize()` the test framework will not know which time to return 
+  and an error will be raised. To prevent that, we set the time in the fixture, the code will be executed **before** the
+  call to `initialize()` and no error will be raised.
+  ```python
+  @automation_fixture
+  def terasse(given_that):
+      given_that.time_is(datetime.time(hour=20))
+      
+      
+  # With Terasse:
+  class Terasse(hass.Hass):
+      def initialize(self):
+          ...
+          current_time = self.time()
+          if self._is_during_night(current_time):
+              self._turn_on_light()
+          ...
+  ```
+
+* #### Alternate versions
+  The `@automation_fixture` can actually be used in 4 different ways:
+  ```python
+  # Single Class:               
+  @automation_fixture(MyAutomation)
+
+  # Multiple Classes:           
+  @automation_fixture(MyAutomation, MyOtherAutomation)
+
+  # Single Class w/ params:     
+  @automation_fixture((upstairs.Bedroom, {'motion': 'binary_sensor.bedroom_motion'}))
+
+  # Multiple Classes w/ params: 
+  @automation_fixture(
+    (upstairs.Bedroom, {'motion': 'binary_sensor.bedroom_motion'}),
+    (upstairs.Bathroom, {'motion': 'binary_sensor.bathroom_motion'}),
+  )
+  ```
+  
+  The alternate versions can be useful for parametrized testing:
+  * When multiple classes are passed, tests will be generated for each automation.   
+  * When using parameters, the injected object will be a tuple: `(Initialized_Automation, params)`  
+
 ### Without `pytest`
 If you do no wish to use `pytest`, first maybe reconsider, `pytest` is awesome :)  
 If you're really set on using something else, worry not it's pretty straighforward too ;)

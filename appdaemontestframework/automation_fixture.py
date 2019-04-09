@@ -115,7 +115,7 @@ def automation_fixture(*args):
                                        (upstairs.Bathroom, {'motion': 'binary_sensor.bathroom_motion'}),
                                    )
 
-    When multiple classes are passed, test will be generated for each automation (put example)
+    When multiple classes are passed, tests will be generated for each automation.
     When using parameters, the injected object will be a tuple: `(Initialized_Automation, params)`
 
     # Pre-initialization setup
