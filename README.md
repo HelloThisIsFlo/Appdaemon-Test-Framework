@@ -42,7 +42,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
   * [1. Set the stage to prepare for the test: `given_that`](#1-set-the-stage-to-prepare-for-the-test-given_that)
   * [2. Trigger action on your automation](#2-trigger-action-on-your-automation)
   * [3. Assert on your way out: `assert_that`](#3-assert-on-your-way-out-assert_that)
-  * [Bonus — Assert callbacks were registered during `initialize()`]() TODO ADD LINK
+  * [Bonus — Assert callbacks were registered during `initialize()`](#bonus--assert-callbacks-were-registered-during-initialize)
   * [Bonus — Travel in Time: `time_travel`](#bonus--travel-in-time-time_travel)
 - [Examples](#examples)
 - [Under The Hood](#under-the-hood)
@@ -178,7 +178,7 @@ To **trigger actions** on your automation, simply **call one of the registered c
 > #### Note
 > It is best-practice to have an initial test that will test the callbacks
 > are _actually_ registered as expected during the `initialize()` phase.
-> See: [Bonus - Assert callbacks were registered during `initialize()`]() TODO: Add link
+> See: [Bonus - Assert callbacks were registered during `initialize()`](#bonus--assert-callbacks-were-registered-during-initialize)
 
 #### Example
 
@@ -289,7 +289,7 @@ class LivingRoom(hass.Hass):
         .with_callback(automation._new_time)
      ```
 
-_See related test file for more examples: [test_assert_callback_registration.py]()_ TODO LINK
+_See related test file for more examples: [test_assert_callback_registration.py](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/test/test_assert_callback_registration.py)_
 
 
 ### Bonus — Travel in Time: `time_travel`
