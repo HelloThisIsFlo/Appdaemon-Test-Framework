@@ -54,6 +54,7 @@ def configure_appdaemontestframework(testdir):
     """)
 
 
+@mark.using_pytester
 @mark.usefixtures('configure_appdaemontestframework')
 class TestAutomationFixture:
     def test_fixture_is_available_for_injection(self, testdir):
