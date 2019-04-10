@@ -42,6 +42,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
   * [1. Set the stage to prepare for the test: `given_that`](#1-set-the-stage-to-prepare-for-the-test-given_that)
   * [2. Trigger action on your automation](#2-trigger-action-on-your-automation)
   * [3. Assert on your way out: `assert_that`](#3-assert-on-your-way-out-assert_that)
+  * [Bonus — Assert callbacks were registered during `initialize()`]() TODO ADD LINK
   * [Bonus — Travel in Time: `time_travel`](#bonus--travel-in-time-time_travel)
 - [Examples](#examples)
 - [Under The Hood](#under-the-hood)
@@ -173,6 +174,12 @@ The way Automations work in Appdaemon is:
 * Your Automation **reacts to the call on the callback**
 
 To **trigger actions** on your automation, simply **call one of the registered callbacks**.
+
+> #### Note
+> It is best-practice to have an initial test that will test the callbacks
+> are _actually_ registered as expected during the `initialize()` phase.
+> See: [Bonus - Assert callbacks were registered during `initialize()`]() TODO: Add link
+
 #### Example
 
 ##### `LivingRoomTest.py`
@@ -197,13 +204,6 @@ class LivingRoom(hass.Hass):
     def _new_motion(self, event_name, data, kwargs):
         < Handle motion here >
 ```
-
-> #### Note
-> It is best-practice to have an initial test that will test the callbacks
-> are _actually_ registered as expected during the `initialize()` phase.  
->
-> _For now you need to use direct call to the mocked `hass_functions`_  
-> _See: [Full example — Kitchen](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py#L41) & [Direct call to `hass_functions`](#direct-call-to-mocked-functions)_
 
 
 
@@ -238,6 +238,58 @@ class LivingRoom(hass.Hass):
                          entity_id='media_player.bathroom_speaker',
                          volume_level=0.6)
      ```
+
+
+### Bonus — Assert callbacks were registered during `initialize()`
+*    #### Listen: Event
+     ```python
+     # Available commmands
+     assert_that(AUTOMATION) \
+         .listens_to.event(EVENT) \
+         .with_callback(CALLBACK)
+     assert_that(AUTOMATION) \
+         .listens_to.event(EVENT, OPTIONAL_KWARGS) \
+         .with_callback(CALLBACK)
+
+     # Examples - Where 'living_room' is an instance of 'LivingRoom' automation
+     assert_that(living_room) \
+         .listens_to.event('click', entity_id='binary_sensor.button') \
+         .with_callback(living_room._new_click_button)
+     ```
+
+*    #### Listen: State
+     ```python
+     # Available commmands
+     assert_that(AUTOMATION) \
+         .listens_to.state(ENTITY_ID) \
+         .with_callback(CALLBACK)
+     assert_that(AUTOMATION) \
+         .listens_to.state(ENTITY_ID, OPTIONAL_KWARGS) \
+         .with_callback(CALLBACK)
+
+     # Examples - Where 'living_room' is an instance of 'LivingRoom' automation
+     assert_that(living_room) \
+         .listens_to.state('binary_sensor.button', old='on', new='off') \
+         .with_callback(living_room._no_more_motion)
+     ```
+
+*    #### Registered: Run Daily
+     ```python
+     # Available commmands
+     assert_that(AUTOMATION) \
+         .registered.run_daily(TIME_AS_DATETIME) \
+         .with_callback(CALLBACK)
+     assert_that(AUTOMATION) \
+         .registered.run_daily(TIME_AS_DATETIME, OPTIONAL_KWARGS) \
+         .with_callback(CALLBACK)
+
+     # Examples - Where 'living_room' is an instance of 'LivingRoom' automation
+    assert_that(living_room) \
+        .registered.run_daily(time(hour=12), time_as_text='noon') \
+        .with_callback(automation._new_time)
+     ```
+
+_See related test file for more examples: [test_assert_callback_registration.py]()_ TODO LINK
 
 
 ### Bonus — Travel in Time: `time_travel`
