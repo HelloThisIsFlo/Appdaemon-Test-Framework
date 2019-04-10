@@ -1,11 +1,14 @@
 import textwrap
 from abc import ABC, abstractmethod
+
+
 ### Custom Matchers ##################################################
 
 
 class ServiceOnAnyDomain:
     def __init__(self, service):
         self.service = ''.join(['/', service])
+
     # Turn on service look like: 'DOMAIN/SERVICE'
     # We just check that the SERVICE part is equal
 
@@ -27,6 +30,8 @@ class AnyString:
 
 assert 'somedomain/my_service' == ServiceOnAnyDomain('my_service')
 assert 'asdfasdf' == AnyString()
+
+
 ######################################################################
 
 
@@ -45,6 +50,8 @@ class EitherOrAssertionError(AssertionError):
             str(second_assertion_error)])
 
         super(EitherOrAssertionError, self).__init__(message)
+
+
 ######################################################################
 
 
@@ -146,34 +153,103 @@ class WasNotWrapper(Was):
             raise AssertionError(
                 "Service shoud NOT have been called with the given args: " + str(kwargs))
 
+
+class ListensToWrapper:
+    def __init__(self, automation_thing_to_check, hass_functions):
+        self.automation_thing_to_check = automation_thing_to_check
+        self.listen_event = hass_functions['listen_event']
+        self.listen_state = hass_functions['listen_state']
+
+    def event(self, event, **event_data):
+        listens_to_wrapper = self
+
+        class WithCallbackWrapper:
+            def with_callback(self, callback):
+                listens_to_wrapper.automation_thing_to_check.initialize()
+                listens_to_wrapper.listen_event.assert_any_call(
+                    callback,
+                    event,
+                    **event_data)
+
+        return WithCallbackWrapper()
+
+    def state(self, entity_id, **listen_state_opts):
+        listens_to_wrapper = self
+
+        class WithCallbackWrapper:
+            def with_callback(self, callback):
+                listens_to_wrapper.automation_thing_to_check.initialize()
+                listens_to_wrapper.listen_state.assert_any_call(
+                    callback,
+                    entity_id,
+                    **listen_state_opts)
+
+        return WithCallbackWrapper()
+
+
+class RegisteredWrapper:
+    def __init__(self, automation_thing_to_check, hass_functions):
+        self.automation_thing_to_check = automation_thing_to_check
+        self._run_daily = hass_functions['run_daily']
+
+    def run_daily(self, time_, **kwargs):
+        registered_wrapper = self
+
+        class WithCallbackWrapper:
+            def with_callback(self, callback):
+                registered_wrapper.automation_thing_to_check.initialize()
+                registered_wrapper._run_daily.assert_any_call(
+                    callback,
+                    time_,
+                    **kwargs)
+
+        return WithCallbackWrapper()
+
+
 NOT_INIT_ERROR = textwrap.dedent("""\
         AssertThat has not been initialized!
 
         Call `assert_that(THING_TO_CHECK).was.ASSERTION`
         And NOT `assert_that.was.ASSERTION`
         """)
+
+
+def _ensure_init(property):
+    if property is None:
+        raise Exception(NOT_INIT_ERROR)
+    return property
+
+
 class AssertThatWrapper:
     def __init__(self, hass_functions):
         self.hass_functions = hass_functions
         self._was = None
         self._was_not = None
+        self._listens_to = None
+        self._registered = None
 
     def __call__(self, thing_to_check):
         self._was = WasWrapper(thing_to_check, self.hass_functions)
         self._was_not = WasNotWrapper(self.was)
+        self._listens_to = ListensToWrapper(thing_to_check, self.hass_functions)
+        self._registered = RegisteredWrapper(thing_to_check, self.hass_functions)
         return self
 
     @property
     def was(self):
-        if self._was is None:
-            raise NOT_INIT_ERROR
-        return self._was
+        return _ensure_init(self._was)
 
     @property
     def was_not(self):
-        if self._was_not is None:
-            raise Exception(NOT_INIT_ERROR)
-        return self._was_not
+        return _ensure_init(self._was_not)
+
+    @property
+    def listens_to(self):
+        return _ensure_init(self._listens_to)
+
+    @property
+    def registered(self):
+        return _ensure_init(self._registered)
 
 
 def _capture_assert_failure_exception(function_with_assertion):

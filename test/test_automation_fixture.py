@@ -55,7 +55,6 @@ def configure_appdaemontestframework(testdir):
 
 
 @mark.usefixtures('configure_appdaemontestframework')
-@mark.only
 class TestAutomationFixture:
     def test_fixture_is_available_for_injection(self, testdir):
         testdir.makepyfile(
