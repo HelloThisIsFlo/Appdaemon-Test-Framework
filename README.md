@@ -141,9 +141,11 @@ The automation given to the fixture will be:
      ```python
      # Command
      given_that.state_of(ENTITY_ID).is_set_to(STATE_TO_SET)
+     given_that.state_of(ENTITY_ID).is_set_to(STATE_TO_SET, ATTRIBUTES_AS_DICT)
 
      # Example
-     given_that.state_of(media_player.speaker).is_set_to('playing')
+     given_that.state_of('media_player.speaker').is_set_to('playing')
+     given_that.state_of('light.kitchen').is_set_to('on', {'brightness': 50, 'color_temp': 450})
      ```
 
 *    #### Time
