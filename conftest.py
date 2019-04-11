@@ -31,28 +31,28 @@ def time_travel(hass_functions):
 def configure_appdaemontestframework_for_pytester(testdir):
     testdir.makeconftest(
         """
-        import pytest
+        from pytest import fixture
         from appdaemontestframework import patch_hass, AssertThatWrapper, GivenThatWrapper, TimeTravelWrapper
         
         
-        @pytest.fixture
+        @fixture
         def hass_functions():
             patched_hass_functions, unpatch_callback = patch_hass()
             yield patched_hass_functions
             unpatch_callback()
         
         
-        @pytest.fixture
+        @fixture
         def given_that(hass_functions):
             return GivenThatWrapper(hass_functions)
         
         
-        @pytest.fixture
+        @fixture
         def assert_that(hass_functions):
             return AssertThatWrapper(hass_functions)
         
         
-        @pytest.fixture
+        @fixture
         def time_travel(hass_functions):
             return TimeTravelWrapper(hass_functions)
     """)

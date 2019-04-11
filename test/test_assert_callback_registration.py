@@ -47,7 +47,6 @@ def automation():
     pass
 
 
-@mark.only
 class TestAssertListenState:
     def test_success(self, automation: MockAutomation, assert_that):
         automation.enable_listen_state_during_initialize()
@@ -92,7 +91,6 @@ class TestAssertListenState:
                 .with_callback(automation._some_other_function)
 
 
-@mark.only
 class TestAssertListenEvent:
     def test_success(self, automation: MockAutomation, assert_that):
         automation.enable_listen_event_during_initialize()
@@ -137,7 +135,6 @@ class TestAssertListenEvent:
                 .with_callback(automation._some_other_function)
 
 
-@mark.only
 class TestRegisteredRunDaily:
     def test_success(self, automation: MockAutomation, assert_that):
         automation.enable_register_run_daily_during_initialize()
