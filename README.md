@@ -339,6 +339,59 @@ assert_that('some_other/service').was.called()
 *  [**Pytest**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/pytest_example.py)
 *  [**Unittest**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
 
+### Special cases
+#### Complex setup fixture
+In this scenario, we wish to test what happens **after** the light was turned on by motion and the `device_tracker.person` is set to `away`.  
+After the first `_new_motion`, the mock functions must be reset to ensure a clean state. For that purpose, it is entirely possible to use `given_that.mock_functions_are_cleared()` inside a particular test:
+```python
+def test_light_turned_on_by_motion_and_person_away__do_not_turn_on_again(given_that,
+                                                                         living_room,
+                                                                         assert_that):
+  # Given: 
+  # - Light was turned on by motion
+  given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
+  living_room._new_motion(None, None, None)
+  given_that.mock_functions_are_cleared()
+  # - Person is away
+  given_that.state_of('device_tracker.person).is_set_to('away')
+  
+
+  # When: New motion
+  living_room._new_motion(None, None, None)
+  
+  
+  # Then: Light isn't turned on
+  assert_that('light.living_room').was_not.turned_on()
+```
+
+Alternatively, if multiple scenarios are to be tested with the same fixture (after turned on by motion & person is away), an intermediate fixture can be used:
+
+```python
+class AfterLightTurnedOnByMotion:
+
+  @pytest.fixture
+  def living_room_after_light_turned_on_by_motion(self, living_room, given_that):
+    given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
+    living_room._new_motion(None, None, None)
+    given_that.mock_functions_are_cleared()
+
+  def test_person_away__new_motion__do_not_turn_on_again(self, 
+                                                         given_that,
+                                                         living_room_after_light_turned_on_by_motion,
+                                                         assert_that):
+    given_that.state_of('device_tracker.person).is_set_to('away')
+    living_room_after_light_turned_on_by_motion._new_motion(None, None, None)
+    assert_that('light.living_room').was_not.turned_on()
+    
+  def test_some_other_condition__do_something_else(self,
+                                                   given_that,
+                                                   living_room_after_light_turned_on_by_motion,
+                                                   assert_that):
+    ...
+
+```
+
+
 ### [Complete Project](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/tree/master/doc/full_example)
 * **Kitchen**
   * [**Automation**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/apps/kitchen.py)
