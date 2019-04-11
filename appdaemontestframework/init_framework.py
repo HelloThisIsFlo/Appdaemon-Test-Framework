@@ -1,3 +1,5 @@
+import logging
+
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
 
@@ -12,7 +14,10 @@ def patch_hass():
     actionable_functions_to_patch = [
         # Meta
         '__init__',  # Patch the __init__ method to skip Hass initialisation
+
+        # Logging
         'log',
+        'error',
 
         # Callback registrations functions
         'run_daily',
@@ -49,7 +54,25 @@ def patch_hass():
         for patch in patches:
             patch.stop()
 
-    # For Compatibility purposes
-    hass_functions['passed_args'] = hass_functions['args']
+    _ensure_compatibility_with_previous_versions(hass_functions)
+    _mock_logging(hass_functions)
 
     return hass_functions, unpatch_callback
+
+
+def _ensure_compatibility_with_previous_versions(hass_functions):
+    hass_functions['passed_args'] = hass_functions['args']
+
+
+def _mock_logging(hass_functions):
+    # Renamed the function to remove confusion
+    get_logging_level_from_name = logging.getLevelName
+
+    def log_error(msg, level='ERROR'):
+        log_log(msg, level)
+
+    def log_log(msg, level='INFO'):
+        logging.log(get_logging_level_from_name(level), msg)
+
+    hass_functions['error'].side_effect = log_error
+    hass_functions['log'].side_effect = log_log
