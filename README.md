@@ -145,7 +145,8 @@ The automation given to the fixture will be:
 
      # Example
      given_that.state_of('media_player.speaker').is_set_to('playing')
-     given_that.state_of('light.kitchen').is_set_to('on', {'brightness': 50, 'color_temp': 450})
+     given_that.state_of('light.kitchen').is_set_to('on', {'brightness': 50,
+                                                           'color_temp': 450})
      ```
 
 *    #### Time
