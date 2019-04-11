@@ -501,7 +501,7 @@ It is pretty easy to replicate the same behavior with your test framework of cho
 
 **Want a functionality not implemented by the helpers?**  
 You can inject `hass_functions` directly in your tests, patched functions are `MagicMocks`.
-The list of patched functions can be found in the [**`init_framework` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/init_framework.py#L60).
+The list of patched functions can be found in the [**`init_framework` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/init_framework.py#L14).
 
 
 
