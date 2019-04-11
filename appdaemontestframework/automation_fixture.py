@@ -3,8 +3,10 @@ from inspect import isfunction, signature
 import pytest
 from appdaemon.plugins.hass.hassapi import Hass
 
+from appdaemontestframework.common import AppdaemonTestFrameworkError
 
-class AutomationFixtureError(Exception):
+
+class AutomationFixtureError(AppdaemonTestFrameworkError):
     pass
 
 
