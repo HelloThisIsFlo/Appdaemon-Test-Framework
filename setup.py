@@ -22,9 +22,7 @@ setup(
     license='MIT',
     install_requires=[
         'appdaemon',
-        'mock',
-        'pyyaml>=4.2b1',
-        'requests>=2.20.0'
+        'mock'
     ],
     include_package_data=True
 )
