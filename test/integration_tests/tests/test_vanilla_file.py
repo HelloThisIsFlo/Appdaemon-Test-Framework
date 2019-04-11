@@ -1,5 +1,5 @@
 import pytest
-from mock import patch, MagicMock
+from mock import patch
 
 """
 Class hierarchy to patch
@@ -47,12 +47,12 @@ class UnrelatedClass():
 class TestVanillaClasses:
     def test_without_mocking(self):
         child = ChildClass()
-        with pytest.raises(Exception, message='Exploding method!!'):
+        with pytest.raises(Exception, match='Exploding method!!'):
             child.call_the_exploding_of_mother()
 
     def test_without_mocking_2(self):
         child = ChildClass()
-        with pytest.raises(Exception, message='Exploding method!!hellooooo'):
+        with pytest.raises(Exception, match='Exploding method!!hellooooo'):
             child.call_the_exploding_of_mother_with_args()
 
     @patch('tests.test_vanilla_file.MotherClass.exploding_method')
@@ -71,9 +71,6 @@ class TestVanillaClasses:
     def test_mocking_exploding_via_object_2(self, exploding_method):
         exploding_method.return_value = 'moooooooocked'
         child = ChildClass()
-        a = MagicMock()
-        a.call_args
-        a.call_args_list
         child.call_the_exploding_of_mother_with_args()
         exploding_method.assert_called_once()
         print(exploding_method.call_args)
