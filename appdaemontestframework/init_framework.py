@@ -38,7 +38,8 @@ def patch_hass():
 
         # Custom callback functions
         'register_constraint',
-        'now_is_between'
+        'now_is_between',
+        'notify'
     ]
 
     patches = []
