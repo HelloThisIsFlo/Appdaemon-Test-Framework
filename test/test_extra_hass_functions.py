@@ -1,5 +1,6 @@
 import appdaemon.plugins.hass.hassapi as hass
-import pytest
+
+from appdaemontestframework import automation_fixture
 
 
 class WithExtraHassFunctions(hass.Hass):
@@ -13,13 +14,9 @@ class WithExtraHassFunctions(hass.Hass):
         self.now_is_between("sunset - 00:45:00", "sunrise + 00:45:00")
 
 
-@pytest.fixture
-def with_extra_hass_functions(given_that):
-    with_extra_hass_functions = WithExtraHassFunctions(
-            None, None, None, None, None, None, None, None)
-    with_extra_hass_functions.initialize()
-    given_that.mock_functions_are_cleared()
-    return with_extra_hass_functions
+@automation_fixture(WithExtraHassFunctions)
+def with_extra_hass_functions():
+    pass
 
 
 def test_now_is_between(given_that, with_extra_hass_functions, hass_functions):

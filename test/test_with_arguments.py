@@ -1,6 +1,8 @@
 import pytest
 import appdaemon.plugins.hass.hassapi as hass
 
+from appdaemontestframework import automation_fixture
+
 
 class WithArguments(hass.Hass):
     """
@@ -26,13 +28,9 @@ class WithArguments(hass.Hass):
         return self.args
 
 
-@pytest.fixture
+@automation_fixture(WithArguments)
 def with_arguments(given_that):
-    with_arguments = WithArguments(
-        None, None, None, None, None, None, None, None)
-    with_arguments.initialize()
-    given_that.mock_functions_are_cleared()
-    return with_arguments
+    pass
 
 
 def test_argument_not_mocked(given_that, with_arguments):
