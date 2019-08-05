@@ -25,13 +25,14 @@ class GivenThatWrapper:
     def _init_mocked_states(self):
         self.mocked_states = {}
 
-        def get_state_mock(entity_id, attribute=None):
+        def get_state_mock(entity_id, **kwargs):
             if entity_id not in self.mocked_states:
                 raise StateNotSetError(entity_id)
 
             state = self.mocked_states[entity_id]
 
-            if not attribute:
+            attribute = kwargs.get("attribute", None)
+            if attribute is None:
                 return state['main']
             elif attribute == 'all':
                 return state['attributes']
