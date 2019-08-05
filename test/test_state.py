@@ -1,3 +1,4 @@
+import pytest
 from appdaemon.plugins.hass.hassapi import Hass
 from pytest import raises
 
@@ -19,6 +20,9 @@ class MockAutomation(Hass):
 
     def get_all_attributes_from_light(self):
         return self.get_state(LIGHT, attribute='all')
+
+    def get_without_using_keyword(self):
+        return self.get_state(LIGHT, 'brightness')
 
 
 @automation_fixture(MockAutomation)
@@ -55,3 +59,10 @@ def test_set_and_get_attribute(given_that, automation: MockAutomation):
 def test_set_and_get_all_attribute(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('on', attributes={'brightness': 11, 'color': 'blue'})
     assert automation.get_all_attributes_from_light() == {'brightness': 11, 'color': 'blue'}
+
+
+@pytest.mark.only
+def test_throw_typeerror_when_attributes_arg_not_passed_via_keyword(given_that, automation: MockAutomation):
+    given_that.state_of(LIGHT).is_set_to('on', attributes={'brightness': 11, 'color': 'blue'})
+    with pytest.raises(TypeError):
+        automation.get_without_using_keyword()
