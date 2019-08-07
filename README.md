@@ -287,10 +287,12 @@ class LivingRoom(hass.Hass):
          .with_callback(CALLBACK)
 
      # Examples - Where 'living_room' is an instance of 'LivingRoom' automation
-    assert_that(living_room) \
-        .registered.run_daily(time(hour=12), time_as_text='noon') \
-        .with_callback(automation._new_time)
+     assert_that(living_room) \
+         .registered.run_daily(time(hour=12), time_as_text='noon') \
+         .with_callback(automation._new_time)
      ```
+
+     **NOTE:** The above examples can be used with run_minutely.
 
 _See related test file for more examples: [test_assert_callback_registration.py](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/test/test_assert_callback_registration.py)_
 
