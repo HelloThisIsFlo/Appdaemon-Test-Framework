@@ -21,6 +21,7 @@ def patch_hass():
 
         # Callback registrations functions
         'run_daily',
+        'run_minutely',
         'run_in',
         'listen_event',
         'listen_state',

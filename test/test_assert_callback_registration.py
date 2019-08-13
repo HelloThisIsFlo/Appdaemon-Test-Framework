@@ -11,6 +11,7 @@ class MockAutomation(hass.Hass):
     should_listen_state = False
     should_listen_event = False
     should_register_run_daily = False
+    should_register_run_minutely = False
 
     def initialize(self):
         if self.should_listen_state:
@@ -19,6 +20,8 @@ class MockAutomation(hass.Hass):
             self.listen_event(self._my_listen_event_callback, 'zwave.scene_activated', scene_id=3)
         if self.should_register_run_daily:
             self.run_daily(self._my_run_daily_callback, time(hour=3, minute=7), extra_param='ok')
+        if self.should_register_run_minutely:
+            self.run_minutely(self._my_run_minutely_callback, time(hour=3, minute=7), extra_param='ok')
 
     def _my_listen_state_callback(self, entity, attribute, old, new, kwargs):
         pass
@@ -27,6 +30,9 @@ class MockAutomation(hass.Hass):
         pass
 
     def _my_run_daily_callback(self, kwargs):
+        pass
+
+    def _my_run_minutely_callback(self, kwargs):
         pass
 
     def _some_other_function(self, entity, attribute, old, new, kwargs):
@@ -40,6 +46,9 @@ class MockAutomation(hass.Hass):
 
     def enable_register_run_daily_during_initialize(self):
         self.should_register_run_daily = True
+
+    def enable_register_run_minutely_during_initialize(self):
+        self.should_register_run_minutely = True
 
 
 @automation_fixture(MockAutomation)
@@ -176,4 +185,48 @@ class TestRegisteredRunDaily:
         with pytest.raises(AssertionError):
             assert_that(automation) \
                 .registered.run_daily(time(hour=3, minute=7), extra_param='ok') \
+                .with_callback(automation._some_other_function)
+
+
+class TestRegisteredRunMinutely:
+    def test_success(self, automation: MockAutomation, assert_that):
+        automation.enable_register_run_minutely_during_initialize()
+
+        assert_that(automation) \
+            .registered.run_minutely(time(hour=3, minute=7), extra_param='ok') \
+            .with_callback(automation._my_run_minutely_callback)
+
+    def test_failure__not_listening(self, automation: MockAutomation, assert_that):
+        with pytest.raises(AssertionError):
+            assert_that(automation) \
+                .registered.run_minutely(time(hour=3, minute=7), extra_param='ok') \
+                .with_callback(automation._my_run_minutely_callback)
+
+    def test_failure__wrong_time(self, automation: MockAutomation, assert_that):
+        automation.enable_register_run_minutely_during_initialize()
+
+        with pytest.raises(AssertionError):
+            assert_that(automation) \
+                .registered.run_minutely(time(hour=4), extra_param='ok') \
+                .with_callback(automation._my_run_minutely_callback)
+
+    def test_failure__wrong_kwargs(self, automation: MockAutomation, assert_that):
+        automation.enable_register_run_minutely_during_initialize()
+
+        with pytest.raises(AssertionError):
+            assert_that(automation) \
+                .registered.run_minutely(time(hour=3, minute=7), extra_param='WRONG') \
+                .with_callback(automation._my_run_minutely_callback)
+
+        with pytest.raises(AssertionError):
+            assert_that(automation) \
+                .registered.run_minutely(time(hour=3, minute=7), wrong='ok') \
+                .with_callback(automation._my_run_minutely_callback)
+
+    def test_failure__wrong_callback(self, automation: MockAutomation, assert_that):
+        automation.enable_register_run_minutely_during_initialize()
+
+        with pytest.raises(AssertionError):
+            assert_that(automation) \
+                .registered.run_minutely(time(hour=3, minute=7), extra_param='ok') \
                 .with_callback(automation._some_other_function)
