@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from appdaemon.plugins.hass.hassapi import Hass
 from pytest import raises
@@ -62,7 +64,18 @@ def test_set_and_get_attribute(given_that, automation: MockAutomation):
 
 def test_set_and_get_all_attribute(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('on', attributes={'brightness': 11, 'color': 'blue'})
-    assert automation.get_all_attributes_from_light() == {'brightness': 11, 'color': 'blue'}
+    assert automation.get_all_attributes_from_light() == {
+        'state': 'on', 'last_updated': None, 'last_changed': None, 'entity_id': LIGHT,
+        'attributes': {'brightness': 11, 'color': 'blue'}
+        }
+
+def test_set_and_get_all_attribute_last_updated_changed(given_that, automation: MockAutomation):
+    dt = datetime.datetime(year=2000, month=1, day=1).isoformat()
+    given_that.state_of(LIGHT).is_set_to('on', attributes={'brightness': 11, 'color': 'blue', 'last_updated': dt, 'last_changed': dt})
+    assert automation.get_all_attributes_from_light() == {
+        'state': 'on', 'last_updated': dt, 'last_changed': dt, 'entity_id': LIGHT,
+        'attributes': {'brightness': 11, 'color': 'blue'}
+        }
 
 def test_get_complete_state_dictionary(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('on', attributes={'brightness': 11, 'color': 'blue'})

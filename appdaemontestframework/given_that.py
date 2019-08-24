@@ -46,7 +46,13 @@ class GivenThatWrapper:
                 if attribute is None:
                     return state['main']
                 elif attribute == 'all':
-                    return state['attributes']
+                    last_updated = state["attributes"].pop("last_updated", None)
+                    last_changed = state["attributes"].pop("last_changed", None)
+                    return {
+                        "last_updated": last_updated, "last_changed": last_changed,
+                        "state": state["main"], "attributes": state['attributes'],
+                        "entity_id": entity_id,
+                    }
                 else:
                     return state['attributes'].get(attribute)
 
