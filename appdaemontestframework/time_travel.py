@@ -1,3 +1,5 @@
+import uuid
+
 class TimeTravelWrapper:
     """
     AppDaemon Test Framework Utility to simulate going forward in time
@@ -7,7 +9,10 @@ class TimeTravelWrapper:
         self.run_in_mock = RunInMock()
 
         run_in_magic_mock = hass_functions['run_in']
-        run_in_magic_mock.side_effect = self.run_in_mock
+        run_in_magic_mock.side_effect = self.run_in_mock.mock_run_in
+
+        cancel_timer_magic_mock = hass_functions['cancel_timer']
+        cancel_timer_magic_mock.side_effect = self.run_in_mock.mock_cancel_timer
 
     def fast_forward(self, duration):
         """
@@ -64,13 +69,21 @@ class RunInMock:
         self.all_registered_callbacks = []
         self.now = 0
 
-    def __call__(self, callback, delay_in_s, **kwargs):
+    def mock_run_in(self, callback, delay_in_s, **kwargs):
+        handle = str(uuid.uuid4())
         self.all_registered_callbacks.append({
             'callback_function': callback,
             'delay_in_s': delay_in_s,
             'registered_at': self.now,
-            'kwargs': kwargs
+            'kwargs': kwargs,
+            'handle': handle
         })
+        return handle
+
+    def mock_cancel_timer(self, handle):
+        for callback in self.all_registered_callbacks:
+            if callback['handle'] == handle:
+                self.all_registered_callbacks.remove(callback)
 
     def fast_forward(self, seconds):
         self.now += seconds
@@ -90,9 +103,9 @@ class RunInMock:
             return scheduled_now_or_before
 
         def _run(callback_registration):
-            kwargs = registration['kwargs']
-            registration['callback_function'](kwargs)
-            callback_run.append(registration)
+            kwargs = callback_registration['kwargs']
+            callback_registration['callback_function'](kwargs)
+            callback_run.append(callback_registration)
 
         def _remove_all_run():
             for registration in callback_run:

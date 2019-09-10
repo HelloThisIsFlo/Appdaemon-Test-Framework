@@ -23,6 +23,7 @@ def patch_hass():
         'run_daily',
         'run_minutely',
         'run_in',
+        'cancel_timer',
         'listen_event',
         'listen_state',
 
