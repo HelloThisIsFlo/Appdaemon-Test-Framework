@@ -6,13 +6,13 @@ class TimeTravelWrapper:
     """
 
     def __init__(self, hass_functions):
-        self.run_in_mock = RunInMock()
+        self.scheduler_mock = SchedulerMocks()
 
         run_in_magic_mock = hass_functions['run_in']
-        run_in_magic_mock.side_effect = self.run_in_mock.mock_run_in
+        run_in_magic_mock.side_effect = self.scheduler_mock.run_in_mock
 
         cancel_timer_magic_mock = hass_functions['cancel_timer']
-        cancel_timer_magic_mock.side_effect = self.run_in_mock.mock_cancel_timer
+        cancel_timer_magic_mock.side_effect = self.scheduler_mock.cancel_timer_mock
 
     def fast_forward(self, duration):
         """
@@ -46,10 +46,10 @@ class TimeTravelWrapper:
 
 
     def _fast_forward_seconds(self, seconds_to_fast_forward):
-        self.run_in_mock.fast_forward(seconds_to_fast_forward)
+        self.scheduler_mock.fast_forward(seconds_to_fast_forward)
 
     def _assert_current_time_seconds(self, expected_seconds_from_start):
-        assert self.run_in_mock.now == expected_seconds_from_start
+        assert self.scheduler_mock.now == expected_seconds_from_start
 
 
 class UnitsWrapper:
@@ -63,13 +63,13 @@ class UnitsWrapper:
     def seconds(self):
         self.function_with_arg_in_seconds(self.duration)
 
-class RunInMock:
-    #  self.run_in(self._after_delay, minutes * 60)
+class SchedulerMocks:
+    """Class to provide functional mocks for the AppDaemon HASS scheduling functions"""
     def __init__(self):
         self.all_registered_callbacks = []
         self.now = 0
 
-    def mock_run_in(self, callback, delay_in_s, **kwargs):
+    def run_in_mock(self, callback, delay_in_s, **kwargs):
         handle = str(uuid.uuid4())
         self.all_registered_callbacks.append({
             'callback_function': callback,
@@ -80,7 +80,7 @@ class RunInMock:
         })
         return handle
 
-    def mock_cancel_timer(self, handle):
+    def cancel_timer_mock(self, handle):
         for callback in self.all_registered_callbacks:
             if callback['handle'] == handle:
                 self.all_registered_callbacks.remove(callback)
