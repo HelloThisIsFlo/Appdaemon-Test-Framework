@@ -6,13 +6,13 @@ class TimeTravelWrapper:
     """
 
     def __init__(self, hass_functions):
-        self.scheduler_mock = SchedulerMocks()
+        self.scheduler_mocks = SchedulerMocks()
 
         run_in_magic_mock = hass_functions['run_in']
-        run_in_magic_mock.side_effect = self.scheduler_mock.run_in_mock
+        run_in_magic_mock.side_effect = self.scheduler_mocks.run_in_mock
 
         cancel_timer_magic_mock = hass_functions['cancel_timer']
-        cancel_timer_magic_mock.side_effect = self.scheduler_mock.cancel_timer_mock
+        cancel_timer_magic_mock.side_effect = self.scheduler_mocks.cancel_timer_mock
 
     def fast_forward(self, duration):
         """
@@ -46,10 +46,10 @@ class TimeTravelWrapper:
 
 
     def _fast_forward_seconds(self, seconds_to_fast_forward):
-        self.scheduler_mock.fast_forward(seconds_to_fast_forward)
+        self.scheduler_mocks.fast_forward(seconds_to_fast_forward)
 
     def _assert_current_time_seconds(self, expected_seconds_from_start):
-        assert self.scheduler_mock.now == expected_seconds_from_start
+        assert self.scheduler_mocks.now == expected_seconds_from_start
 
 
 class UnitsWrapper:
