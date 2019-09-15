@@ -3,7 +3,6 @@ import logging
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
 
-
 def patch_hass():
     """
     Patch the Hass API and returns a tuple of:
@@ -47,7 +46,11 @@ def patch_hass():
     patches = []
     hass_functions = {}
     for function_name in actionable_functions_to_patch:
-        patch_function = mock.patch.object(Hass, function_name, create=True)
+        autospec = False
+        # spec the __init__ call se we get access to the instance object in the mock
+        if function_name == '__init__':
+            autospec = True
+        patch_function = mock.patch.object(Hass, function_name, create=True, autospec=autospec)
         patches.append(patch_function)
         patched_function = patch_function.start()
         patched_function.return_value = None
@@ -59,6 +62,7 @@ def patch_hass():
 
     _ensure_compatibility_with_previous_versions(hass_functions)
     _mock_logging(hass_functions)
+    _mock_hass_init(hass_functions)
 
     return hass_functions, unpatch_callback
 
@@ -79,3 +83,10 @@ def _mock_logging(hass_functions):
 
     hass_functions['error'].side_effect = log_error
     hass_functions['log'].side_effect = log_log
+
+def _mock_hass_init(hass_functions):
+    """Mock the Hass object init and set up class attributes that are used by automations"""
+    def hass_init_mock(self, ad, name, logger, error, args, config, app_config, global_vars):
+        self.name = name
+
+    hass_functions['__init__'].side_effect = hass_init_mock
