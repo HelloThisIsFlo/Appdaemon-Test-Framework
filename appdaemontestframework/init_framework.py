@@ -3,6 +3,7 @@ import logging
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
 
+
 def patch_hass():
     """
     Patch the Hass API and returns a tuple of:
