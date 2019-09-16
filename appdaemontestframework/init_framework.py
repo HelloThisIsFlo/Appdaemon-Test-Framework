@@ -19,11 +19,21 @@ def patch_hass():
         'log',
         'error',
 
-        # Callback registrations functions
-        'run_daily',
-        'run_minutely',
+        # Scheduler callback registrations functions
         'run_in',
+        'run_once',
+        'run_at',
+        'run_daily',
+        'run_hourly',
+        'run_minutely',
+        'run_every',
         'cancel_timer',
+
+        # Sunrise and sunset functions
+        'run_at_sunrise',
+        'run_at_sunset',
+
+        # Listener callback registrations functions
         'listen_event',
         'listen_state',
 
