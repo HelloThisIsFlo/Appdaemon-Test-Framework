@@ -78,11 +78,11 @@ class TestInitialize:
         bathroom.initialize()
         assert_evening_mode_started()
 
-    def test_callbacks_are_registered(self, bathroom, hass_functions):
+    def test_callbacks_are_registered(self, bathroom, hass_mock):
         # Given: The mocked callback Appdaemon registration functions
-        listen_event = hass_functions['listen_event']
-        listen_state = hass_functions['listen_state']
-        run_daily = hass_functions['run_daily']
+        listen_event = hass_mock._hass_functions['listen_event']
+        listen_state = hass_mock._hass_functions['listen_state']
+        run_daily = hass_mock._hass_functions['run_daily']
 
         # When: Calling `initialize`
         bathroom.initialize()
