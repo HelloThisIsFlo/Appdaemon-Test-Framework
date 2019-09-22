@@ -1,20 +1,39 @@
-import uuid
+import datetime
+
 
 class TimeTravelWrapper:
     """
     AppDaemon Test Framework Utility to simulate going forward in time
     """
 
-    def __init__(self, hass_functions):
-        self.scheduler_mocks = SchedulerMocks()
+    def __init__(self, hass_mock):
+        self._hass_mock = hass_mock
+        # self.scheduler_mocks = SchedulerMocks()
 
-        run_in_magic_mock = hass_functions['run_in']
-        run_in_magic_mock.side_effect = self.scheduler_mocks.run_in_mock
+        # mock_funcs = {
+        #     'cancel_timer': self.scheduler_mocks.cancel_timer_mock,
+        #     'get_now': self.scheduler_mocks.get_now_mock,
+        #     'get_now_ts': self.scheduler_mocks.get_now_ts_mock,
+        #     'AD.insert_schedule': self.scheduler_mocks.insert_schedule_mock,
+        # }
+        # for hass_function, mock in mock_funcs.items():
+        #     hass_functions[hass_function].side_effect = mock
 
-        cancel_timer_magic_mock = hass_functions['cancel_timer']
-        cancel_timer_magic_mock.side_effect = self.scheduler_mocks.cancel_timer_mock
+    def reset_time(self, time):
+        """Rest the time of the simulation. You can not call this once you have registed any callbacks
 
-    def fast_forward(self, duration):
+        if time is a datetime, it will set to that absolution time.
+        if time is just a time, it will set the time, but leave the day the same.
+
+        Format:
+        > time_travel.reset_time(datetime.datetime(2019, 04, 05, 14, 13))
+        > # or if you don't care about the date
+        > time_travel.reset_time(datetime.time(14, 13))
+        """
+        #self.scheduler_mocks.reset_time(time)
+        self._hass_mock._schedule_mocks.reset_time(time)
+
+    def fast_forward(self, duration=None):
         """
         Simulate going forward in time.
 
@@ -28,8 +47,15 @@ class TimeTravelWrapper:
         > time_travel.fast_forward(10).minutes()
         > # Or
         > time_travel.fast_forward(30).seconds()
+        > # or
+        > time_travel.fast_forward(3).hours()
+        > # or
+        > time_travel.fast_forward().to(datetime.time(14, 55))
         """
-        return UnitsWrapper(duration, self._fast_forward_seconds)
+        if duration:
+            return UnitsWrapper(duration, self._fast_forward_seconds)
+        else:
+            return AbsoluteWrapper(self.scheduler_mocks.fast_forward)
 
     def assert_current_time(self, expected_current_time):
         """
@@ -44,12 +70,19 @@ class TimeTravelWrapper:
         """
         return UnitsWrapper(expected_current_time, self._assert_current_time_seconds)
 
-
     def _fast_forward_seconds(self, seconds_to_fast_forward):
-        self.scheduler_mocks.fast_forward(seconds_to_fast_forward)
+        self._hass_mock._schedule_mocks.fast_forward(datetime.timedelta(seconds=seconds_to_fast_forward))
 
     def _assert_current_time_seconds(self, expected_seconds_from_start):
-        assert self.scheduler_mocks.now == expected_seconds_from_start
+        assert self._hass_mock._schedule_mocks.elapsed_seconds() == expected_seconds_from_start
+
+
+class AbsoluteWrapper:
+    def __init__(self, function_for_to_set_absolute_time):
+        self.function_for_to_set_absolute_time = function_for_to_set_absolute_time
+
+    def to(self, time):
+        self.function_for_to_set_absolute_time(time)
 
 
 class UnitsWrapper:
@@ -57,62 +90,15 @@ class UnitsWrapper:
         self.duration = duration
         self.function_with_arg_in_seconds = function_with_arg_in_seconds
 
+    def hours(self):
+        self.function_with_arg_in_seconds(self.duration * 60 * 60)
+
     def minutes(self):
         self.function_with_arg_in_seconds(self.duration * 60)
 
     def seconds(self):
         self.function_with_arg_in_seconds(self.duration)
 
-class SchedulerMocks:
-    """Class to provide functional mocks for the AppDaemon HASS scheduling functions"""
-    def __init__(self):
-        self.all_registered_callbacks = []
-        self.now = 0
 
-    def run_in_mock(self, callback, delay_in_s, **kwargs):
-        handle = str(uuid.uuid4())
-        self.all_registered_callbacks.append({
-            'callback_function': callback,
-            'delay_in_s': delay_in_s,
-            'registered_at': self.now,
-            'kwargs': kwargs,
-            'handle': handle
-        })
-        return handle
 
-    def cancel_timer_mock(self, handle):
-        for callback in self.all_registered_callbacks:
-            if callback['handle'] == handle:
-                self.all_registered_callbacks.remove(callback)
 
-    def fast_forward(self, seconds):
-        self.now += seconds
-
-        self._run_callbacks()
-
-    def _run_callbacks(self):
-        callback_run = []
-
-        def _should_run(callback_registration):
-            delay_in_s = callback_registration['delay_in_s']
-            registered_at = callback_registration['registered_at']
-
-            scheduled_time = registered_at + delay_in_s
-            scheduled_now_or_before = scheduled_time <= self.now
-
-            return scheduled_now_or_before
-
-        def _run(callback_registration):
-            kwargs = callback_registration['kwargs']
-            callback_registration['callback_function'](kwargs)
-            callback_run.append(callback_registration)
-
-        def _remove_all_run():
-            for registration in callback_run:
-                self.all_registered_callbacks.remove(registration)
-
-        for registration in self.all_registered_callbacks:
-            if _should_run(registration):
-                _run(registration)
-
-        _remove_all_run()

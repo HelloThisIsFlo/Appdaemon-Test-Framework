@@ -1,12 +1,17 @@
 import logging
-
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
+#from appdeamon import AppDaemon
 
 class MockHandler:
-    def __init__(self, object_to_patch, function_name, side_effect=None):
+    def __init__(self, object_to_patch, function_name, side_effect=None, wrapped=False):
         self.function_name = function_name
-        self.patch = mock.patch.object(object_to_patch, self.function_name, create=True)
+        # if wrapped is set to true, create a patch that wraps the original function
+        wrapped_function =  None
+        if wrapped:
+            wrapped_function = getattr(object_to_patch, function_name)
+
+        self.patch = mock.patch.object(object_to_patch, self.function_name, create=True, wrap=wrapped_function)
         self.mock = self.patch.start()
         self.mock.return_value = None
         self.mock.side_effect = side_effect
@@ -14,6 +19,8 @@ class MockHandler:
 
 class HassMock:
     def __init__(self):
+        self._schedule_mocks = SchedulerMocks()
+
         self._mock_handlers = [
             # Meta
             MockHandler(Hass, '__init__'),  # Patch the __init__ method to skip Hass initialization
@@ -23,14 +30,16 @@ class HassMock:
             MockHandler(Hass, 'error'),
 
             # Scheduler callback registrations functions
-            MockHandler(Hass, 'run_in'),
-            MockHandler(Hass, 'run_once'),
-            MockHandler(Hass, 'run_at'),
-            MockHandler(Hass, 'run_daily'),
-            MockHandler(Hass, 'run_hourly'),
-            MockHandler(Hass, 'run_minutely'),
-            MockHandler(Hass, 'run_every'),
-            MockHandler(Hass, 'cancel_timer'),
+            # Wrap all these so we can re-use the AppDaemon code, but check if they were called
+            MockHandler(Hass, 'run_in', wrapped=True),
+            MockHandler(Hass, 'run_once', wrapped=True),
+            MockHandler(Hass, 'run_at', wrapped=True),
+            MockHandler(Hass, 'run_daily', wrapped=True),
+            MockHandler(Hass, 'run_hourly', wrapped=True),
+            MockHandler(Hass, 'run_minutely', wrapped=True),
+            MockHandler(Hass, 'run_every', wrapped=True),
+
+            MockHandler(Hass, 'cancel_timer', side_effect=self._schedule_mocks.cancel_timer_mock),
 
             # Sunrise and sunset functions
             MockHandler(Hass, 'run_at_sunrise'),
@@ -43,7 +52,8 @@ class HassMock:
             # State functions / attr
             MockHandler(Hass, 'set_state'),
             MockHandler(Hass, 'get_state'),
-            MockHandler(Hass, 'time'),
+            MockHandler(Hass, 'get_now', side_effect=self._schedule_mocks.get_now_mock),
+            MockHandler(Hass, 'get_now_ts', side_effect=self._schedule_mocks.get_now_ts_mock),
             MockHandler(Hass, 'args'),  # Not a function, attribute. But same patching logic
 
             # Interactions functions

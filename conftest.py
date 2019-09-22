@@ -24,7 +24,7 @@ def assert_that(hass_mock):
 
 @fixture
 def time_travel(hass_mock):
-    return TimeTravelWrapper(hass_mock._hass_functions)
+    return TimeTravelWrapper(hass_mock)
 
 
 @fixture
@@ -54,5 +54,5 @@ def configure_appdaemontestframework_for_pytester(testdir):
 
         @fixture
         def time_travel(hass_mock):
-            return TimeTravelWrapper(hass_mock._hass_functions)
+            return TimeTravelWrapper(hass_mock)
     """)
