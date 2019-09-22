@@ -57,6 +57,7 @@ class Test_time_movement:
         scheduler_mocks.fast_forward(datetime.timedelta(days=1))
         assert scheduler_mocks.get_now_mock() == datetime.datetime(2015, 1, 2, 12, 0)
 
+    #def test_scheduled_
 
 class Test_scheduling_and_dispatch:
     pass

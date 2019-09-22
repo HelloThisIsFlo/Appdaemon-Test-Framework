@@ -53,9 +53,6 @@ class SchedulerMocks:
         elif type(time) == datetime.datetime:
             target_datetime = time
 
-        if target_datetime < self._now:
-            raise ValueError("You can not schedule events in the past")
-
         self._run_callbacks_and_advance_time(target_datetime)
 
     ### Internal functions
@@ -65,6 +62,7 @@ class SchedulerMocks:
         new_callback = CallbackInfo(callback_function, kwargs, run_date_time, interval)
         if new_callback.run_date_time < self._now:
             raise ValueError("Can not schedule events in the past")
+        print("Intert!")
         self._registered_callbacks.append(new_callback)
         return new_callback.handle
 
@@ -72,6 +70,8 @@ class SchedulerMocks:
         """run all callbacks scheduled between now and target_datetime"""
         if target_datetime <= self._now:
             raise ValueError("You can not fast forward to a time in the past.")
+
+        print("Here: " + str(self._registered_callbacks))
 
         while True:
             callbacks_to_run = [x for x in self._registered_callbacks if x.run_date_time <= target_datetime]

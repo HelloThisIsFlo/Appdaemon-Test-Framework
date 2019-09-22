@@ -55,7 +55,7 @@ class TimeTravelWrapper:
         if duration:
             return UnitsWrapper(duration, self._fast_forward_seconds)
         else:
-            return AbsoluteWrapper(self.scheduler_mocks.fast_forward)
+            return AbsoluteWrapper(self._hass_mock._schedule_mocks.fast_forward)
 
     def assert_current_time(self, expected_current_time):
         """
