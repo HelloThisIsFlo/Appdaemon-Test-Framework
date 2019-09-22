@@ -10,52 +10,59 @@ def patch_hass():
     - The patched functions (as Dict)
     - A callback to un-patch all functions
     """
+    class MockInfo:
+        """Holds information about a function that will be mocked"""
+        def __init__(self, object_to_patch, function_name, autospec=False):
+            self.object_to_patch = object_to_patch
+            self.function_name = function_name
+            # Autospec will include `self` in the mock signature.
+            # Useful if you want a sideeffect that modifies the actual object instance.
+            self.autospec = autospec
 
     actionable_functions_to_patch = [
         # Meta
-        '__init__',  # Patch the __init__ method to skip Hass initialisation
+        MockInfo(Hass, '__init__', autospec=True),  # Patch the __init__ method to skip Hass initialization
 
         # Logging
-        'log',
-        'error',
+        MockInfo(Hass, 'log'),
+        MockInfo(Hass, 'error'),
 
         # Callback registrations functions
-        'run_daily',
-        'run_minutely',
-        'run_in',
-        'cancel_timer',
-        'listen_event',
-        'listen_state',
+        MockInfo(Hass, 'run_daily'),
+        MockInfo(Hass, 'run_minutely'),
+        MockInfo(Hass, 'run_in'),
+        MockInfo(Hass, 'cancel_timer'),
+        MockInfo(Hass, 'listen_event'),
+        MockInfo(Hass, 'listen_state'),
 
         # State functions / attr
-        'set_state',
-        'get_state',
-        'time',
-        'args',  # Not a function, attribute. But same patching logic
+        MockInfo(Hass, 'set_state'),
+        MockInfo(Hass, 'get_state'),
+        MockInfo(Hass, 'time'),
+        MockInfo(Hass, 'args'),  # Not a function, attribute. But same patching logic
 
         # Interactions functions
-        'call_service',
-        'turn_on',
-        'turn_off',
+        MockInfo(Hass, 'call_service'),
+        MockInfo(Hass, 'turn_on'),
+        MockInfo(Hass, 'turn_off'),
 
         # Custom callback functions
-        'register_constraint',
-        'now_is_between',
-        'notify'
+        MockInfo(Hass, 'register_constraint'),
+        MockInfo(Hass, 'now_is_between'),
+        MockInfo(Hass, 'notify'),
     ]
 
     patches = []
     hass_functions = {}
-    for function_name in actionable_functions_to_patch:
-        autospec = False
-        # spec the __init__ call se we get access to the instance object in the mock
-        if function_name == '__init__':
-            autospec = True
-        patch_function = mock.patch.object(Hass, function_name, create=True, autospec=autospec)
+    for mock_info in actionable_functions_to_patch:
+        print(mock_info.function_name)
+        print(mock_info.autospec)
+        patch_function = mock.patch.object(mock_info.object_to_patch, mock_info.function_name, create=True,
+                                           autospec=mock_info.autospec)
         patches.append(patch_function)
         patched_function = patch_function.start()
         patched_function.return_value = None
-        hass_functions[function_name] = patched_function
+        hass_functions[mock_info.function_name] = patched_function
 
     def unpatch_callback():
         for patch in patches:
