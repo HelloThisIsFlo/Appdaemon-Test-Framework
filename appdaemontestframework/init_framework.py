@@ -87,7 +87,7 @@ def _mock_logging(hass_functions):
 
 def _mock_hass_init(hass_functions):
     """Mock the Hass object init and set up class attributes that are used by automations"""
-    def hass_init_mock(self, ad, name, logger, error, args, config, app_config, global_vars):
+    def hass_init_mock(self, _ad, name, _logger, _error, _args, _config, _app_config, _global_vars):
         self.name = name
 
     hass_functions['__init__'].side_effect = hass_init_mock
