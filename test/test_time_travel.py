@@ -13,8 +13,6 @@ class MockAutomation(Hass):
 def automation():
     pass
 
-#class test_time_retrieval_mocks():
-
 
 class Test_fast_forward:
     @staticmethod
