@@ -76,7 +76,7 @@ class HassMock:
     ### Logging mocks
     @staticmethod
     def _log_error(msg, level='ERROR'):
-        log_log(msg, level)
+        HassMock._log_log(msg, level)
 
     @staticmethod
     def _log_log(msg, level='INFO'):
