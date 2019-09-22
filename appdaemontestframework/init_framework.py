@@ -14,7 +14,7 @@ class MockHandler:
 
 class HassMock:
     def __init__(self):
-        self._mocks = [
+        self._mock_handlers = [
             # Meta
             MockHandler(Hass, '__init__'),  # Patch the __init__ method to skip Hass initialization
 
@@ -63,13 +63,13 @@ class HassMock:
 
         # TODO: remove this temp convert the new _mocks into the old _hass_functions
         self._hass_functions = {}
-        for mock_handler in self._mocks:
+        for mock_handler in self._mock_handlers:
             self._hass_functions[mock_handler.function_name] = mock_handler.mock
         # ensure compatibility with older versions of AppDaemon
         self._hass_functions['passed_args'] = self._hass_functions['args']
 
     def unpatch_mocks(self):
-        for mock_handler in self._mocks:
+        for mock_handler in self._mock_handlers:
             mock_handler.mock.stop()
 
 
