@@ -32,7 +32,7 @@ def configure_appdaemontestframework_for_pytester(testdir):
     testdir.makeconftest(
         """
         from pytest import fixture
-        from appdaemontestframework import patch_hass, AssertThatWrapper, GivenThatWrapper, TimeTravelWrapper
+        from appdaemontestframework import HassMock, AssertThatWrapper, GivenThatWrapper, TimeTravelWrapper
 
 
         @fixture
