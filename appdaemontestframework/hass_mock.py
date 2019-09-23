@@ -8,8 +8,8 @@ class HassMock:
     def __init__(self):
         self._schedule_mocks = SchedulerMocks()
 
-        insert_schedule_mock = self._schedule_mocks.insert_schedule_mock
-
+        # Mocked out init for Hass. It needs to be in this scope so it can get access to the scheduler mock instance
+        insert_schedule_mock = self._schedule_mocks.insert_schedule_mock # to avoid `self` shadowing in `_hass_init_mock`
         def _hass_init_mock(self, _ad, name, _logger, _error, _args, _config, _app_config, _global_vars):
             self.name = name
             class AD(object):
@@ -17,13 +17,12 @@ class HassMock:
             mock.patch.object(AD, 'log', create=True).start()
             mock.patch.object(AD, 'insert_schedule', create=True, side_effect=insert_schedule_mock).start()
             self.AD = AD()
-            #self.AD.insert_schedule('', 0, None, None, None)
 
+        # This is a list of all mocked out functions.
         self._mock_handlers = [
             ### Meta
             # Patch the __init__ method to skip Hass initialization. Use autospec so we can access the `self` object
             MockHandler(Hass, '__init__', side_effect=_hass_init_mock, autospec=True),
-            #MockHandler(Hass, '__init__'),
 
             ### logging
             MockHandler(Hass, 'log', side_effect=self._log_log),
@@ -67,7 +66,8 @@ class HassMock:
             MockHandler(Hass, 'notify'),
         ]
 
-        # TODO: remove this temp convert the new _mocks into the old _hass_functions
+        # TODO: remove this temp code (or clean it up for production)
+        # convert the new _mocks into the old _hass_functions
         self._hass_functions = {}
         for mock_handler in self._mock_handlers:
             self._hass_functions[mock_handler.function_name] = mock_handler.mock
@@ -77,7 +77,6 @@ class HassMock:
     def unpatch_mocks(self):
         for mock_handler in self._mock_handlers:
             mock_handler.patch.stop()
-
 
     ### Logging mocks
     @staticmethod

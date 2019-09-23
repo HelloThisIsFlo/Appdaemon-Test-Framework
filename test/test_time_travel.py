@@ -137,11 +137,10 @@ class Test_reset_time:
         time_travel.reset_time(reset_time)
         assert automation.datetime() == reset_time
 
-    # def test_throws_exception_when_reset_time_is_called_with_registed_callbacks(self, time_travel, automation):
-    #     callback_mock = mock.Mock()
-    #     automation.run_in(callback_mock, 1)
-    #     with pytest.raises(RuntimeError):
-    #         time_travel.reset_time(datetime.datetime(2020, 1, 1, 12, 0))
+    def test_reset_time_in_past_throws_exception(self, time_travel):
+        with pytest.raises(ValueError) as cm:
+            time_travel.reset_time(datetime.datetime(1990, 1, 1, 0, 0))
+        assert str(cm.value) == 'You can not fast forward to a time in the past.'
 
 
 class Test_run_daily:

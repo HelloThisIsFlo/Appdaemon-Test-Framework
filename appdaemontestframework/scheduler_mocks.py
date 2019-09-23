@@ -9,7 +9,7 @@ class SchedulerMocks:
         self._registered_callbacks = []
         # Default to Jan 1st, 2000 12:00AM
         self._now = datetime.datetime(2000, 1, 1, 0, 0)
-        self.start_time = self._now
+        self._start_time = self._now
         self._reset_time_callled = False # only allow one call
 
     ### Hass mock functions
@@ -37,13 +37,13 @@ class SchedulerMocks:
             time = datetime.datetime.combine(self._now.date(), time)
             if time < self._now:
                 time += datetime.timedelta(days=1)
-        self.start_time = time
+        self._start_time = time
         # advace forward to this time without calling callbacks along the way
         self._run_callbacks_and_advance_time(time, run_callbacks=False)
         # self._reset_time_callled = True
 
     def elapsed_seconds(self):
-        return (self._now - self.start_time).total_seconds()
+        return (self._now - self._start_time).total_seconds()
 
     def fast_forward(self, time):
         """Fastforward time and invoke callbacks. time can be a timedelta, time, or datetime"""
