@@ -60,9 +60,10 @@ class SchedulerMocks:
         """queue a new callback and return its handle"""
         interval = kwargs.get("interval", 0)
         new_callback = CallbackInfo(callback_function, kwargs, run_date_time, interval)
+
         if new_callback.run_date_time < self._now:
             raise ValueError("Can not schedule events in the past")
-        print("Intert!")
+
         self._registered_callbacks.append(new_callback)
         return new_callback.handle
 

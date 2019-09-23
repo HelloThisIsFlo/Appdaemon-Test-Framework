@@ -1,5 +1,6 @@
 import textwrap
 from abc import ABC, abstractmethod
+import mock
 
 
 ### Custom Matchers ##################################################
@@ -200,6 +201,7 @@ class RegisteredWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
                 registered_wrapper._run_daily.assert_any_call(
+                    mock.ANY, # for `self`
                     callback,
                     time_,
                     **kwargs)
@@ -213,6 +215,7 @@ class RegisteredWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
                 registered_wrapper._run_mintely.assert_any_call(
+                    mock.ANY, # for `self`
                     callback,
                     time_,
                     **kwargs)
@@ -235,8 +238,9 @@ def _ensure_init(property):
 
 
 class AssertThatWrapper:
-    def __init__(self, hass_functions):
-        self.hass_functions = hass_functions
+    def __init__(self, hass_mock):
+        self.hass_mock = hass_mock
+        self.hass_functions = self.hass_mock._hass_functions
         self._was = None
         self._was_not = None
         self._listens_to = None

@@ -14,7 +14,7 @@ def hass_mock():
 
 @fixture
 def given_that(hass_mock):
-    return GivenThatWrapper(hass_mock._hass_functions)
+    return GivenThatWrapper(hass_mock)
 
 
 @fixture
@@ -44,12 +44,12 @@ def configure_appdaemontestframework_for_pytester(testdir):
 
         @fixture
         def given_that(hass_mock):
-            return GivenThatWrapper(hass_mock._hass_functions)
+            return GivenThatWrapper(hass_mock)
 
 
         @fixture
         def assert_that(hass_mock):
-            return AssertThatWrapper(hass_mock._hass_functions)
+            return AssertThatWrapper(hass_mock)
 
 
         @fixture
