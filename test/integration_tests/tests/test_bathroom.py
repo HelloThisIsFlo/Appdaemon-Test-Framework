@@ -2,6 +2,7 @@ from apps.bathroom import Bathroom, BATHROOM_VOLUMES, DEFAULT_VOLUMES, FAKE_MUTE
 from appdaemon.plugins.hass.hassapi import Hass
 from mock import patch, MagicMock
 import pytest
+import mock
 from datetime import time
 from apps.entity_ids import ID
 
@@ -112,10 +113,12 @@ class TestInitialize:
             new='off')
 
         run_daily.assert_any_call(
+            mock.ANY, # for `self`
             bathroom._time_triggered,
             time(hour=DAY_HOUR),
             hour=DAY_HOUR)
         run_daily.assert_any_call(
+            mock.ANY, # for `self`
             bathroom._time_triggered,
             time(hour=EVENING_HOUR),
             hour=EVENING_HOUR)
