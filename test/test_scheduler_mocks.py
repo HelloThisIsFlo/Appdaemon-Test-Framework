@@ -35,7 +35,7 @@ class Test_time_movement:
     def test_fast_forward_to_past_raises_exception(self, scheduler_mocks):
         with pytest.raises(ValueError) as cm:
             scheduler_mocks.fast_forward(datetime.timedelta(-1))
-        assert str(cm.value) == "You can not schedule events in the past"
+        assert str(cm.value) == "You can not fast forward to a time in the past."
 
     def test_fast_forward_to_time_in_future_goes_to_correct_time(self, scheduler_mocks):
         scheduler_mocks.reset_time(datetime.datetime(2015, 1, 1, 12, 0))
