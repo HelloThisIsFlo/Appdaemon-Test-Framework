@@ -31,13 +31,13 @@ class HassMock:
 
             ### Scheduler callback registrations functions
             # Wrap all these so we can re-use the AppDaemon code, but check if they were called
-            MockHandler(Hass, 'run_in', wrapped=True),
-            MockHandler(Hass, 'run_once', wrapped=True),
-            MockHandler(Hass, 'run_at', wrapped=True),
-            MockHandler(Hass, 'run_daily', wrapped=True),
-            MockHandler(Hass, 'run_hourly', wrapped=True),
-            MockHandler(Hass, 'run_minutely', wrapped=True),
-            MockHandler(Hass, 'run_every', wrapped=True),
+            WrappedMockHandler(Hass, 'run_in'),
+            WrappedMockHandler(Hass, 'run_once'),
+            WrappedMockHandler(Hass, 'run_at'),
+            WrappedMockHandler(Hass, 'run_daily'),
+            WrappedMockHandler(Hass, 'run_hourly'),
+            WrappedMockHandler(Hass, 'run_minutely'),
+            WrappedMockHandler(Hass, 'run_every'),
 
             MockHandler(Hass, 'cancel_timer', side_effect=self._schedule_mocks.cancel_timer_mock),
 
@@ -92,16 +92,22 @@ class HassMock:
 
 
 class MockHandler:
-    def __init__(self, object_to_patch, function_name, side_effect=None, wrapped=False, autospec=False):
+    """A class for generating a mock in an object and holding on to info about it.
+    :param object_to_patch: The object to patch
+    :param function_name: the name of the function to patch in the object
+    :param side_effect: side effect method to call. If not set, it will just return `None`
+    :param autospec: If `True` will autospec the Mock signature. Useful for getting `self` in side effects.
+    """
+    def __init__(self, object_to_patch, function_name, side_effect=None, autospec=False):
         self.function_name = function_name
-        # if wrapped is set to true, create a patch that wraps the original function
         return_value = None
-        #wrapped_function =  None
-        if wrapped:
-            side_effect = getattr(object_to_patch, function_name)
-            return_value = mock.DEFAULT
-            autospec = True
-
         self.patch = mock.patch.object(object_to_patch, self.function_name, create=True,
-                                       autospec=autospec, side_effect=side_effect, return_value=return_value)
+                                       autospec=autospec, side_effect=side_effect, return_value=None)
         self.mock = self.patch.start()
+
+
+class WrappedMockHandler(MockHandler):
+    """Heper class that privides a 'wrapped' mock. This will automatically call the original function while still providing
+    a Mock for asserts and the stuch."""
+    def __init__(self, object_to_patch, function_name):
+        super().__init__(object_to_patch, function_name, side_effect=getattr(object_to_patch, function_name), autospec=True)
