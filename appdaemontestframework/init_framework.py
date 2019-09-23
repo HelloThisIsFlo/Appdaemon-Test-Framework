@@ -12,9 +12,12 @@ class HassMock:
 
         def _hass_init_mock(self, _ad, name, _logger, _error, _args, _config, _app_config, _global_vars):
             self.name = name
-            self.AD = object()
-            mock.patch.object(self.AD, 'log', create=True)
-            mock.patch.object(self.AD, 'insert_schedule', create=True, side_effect=insert_schedule_mock)
+            class AD(object):
+                pass
+            mock.patch.object(AD, 'log', create=True).start()
+            mock.patch.object(AD, 'insert_schedule', create=True, side_effect=insert_schedule_mock).start()
+            self.AD = AD()
+            #self.AD.insert_schedule('', 0, None, None, None)
 
         self._mock_handlers = [
             ### Meta
@@ -92,9 +95,13 @@ class MockHandler:
     def __init__(self, object_to_patch, function_name, side_effect=None, wrapped=False, autospec=False):
         self.function_name = function_name
         # if wrapped is set to true, create a patch that wraps the original function
-        wrapped_function =  None
+        return_value = None
+        #wrapped_function =  None
         if wrapped:
-            wrapped_function = getattr(object_to_patch, function_name)
+            side_effect = getattr(object_to_patch, function_name)
+            return_value = mock.DEFAULT
+            autospec = True
 
-        self.patch = mock.patch.object(object_to_patch, self.function_name, create=True, wrap=wrapped_function, autospec=autospec, side_effect=side_effect, return_value=None)
+        self.patch = mock.patch.object(object_to_patch, self.function_name, create=True,
+                                       autospec=autospec, side_effect=side_effect, return_value=return_value)
         self.mock = self.patch.start()
