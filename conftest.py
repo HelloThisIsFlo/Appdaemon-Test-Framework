@@ -19,7 +19,7 @@ def given_that(hass_mock):
 
 @fixture
 def assert_that(hass_mock):
-    return AssertThatWrapper(hass_mock._hass_functions)
+    return AssertThatWrapper(hass_mock)
 
 
 @fixture

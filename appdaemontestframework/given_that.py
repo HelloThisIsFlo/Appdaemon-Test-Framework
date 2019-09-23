@@ -7,7 +7,7 @@ class StateNotSetError(AppdaemonTestFrameworkError):
     def __init__(self, entity_id):
         super().__init__(f"""
         State for entity: '{entity_id}' was never set!
-        Please make sure to set the state with `given_that.state_of({entity_id}).is_set_to(STATE)` 
+        Please make sure to set the state with `given_that.state_of({entity_id}).is_set_to(STATE)`
         before trying to access the mocked state
         """)
 
@@ -17,8 +17,9 @@ class AttributeNotSetError(AppdaemonTestFrameworkError):
 
 
 class GivenThatWrapper:
-    def __init__(self, hass_functions):
-        self.hass_functions = hass_functions
+    def __init__(self, hass_mock):
+        self.hass_mock = hass_mock
+        self.hass_functions = self.hass_mock._hass_functions
         self._init_mocked_states()
         self._init_mocked_passed_args()
 
