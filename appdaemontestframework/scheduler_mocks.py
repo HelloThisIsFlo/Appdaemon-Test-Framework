@@ -7,8 +7,10 @@ class SchedulerMocks:
     """Class to provide functional mocks for the AppDaemon HASS scheduling functions"""
     def __init__(self):
         self._registered_callbacks = []
-        # Default to Jan 1st, 2015 12:00AM
-        self.reset_time(datetime.datetime(2015, 1, 1, 0, 0))
+        # Default to Jan 1st, 2000 12:00AM
+        self._now = datetime.datetime(2000, 1, 1, 0, 0)
+        self.start_time = self._now
+        self._reset_time_callled = False # only allow one call
 
     ### Hass mock functions
     def get_now_mock(self):
@@ -28,13 +30,17 @@ class SchedulerMocks:
 
     ### Test framework functions
     def reset_time(self, time):
-        if len(self._registered_callbacks) != 0:
-            raise RuntimeError("You can not reset time with pending callbacks")
+        # if self._reset_time_callled:
+        #     raise RuntimeError("You can only reset time once. Use fast forward functions after that.")
 
         if type(time) == datetime.time:
             time = datetime.datetime.combine(self._now.date(), time)
-        self._now = time
-        self.start_time = self._now
+            if time < self._now:
+                time += datetime.timedelta(days=1)
+        self.start_time = time
+        # advace forward to this time without calling callbacks along the way
+        self._run_callbacks_and_advance_time(time, run_callbacks=False)
+        # self._reset_time_callled = True
 
     def elapsed_seconds(self):
         return (self._now - self.start_time).total_seconds()
@@ -67,12 +73,10 @@ class SchedulerMocks:
         self._registered_callbacks.append(new_callback)
         return new_callback.handle
 
-    def _run_callbacks_and_advance_time(self, target_datetime):
+    def _run_callbacks_and_advance_time(self, target_datetime, run_callbacks=True):
         """run all callbacks scheduled between now and target_datetime"""
-        if target_datetime <= self._now:
+        if target_datetime < self._now:
             raise ValueError("You can not fast forward to a time in the past.")
-
-        print("Here: " + str(self._registered_callbacks))
 
         while True:
             callbacks_to_run = [x for x in self._registered_callbacks if x.run_date_time <= target_datetime]
@@ -83,7 +87,8 @@ class SchedulerMocks:
             # dispatch the oldest callback
             callback = callbacks_to_run[0]
             self._now = callback.run_date_time
-            callback()
+            if run_callbacks:
+                callback()
             if callback.interval > 0:
                 callback.run_date_time += datetime.timedelta(seconds=callback.interval)
             else:
