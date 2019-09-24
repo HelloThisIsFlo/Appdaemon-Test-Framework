@@ -30,7 +30,7 @@ class Test_time_movement:
         scheduler_mocks.insert_schedule_mock('', scheduled_utc, lambda: None, False, None)
         with pytest.raises(RuntimeError) as cm:
             scheduler_mocks.set_start_time(datetime.datetime(2010, 6, 1, 0, 0))
-        assert str(cm.value) == 'You can not reset time with pending callbacks'
+        assert str(cm.value) == 'You can not set start time while callbacks are scheduled'
 
     def test_fast_forward_to_past_raises_exception(self, scheduler_mocks):
         with pytest.raises(ValueError) as cm:
