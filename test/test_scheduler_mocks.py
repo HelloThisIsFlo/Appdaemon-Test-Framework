@@ -20,17 +20,17 @@ class Test_get_now_mocks:
 
 
 class Test_time_movement:
-    def test_reset_time_to_known_time(self, scheduler_mocks):
+    def test_set_start_time_to_known_time(self, scheduler_mocks):
         new_time = datetime.datetime(2010, 6, 1, 0, 0)
-        scheduler_mocks.reset_time(new_time)
+        scheduler_mocks.set_start_time(new_time)
         assert scheduler_mocks.get_now_mock() == new_time
 
-    # def test_cant_reset_time_with_pending_callbacks(self, scheduler_mocks):
-    #     scheduled_utc = scheduler_mocks.get_now_ts_mock() + 10
-    #     scheduler_mocks.insert_schedule_mock('', scheduled_utc, lambda: None, False, None)
-    #     with pytest.raises(RuntimeError) as cm:
-    #         scheduler_mocks.reset_time(datetime.datetime(2010, 6, 1, 0, 0))
-    #     assert str(cm.value) == 'You can not reset time with pending callbacks'
+    def test_cant_set_start_time_with_pending_callbacks(self, scheduler_mocks):
+        scheduled_utc = scheduler_mocks.get_now_ts_mock() + 10
+        scheduler_mocks.insert_schedule_mock('', scheduled_utc, lambda: None, False, None)
+        with pytest.raises(RuntimeError) as cm:
+            scheduler_mocks.set_start_time(datetime.datetime(2010, 6, 1, 0, 0))
+        assert str(cm.value) == 'You can not reset time with pending callbacks'
 
     def test_fast_forward_to_past_raises_exception(self, scheduler_mocks):
         with pytest.raises(ValueError) as cm:
@@ -38,12 +38,12 @@ class Test_time_movement:
         assert str(cm.value) == "You can not fast forward to a time in the past."
 
     def test_fast_forward_to_time_in_future_goes_to_correct_time(self, scheduler_mocks):
-        scheduler_mocks.reset_time(datetime.datetime(2015, 1, 1, 12, 0))
+        scheduler_mocks.set_start_time(datetime.datetime(2015, 1, 1, 12, 0))
         scheduler_mocks.fast_forward(datetime.time(14, 0))
         assert scheduler_mocks.get_now_mock() == datetime.datetime(2015, 1, 1, 14, 0)
 
     def test_fast_forward_to_time_in_past_wraps_to_correct_time(self, scheduler_mocks):
-        scheduler_mocks.reset_time(datetime.datetime(2015, 1, 1, 12, 0))
+        scheduler_mocks.set_start_time(datetime.datetime(2015, 1, 1, 12, 0))
         scheduler_mocks.fast_forward(datetime.time(7, 0))
         assert scheduler_mocks.get_now_mock() == datetime.datetime(2015, 1, 2, 7, 0)
 
@@ -53,7 +53,7 @@ class Test_time_movement:
         assert scheduler_mocks.get_now_mock() == to_datetime
 
     def test_fast_forward_by_timedelta_goes_to_correct_time(self, scheduler_mocks):
-        scheduler_mocks.reset_time(datetime.datetime(2015, 1, 1, 12, 0))
+        scheduler_mocks.set_start_time(datetime.datetime(2015, 1, 1, 12, 0))
         scheduler_mocks.fast_forward(datetime.timedelta(days=1))
         assert scheduler_mocks.get_now_mock() == datetime.datetime(2015, 1, 2, 12, 0)
 

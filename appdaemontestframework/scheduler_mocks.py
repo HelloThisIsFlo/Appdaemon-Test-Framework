@@ -8,9 +8,7 @@ class SchedulerMocks:
     def __init__(self):
         self._registered_callbacks = []
         # Default to Jan 1st, 2000 12:00AM
-        self._now = datetime.datetime(2000, 1, 1, 0, 0)
-        self._start_time = self._now
-        self._reset_time_callled = False # only allow one call
+        self.set_start_time(datetime.datetime(2000, 1, 1, 0, 0))
 
     ### Hass mock functions
     def get_now_mock(self):
@@ -29,18 +27,19 @@ class SchedulerMocks:
                 self._registered_callbacks.remove(callback)
 
     ### Test framework functions
-    def reset_time(self, time):
-        # if self._reset_time_callled:
-        #     raise RuntimeError("You can only reset time once. Use fast forward functions after that.")
+    def set_start_time(self, time):
+        """Set the absolute start time and set current time to that as well.
+        if time is a datetime, it goes right to that.
+        if time is time, it will set to that time with the current date.
+
+        To guarantee consistency, you can not set the start time while any callbacks are scheduled.
+        """
+        if len(self._registered_callbacks) > 0:
+            raise RuntimeError("You can not set start time while callbacks are scheduled")
 
         if type(time) == datetime.time:
             time = datetime.datetime.combine(self._now.date(), time)
-            if time < self._now:
-                time += datetime.timedelta(days=1)
-        self._start_time = time
-        # advace forward to this time without calling callbacks along the way
-        self._run_callbacks_and_advance_time(time, run_callbacks=False)
-        # self._reset_time_callled = True
+        self._start_time = self._now = time
 
     def elapsed_seconds(self):
         return (self._now - self._start_time).total_seconds()

@@ -8,30 +8,20 @@ class TimeTravelWrapper:
 
     def __init__(self, hass_mock):
         self._hass_mock = hass_mock
-        # self.scheduler_mocks = SchedulerMocks()
 
-        # mock_funcs = {
-        #     'cancel_timer': self.scheduler_mocks.cancel_timer_mock,
-        #     'get_now': self.scheduler_mocks.get_now_mock,
-        #     'get_now_ts': self.scheduler_mocks.get_now_ts_mock,
-        #     'AD.insert_schedule': self.scheduler_mocks.insert_schedule_mock,
-        # }
-        # for hass_function, mock in mock_funcs.items():
-        #     hass_functions[hass_function].side_effect = mock
-
-    def reset_time(self, time):
-        """Rest the time of the simulation. You can not call this once you have registed any callbacks
+    def set_start_time(self, time):
+        """Set the start time of the simulation. You can not call this once you have registed any callbacks
 
         if time is a datetime, it will set to that absolution time.
         if time is just a time, it will set the time, but leave the day the same.
 
         Format:
-        > time_travel.reset_time(datetime.datetime(2019, 04, 05, 14, 13))
+        > time_travel.set_start_time(datetime.datetime(2019, 04, 05, 14, 13))
         > # or if you don't care about the date
-        > time_travel.reset_time(datetime.time(14, 13))
+        > time_travel.set_start_time(datetime.time(14, 13))
         """
-        #self.scheduler_mocks.reset_time(time)
-        self._hass_mock._schedule_mocks.reset_time(time)
+        #TODO: don't call private interface
+        self._hass_mock._schedule_mocks.set_start_time(time)
 
     def fast_forward(self, duration=None):
         """
