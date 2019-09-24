@@ -67,7 +67,8 @@ class HassMock:
         ]
 
         # TODO: remove this temp code (or clean it up for production)
-        # convert the new _mocks into the old _hass_functions
+        # TODO: likely should have public interfaces for anything that wants to access this
+        # convert the new _mocks into the old _hass_functionss
         self._hass_functions = {}
         for mock_handler in self._mock_handlers:
             self._hass_functions[mock_handler.function_name] = mock_handler.mock
