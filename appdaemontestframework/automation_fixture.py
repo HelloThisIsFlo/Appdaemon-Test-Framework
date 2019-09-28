@@ -10,11 +10,12 @@ class AutomationFixtureError(AppdaemonTestFrameworkError):
     pass
 
 
-def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_mock):
+def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_mock, initialize_automation):
     _inject_helpers_and_call_function(function, given_that, hass_mock)
     automation = automation_class(
         None, None, None, None, None, None, None, None)
-    automation.initialize()
+    if initialize_automation:
+        automation.initialize()
     given_that.mock_functions_are_cleared()
     return automation
 
@@ -66,7 +67,8 @@ def ensure_automation_is_valid(automation_class):
 
 
 class _AutomationFixtureDecoratorWithoutArgs:
-    def __init__(self, automation_classes):
+    def __init__(self, automation_classes, initialize_automation):
+        self.initialize_automation = initialize_automation
         self.automation_classes = automation_classes
         for automation in self.automation_classes:
             ensure_automation_is_valid(automation)
@@ -75,7 +77,8 @@ class _AutomationFixtureDecoratorWithoutArgs:
         @pytest.fixture(params=self.automation_classes, ids=self._generate_id)
         def automation_fixture_with_initialisation(request, given_that, hass_mock):
             automation_class = request.param
-            return _instantiate_and_initialize_automation(function, automation_class, given_that, hass_mock)
+            return _instantiate_and_initialize_automation(
+                function, automation_class, given_that, hass_mock, self.initialize_automation)
 
         return automation_fixture_with_initialisation
 
@@ -84,7 +87,8 @@ class _AutomationFixtureDecoratorWithoutArgs:
 
 
 class _AutomationFixtureDecoratorWithArgs:
-    def __init__(self, automation_classes_with_args):
+    def __init__(self, automation_classes_with_args, initialize_automation):
+        self.initialize_automation = initialize_automation
         self.automation_classes_with_args = automation_classes_with_args
         for automation, _args in self.automation_classes_with_args:
             ensure_automation_is_valid(automation)
@@ -95,7 +99,7 @@ class _AutomationFixtureDecoratorWithArgs:
             automation_class = request.param[0]
             automation_args = request.param[1]
             automation = _instantiate_and_initialize_automation(
-                function, automation_class, given_that, hass_mock)
+                function, automation_class, given_that, hass_mock, self.initialize_automation)
             return (automation, automation_args)
 
         return automation_fixture_with_initialisation
@@ -104,7 +108,7 @@ class _AutomationFixtureDecoratorWithArgs:
         return automation_classes_with_args[0].__name__
 
 
-def automation_fixture(*args):
+def automation_fixture(*args, **kwargs):
     """
     Decorator to seamlessly initialize and inject an automation fixture
 
@@ -116,6 +120,8 @@ def automation_fixture(*args):
                                        (upstairs.Bedroom, {'motion': 'binary_sensor.bedroom_motion'}),
                                        (upstairs.Bathroom, {'motion': 'binary_sensor.bathroom_motion'}),
                                    )
+
+    #TODO: update docs here and elsewhere for the new `initialize` kwarg
 
     When multiple classes are passed, tests will be generated for each automation.
     When using parameters, the injected object will be a tuple: `(Initialized_Automation, params)`
@@ -150,9 +156,13 @@ def automation_fixture(*args):
         raise AutomationFixtureError(
             'Do not forget to pass the automation class(es) as argument')
 
+    should_initialize = True
+    if 'initialize' in kwargs:
+        should_initialize = kwargs['initialize']
+
     if type(args[0]) is not tuple:
         automation_classes = args
-        return _AutomationFixtureDecoratorWithoutArgs(automation_classes)
+        return _AutomationFixtureDecoratorWithoutArgs(automation_classes, should_initialize)
     else:
         automation_classes_with_args = args
-        return _AutomationFixtureDecoratorWithArgs(automation_classes_with_args)
+        return _AutomationFixtureDecoratorWithArgs(automation_classes_with_args, should_initialize)

@@ -31,15 +31,15 @@ class TestAutomationFixture:
             """
             from appdaemon.plugins.hass.hassapi import Hass
             from appdaemontestframework import automation_fixture
-            
+
             class MockAutomation(Hass):
                 def initialize(self):
                     pass
-            
+
             @automation_fixture(MockAutomation)
             def mock_automation():
                 pass
-                
+
             def test_is_injected_as_fixture(mock_automation):
                 assert mock_automation is not None
         """)
@@ -47,25 +47,64 @@ class TestAutomationFixture:
         result = testdir.runpytest()
         result.assert_outcomes(passed=1)
 
-    def test_automation_was_initialized(self, testdir):
+    def test_automation_was_initialized_with_default_initialize(self, testdir):
         testdir.makepyfile(
             """
             from appdaemon.plugins.hass.hassapi import Hass
             from appdaemontestframework import automation_fixture
-            
+
             class MockAutomation(Hass):
-                was_initialized: False
-                
                 def initialize(self):
                     self.was_initialized = True
-                    
-            
+
+
             @automation_fixture(MockAutomation)
             def mock_automation():
                 pass
-                
+
             def test_was_initialized(mock_automation):
-                assert mock_automation.was_initialized
+                assert getattr(mock_automation, 'was_initialized', False) == True
+        """)
+
+        result = testdir.runpytest()
+        result.assert_outcomes(passed=1)
+
+    def test_automation_was_initialized_with_initialize_set_True(self, testdir):
+        testdir.makepyfile(
+            """
+            from appdaemon.plugins.hass.hassapi import Hass
+            from appdaemontestframework import automation_fixture
+
+            class MockAutomation(Hass):
+                def initialize(self):
+                    self.was_initialized = True
+
+
+            @automation_fixture(MockAutomation, initialize=True)
+            def mock_automation():
+                pass
+
+            def test_was_initialized(mock_automation):
+                assert getattr(mock_automation, 'was_initialized', False) == True
+        """)
+
+    def test_automation_was_not_initialized_with_initialize_set_False(self, testdir):
+        testdir.makepyfile(
+            """
+            from appdaemon.plugins.hass.hassapi import Hass
+            from appdaemontestframework import automation_fixture
+
+            class MockAutomation(Hass):
+                def initialize(self):
+                    self.was_initialized = True
+
+
+            @automation_fixture(MockAutomation, initialize=False)
+            def mock_automation():
+                pass
+
+            def test_was_initialized(mock_automation):
+                assert getattr(mock_automation, 'was_initialized', False) == False
         """)
 
         result = testdir.runpytest()
@@ -76,19 +115,19 @@ class TestAutomationFixture:
             """
             from appdaemon.plugins.hass.hassapi import Hass
             from appdaemontestframework import automation_fixture
-            
+
             class MockAutomation(Hass):
                 def initialize(self):
                     self.turn_on('light.living_room')
-                    
-            
+
+
             @automation_fixture(MockAutomation)
             def mock_automation():
                 pass
-                
+
             def test_some_test(mock_automation):
                 assert mock_automation is not None
-            
+
         """)
 
         result = testdir.runpytest()
@@ -99,20 +138,20 @@ class TestAutomationFixture:
             """
             from appdaemon.plugins.hass.hassapi import Hass
             from appdaemontestframework import automation_fixture
-            
+
             class MockAutomation(Hass):
                 def initialize(self):
                     pass
-                    
+
             class OtherMockAutomation(Hass):
                 def initialize(self):
                     pass
-                    
-            
+
+
             @automation_fixture(MockAutomation, OtherMockAutomation)
             def mock_automation():
                 pass
-                
+
             def test_some_test(mock_automation):
                 assert mock_automation is not None
         """)
@@ -125,19 +164,19 @@ class TestAutomationFixture:
             """
             from appdaemon.plugins.hass.hassapi import Hass
             from appdaemontestframework import automation_fixture
-            
+
             class MockAutomation(Hass):
                 def initialize(self):
                     pass
-                
+
                 def assert_light_on(self):
                     assert self.get_state('light.bed') == 'on'
-                    
-                    
+
+
             @automation_fixture(MockAutomation)
             def mock_automation(given_that):
                 given_that.state_of('light.bed').is_set_to('on')
-                
+
             def test_some_test(mock_automation):
                 mock_automation.assert_light_on()
         """)
@@ -150,15 +189,15 @@ class TestAutomationFixture:
             """
             from appdaemon.plugins.hass.hassapi import Hass
             from appdaemontestframework import automation_fixture
-            
+
             class MockAutomation(Hass):
                 def initialize(self):
                     pass
-            
+
             @automation_fixture
             def mock_automation():
                 pass
-                
+
             def test_some_test(mock_automation):
                 assert mock_automation is not None
         """)
@@ -176,13 +215,13 @@ class TestAutomationFixture:
                     """
                     from appdaemon.plugins.hass.hassapi import Hass
                     from appdaemontestframework import automation_fixture
-                    
+
                     %s
-                    
+
                     @automation_fixture(MockAutomation)
                     def mock_automation():
                         pass
-                        
+
                     def test_some_test(mock_automation):
                         assert mock_automation is not None
                 """) % dedent(automation_class_src))
@@ -224,7 +263,7 @@ class TestAutomationFixture:
                                          def __init__(self, ad, name, logger, error, args, config, app_config, global_vars):
                                              super().__init__(ad, name, logger, error, args, config, app_config, global_vars)
                                              self.log("do some things in '__init__'")
-                                             
+
                                          def initialize(self):
                                              self.turn_on('light.living_room')
                                      """,
@@ -246,20 +285,20 @@ class TestAutomationFixture:
                 """
                 from appdaemon.plugins.hass.hassapi import Hass
                 from appdaemontestframework import automation_fixture
-                
+
                 class MockAutomation(Hass):
                     def initialize(self):
                         pass
-                        
-                
+
+
                 @automation_fixture((MockAutomation, "some_arg"))
                 def mock_automation_with_args():
                     pass
-                    
+
                 def test_automation_was_injected_with_args(mock_automation_with_args):
                     automation = mock_automation_with_args[0]
                     arg = mock_automation_with_args[1]
-                    
+
                     assert isinstance(automation, MockAutomation)
                     assert arg == "some_arg"
             """)
@@ -272,27 +311,27 @@ class TestAutomationFixture:
                 """
                 from appdaemon.plugins.hass.hassapi import Hass
                 from appdaemontestframework import automation_fixture
-                
+
                 class MockAutomation(Hass):
                     def initialize(self):
                         pass
-                        
+
                 class OtherAutomation(Hass):
                     def initialize(self):
                         pass
-                        
-                
+
+
                 @automation_fixture(
                     (MockAutomation, "some_arg"),
                     (OtherAutomation, "other_arg")
                 )
                 def mock_automation_with_args():
                     pass
-                    
+
                 def test_automation_was_injected_with_args(mock_automation_with_args):
                     automation = mock_automation_with_args[0]
                     arg = mock_automation_with_args[1]
-                    
+
                     assert isinstance(automation, MockAutomation) or isinstance(automation, OtherAutomation)
                     assert arg == "some_arg" or arg == "other_arg"
             """)
