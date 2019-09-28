@@ -29,7 +29,7 @@ class TimeTravelWrapper:
         > # or
         > time_travel.fast_forward().to(datetime.time(14, 55))
         """
-        self._hass_mock.assert_automations_initialized()
+        self._hass_mock.assert_automataions_initialized()
         if duration:
             return UnitsWrapper(duration, self._fast_forward_seconds)
         else:
