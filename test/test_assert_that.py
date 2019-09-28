@@ -21,8 +21,9 @@ def uninited_automation():
 
 class Test_init:
     def test_init_raises_with_uninitialized_automations(self, uninited_automation, assert_that):
-        with pytest.raises(RuntimeError):
+        with pytest.raises(RuntimeError) as cm:
             assert_that('foo')
+        assert 'Uninitalized automation instances:' in str(cm.value)
 
     def test_init_passes_with_initialized_automations(self, automation, assert_that):
         assert_that('foo')
@@ -39,3 +40,4 @@ class Test_init:
     def test_calling_method_before_init_raises(self, assert_that, method):
         with pytest.raises(Exception) as cm:
             getattr(assert_that, method)()
+        assert 'AssertThat has not been initialized!' in str(cm.value)
