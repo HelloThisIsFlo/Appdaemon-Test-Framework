@@ -1,8 +1,8 @@
 from appdaemon.plugins.hass.hassapi import Hass
 from appdaemontestframework import automation_fixture
-import mock
 import pytest
 import datetime
+
 
 class MockAutomation(Hass):
     def initialize(self):
