@@ -80,8 +80,7 @@ class GivenThatWrapper:
         return IsWrapper()
 
     def time_is(self, time_as_datetime):
-        # TODO: internal call.
-        self.hass_mock._schedule_mocks.set_start_time(time_as_datetime)
+        self.hass_mock.set_start_time(time_as_datetime)
 
     def mock_functions_are_cleared(self, clear_mock_states=False, clear_mock_passed_args=False):
         for mocked_function in self.hass_functions.values():

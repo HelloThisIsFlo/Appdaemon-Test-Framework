@@ -16,15 +16,9 @@ def automation():
 
 class Test_automation_init:
     @staticmethod
-    @pytest.fixture
+    @automation_fixture(MockAutomation, initialize=False)
     def uninited_automation(given_that):
-        automation = MockAutomation(
-            None, None, None, None, None, None, None, None)
-
-        # Clear calls recorded during initialization
-        given_that.mock_functions_are_cleared()
-
-        return automation
+        pass
 
     def test_fast_forward_raises_with_uninitialized_automations(self, uninited_automation, time_travel):
         with pytest.raises(RuntimeError):
@@ -38,8 +32,8 @@ class Test_automation_init:
 class Test_fast_forward:
     @staticmethod
     @pytest.fixture
-    def automation_at_noon(automation, time_travel):
-        time_travel.set_start_time(datetime.datetime(2020, 1, 1, 12, 0))
+    def automation_at_noon(automation, time_travel, given_that):
+        given_that.time_is(datetime.datetime(2020, 1, 1, 12, 0))
         return automation
 
     class Test_to:
@@ -119,8 +113,8 @@ class Test_callback_execution:
         time_travel.fast_forward(10).seconds()
         callback_mock.assert_not_called()
 
-    def test_time_is_correct_when_callback_it_run(self, time_travel, automation):
-        time_travel.set_start_time(datetime.datetime(2020, 1, 1, 12, 0))
+    def test_time_is_correct_when_callback_it_run(self, time_travel, given_that, automation):
+        given_that.time_is(datetime.datetime(2020, 1, 1, 12, 0))
 
         time_when_called = []
         def callback(kwargs):
@@ -150,24 +144,6 @@ class Test_callback_execution:
         automation.run_minutely(callback_mock, None)
         time_travel.fast_forward(10).minutes()
         assert callback_mock.call_count == 10
-
-
-class Test_set_start_time:
-    def test_sets_to_proper_datetime(self, time_travel, automation):
-        set_time = datetime.datetime(2020, 1, 1, 12, 0)
-        time_travel.set_start_time(set_time)
-        assert automation.datetime() == set_time
-
-    # def test_set_time_in_past_throws_exception(self, time_travel):
-    #     with pytest.raises(ValueError) as cm:
-    #         time_travel.set_start_time(datetime.datetime(1990, 1, 1, 0, 0))
-    #     assert str(cm.value) == 'You can not fast forward to a time in the past.'
-
-    def test_set_time_while_callbacks_scheduled_throws_exception(self, time_travel, automation):
-        automation.run_in(lambda: None, 15)
-        with pytest.raises(RuntimeError) as cm:
-            time_travel.set_start_time(datetime.datetime(2010, 1, 1, 0, 0))
-        assert str(cm.value) == "You can not set start time while callbacks are scheduled"
 
 
 class Test_run_daily:

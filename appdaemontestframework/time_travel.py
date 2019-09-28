@@ -10,20 +10,6 @@ class TimeTravelWrapper:
     def __init__(self, hass_mock):
         self._hass_mock = hass_mock
 
-    def set_start_time(self, time):
-        """Set the start time of the simulation. You can not call this once you have registed any callbacks
-
-        if time is a datetime, it will set to that absolution time.
-        if time is just a time, it will set the time, but leave the day the same.
-
-        Format:
-        > time_travel.set_start_time(datetime.datetime(2019, 04, 05, 14, 13))
-        > # or if you don't care about the date
-        > time_travel.set_start_time(datetime.time(14, 13))
-        """
-        #TODO: don't call private interface
-        self._hass_mock._schedule_mocks.set_start_time(time)
-
     def fast_forward(self, duration=None):
         """
         Simulate going forward in time.

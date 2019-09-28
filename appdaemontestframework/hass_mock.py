@@ -99,6 +99,10 @@ class HassMock:
         get_logging_level_from_name = logging.getLevelName
         logging.log(get_logging_level_from_name(level), msg)
 
+    ### Access to internal scheduler
+    def set_start_time(self, time):
+        self._schedule_mocks.set_start_time(time)
+
     ### Internal state checkers
     def uninitialized_automations(self):
         """returns a list of automations that haven't been initialized"""
