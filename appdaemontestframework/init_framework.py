@@ -55,8 +55,6 @@ def patch_hass():
     patches = []
     hass_functions = {}
     for mock_info in actionable_functions_to_patch:
-        print(mock_info.function_name)
-        print(mock_info.autospec)
         patch_function = mock.patch.object(mock_info.object_to_patch, mock_info.function_name, create=True,
                                            autospec=mock_info.autospec)
         patches.append(patch_function)
