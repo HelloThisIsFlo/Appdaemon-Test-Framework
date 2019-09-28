@@ -2,6 +2,7 @@ import logging
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
 from appdaemontestframework.scheduler_mocks import SchedulerMocks
+import textwrap
 
 
 class HassMock:
@@ -104,13 +105,21 @@ class HassMock:
         self._schedule_mocks.set_start_time(time)
 
     ### Internal state checkers
-    def uninitialized_automations(self):
-        """returns a list of automations that haven't been initialized"""
-        uninted_automations = []
+    def assert_automataions_initialized(self):
+        """raises an exception if any automations haven't been initialized"""
+        uninited_automations = []
         for instance in self._hass_instances:
             if not instance.initialize_mock.mock.called:
-                uninted_automations.append(instance)
-        return uninted_automations
+                uninited_automations.append(instance)
+        if uninited_automations:
+            error = textwrap.dedent("""\
+                    AssertThat called before all automations initialized. Either directly call `initialize()` on
+                    objects or use a test fixtures that does this for use.
+
+                    Uninitalized automation instances:""")
+            for automation in uninited_automations:
+                error += "\n\tClass: {}, Name: {}".format(automation.__class__.__name__, automation.name)
+            raise RuntimeError(error)
 
 
 class MockHandler:

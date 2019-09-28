@@ -21,7 +21,21 @@ def uninited_automation():
 
 class Test_init:
     def test_init_raises_with_uninitialized_automations(self, uninited_automation, assert_that):
-        pass
+        with pytest.raises(RuntimeError):
+            assert_that('foo')
 
-    def test_init_raises_with_uninitialized_wrapper(self, assert_that):
-        pass
+    def test_init_passes_with_initialized_automations(self, automation, assert_that):
+        assert_that('foo')
+
+    @pytest.mark.parametrize(
+        "method",
+        (
+            ('was'),
+            ('was_not'),
+            ('listens_to'),
+            ('registered'),
+        )
+    )
+    def test_calling_method_before_init_raises(self, assert_that, method):
+        with pytest.raises(Exception) as cm:
+            getattr(assert_that, method)()

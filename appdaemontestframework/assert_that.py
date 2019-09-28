@@ -231,38 +231,25 @@ NOT_INIT_ERROR = textwrap.dedent("""\
         """)
 
 
-AUTOMATION_NOT_INIT_ERROR = textwrap.dedent("""\
-        AssertThat called before all automations initialized. Either directly call `initialize()` on
-        objects or use a test fixtures that does this for use.
-
-        Uninitalized automation instances:
-        """)
-
-
 class AssertThatWrapper:
     def __init__(self, hass_mock):
-        self.hass_mock = hass_mock
-        self.hass_functions = self.hass_mock._hass_functions
+        self._hass_mock = hass_mock
+        self._hass_functions = self._hass_mock._hass_functions
         self._was = None
         self._was_not = None
         self._listens_to = None
         self._registered = None
 
     def __call__(self, thing_to_check):
-        self._was = WasWrapper(thing_to_check, self.hass_functions)
+        self._was = WasWrapper(thing_to_check, self._hass_functions)
         self._was_not = WasNotWrapper(self.was)
-        self._listens_to = ListensToWrapper(thing_to_check, self.hass_functions)
-        self._registered = RegisteredWrapper(thing_to_check, self.hass_functions)
+        self._listens_to = ListensToWrapper(thing_to_check, self._hass_functions)
+        self._registered = RegisteredWrapper(thing_to_check, self._hass_functions)
         return self
 
     def _ensure_init(self, property):
         # Don't allow calls if any automations aren't initalized
-        uninited_automations = self.hass_mock.uninitialized_automations()
-        if uninited_automations:
-            error = AUTOMATION_NOT_INIT_ERROR
-            for automation in uninited_automations:
-                error += "\n\t{}",format(automation.name)
-            raise RuntimeError(error)
+        self._hass_mock.assert_automataions_initialized()
 
         if property is None:
             raise Exception(NOT_INIT_ERROR)
