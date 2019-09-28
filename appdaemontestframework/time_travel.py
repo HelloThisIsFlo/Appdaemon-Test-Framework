@@ -1,4 +1,5 @@
 import datetime
+import textwrap
 
 
 class TimeTravelWrapper:
@@ -42,6 +43,7 @@ class TimeTravelWrapper:
         > # or
         > time_travel.fast_forward().to(datetime.time(14, 55))
         """
+        self._ensure_init()
         if duration:
             return UnitsWrapper(duration, self._fast_forward_seconds)
         else:
@@ -59,6 +61,19 @@ class TimeTravelWrapper:
         > time_travel.assert_current_time(30).seconds()
         """
         return UnitsWrapper(expected_current_time, self._assert_current_time_seconds)
+
+    def _ensure_init(self):
+        """Raise exception if all automations aren't initalized"""
+        uninited_automations = self._hass_mock.uninitialized_automations()
+        if uninited_automations:
+            error = textwrap.dedent("""\
+                    AssertThat called before all automations initialized. Either directly call `initialize()` on
+                    objects or use a test fixtures that does this for use.
+
+                    Uninitalized automation instances:""")
+            for automation in uninited_automations:
+                error += "\n\tClass: {}, Name: {}".format(automation.__class__.__name__, automation.name)
+            raise RuntimeError(error)
 
     def _fast_forward_seconds(self, seconds_to_fast_forward):
         self._hass_mock._schedule_mocks.fast_forward(datetime.timedelta(seconds=seconds_to_fast_forward))

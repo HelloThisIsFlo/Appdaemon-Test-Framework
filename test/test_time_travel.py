@@ -14,6 +14,27 @@ def automation():
     pass
 
 
+class Test_automation_init:
+    @staticmethod
+    @pytest.fixture
+    def uninited_automation(given_that):
+        automation = MockAutomation(
+            None, None, None, None, None, None, None, None)
+
+        # Clear calls recorded during initialization
+        given_that.mock_functions_are_cleared()
+
+        return automation
+
+    def test_fast_forward_raises_with_uninitialized_automations(self, uninited_automation, time_travel):
+        with pytest.raises(RuntimeError):
+            time_travel.fast_forward(30).minutes()
+
+    def test_fast_forward_does_not_raise_with_initialized_automation(self, uninited_automation, time_travel):
+        uninited_automation.initialize()
+        time_travel.fast_forward(30).minutes()
+
+
 class Test_fast_forward:
     @staticmethod
     @pytest.fixture

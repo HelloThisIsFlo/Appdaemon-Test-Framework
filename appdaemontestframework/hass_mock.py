@@ -6,12 +6,21 @@ from appdaemontestframework.scheduler_mocks import SchedulerMocks
 
 class HassMock:
     def __init__(self):
+        # Make instances of encapsulated mock functionality
         self._schedule_mocks = SchedulerMocks()
 
         # Mocked out init for Hass. It needs to be in this scope so it can get access to the scheduler mock instance
         insert_schedule_mock = self._schedule_mocks.insert_schedule_mock # to avoid `self` shadowing in `_hass_init_mock`
+        _hass_instances = []
+        self._hass_instances = _hass_instances # list of all hass instances
         def _hass_init_mock(self, _ad, name, _logger, _error, _args, _config, _app_config, _global_vars):
+            _hass_instances.append(self)
             self.name = name
+
+            # Wrap initilize in a Mock so we check if it was run
+            self.initialize_mock = WrappedMockHandler(self, 'initialize')
+
+            # Mock out the AD instance so we can re-use Hass internal scheduling functions as-is
             class AD(object):
                 pass
             mock.patch.object(AD, 'log', create=True).start()
@@ -89,6 +98,15 @@ class HassMock:
         # Renamed the function to remove confusion
         get_logging_level_from_name = logging.getLevelName
         logging.log(get_logging_level_from_name(level), msg)
+
+    ### Internal state checkers
+    def uninitialized_automations(self):
+        """returns a list of automations that haven't been initialized"""
+        uninted_automations = []
+        for instance in self._hass_instances:
+            if not instance.initialize_mock.mock.called:
+                uninted_automations.append(instance)
+        return uninted_automations
 
 
 class MockHandler:

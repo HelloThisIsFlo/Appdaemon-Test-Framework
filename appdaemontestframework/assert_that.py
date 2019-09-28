@@ -231,10 +231,12 @@ NOT_INIT_ERROR = textwrap.dedent("""\
         """)
 
 
-def _ensure_init(property):
-    if property is None:
-        raise Exception(NOT_INIT_ERROR)
-    return property
+AUTOMATION_NOT_INIT_ERROR = textwrap.dedent("""\
+        AssertThat called before all automations initialized. Either directly call `initialize()` on
+        objects or use a test fixtures that does this for use.
+
+        Uninitalized automation instances:
+        """)
 
 
 class AssertThatWrapper:
@@ -253,21 +255,34 @@ class AssertThatWrapper:
         self._registered = RegisteredWrapper(thing_to_check, self.hass_functions)
         return self
 
+    def _ensure_init(self, property):
+        # Don't allow calls if any automations aren't initalized
+        uninited_automations = self.hass_mock.uninitialized_automations()
+        if uninited_automations:
+            error = AUTOMATION_NOT_INIT_ERROR
+            for automation in uninited_automations:
+                error += "\n\t{}",format(automation.name)
+            raise RuntimeError(error)
+
+        if property is None:
+            raise Exception(NOT_INIT_ERROR)
+        return property
+
     @property
     def was(self):
-        return _ensure_init(self._was)
+        return self._ensure_init(self._was)
 
     @property
     def was_not(self):
-        return _ensure_init(self._was_not)
+        return self._ensure_init(self._was_not)
 
     @property
     def listens_to(self):
-        return _ensure_init(self._listens_to)
+        return self._ensure_init(self._listens_to)
 
     @property
     def registered(self):
-        return _ensure_init(self._registered)
+        return self._ensure_init(self._registered)
 
 
 def _capture_assert_failure_exception(function_with_assertion):
