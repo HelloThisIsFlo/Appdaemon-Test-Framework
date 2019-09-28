@@ -76,9 +76,7 @@ class HassMock:
             MockHandler(Hass, 'notify'),
         ]
 
-        # TODO: remove this temp code (or clean it up for production)
-        # TODO: likely should have public interfaces for anything that wants to access this
-        # convert the new _mocks into the old _hass_functionss
+        # Generate a dictionary of mocked Hass functions for use by `assert_that` and `given_that`
         self._hass_functions = {}
         for mock_handler in self._mock_handlers:
             self._hass_functions[mock_handler.function_name] = mock_handler.mock
