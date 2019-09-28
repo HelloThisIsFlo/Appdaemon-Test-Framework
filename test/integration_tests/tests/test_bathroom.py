@@ -5,6 +5,8 @@ import pytest
 import mock
 from datetime import time
 from apps.entity_ids import ID
+from appdaemontestframework import automation_fixture
+
 
 MORNING_STEP1_COLOR = 'BLUE'
 SHOWER_COLOR = 'GREEN'
@@ -15,7 +17,7 @@ EVENING_HOUR = 20
 DAY_HOUR = 4
 
 
-@pytest.fixture
+@automation_fixture(Bathroom, initialize=False)
 def bathroom(given_that):
     # Set initial state
     speakers = [
@@ -30,40 +32,44 @@ def bathroom(given_that):
 
     given_that.time_is(time(hour=15))
 
-    bathroom = Bathroom(
-        None, None, None, None, None, None, None, None)
-    bathroom.initialize()
 
-    # Clear calls recorded during initialisation
-    given_that.mock_functions_are_cleared()
-    return bathroom
+class WhenNewWrapper:
+    def __init__(self, bathroom, initialize=True):
+        self.bathroom = bathroom
+        if initialize:
+            self.bathroom.initialize()
+
+    def time(self, hour=None):
+        self.bathroom._time_triggered({'hour': hour})
+
+    def motion_bathroom(self):
+        self.bathroom._new_motion_bathroom(None, None, None)
+
+    def motion_kitchen(self):
+        self.bathroom._new_motion_kitchen(None, None, None)
+
+    def motion_living_room(self):
+        self.bathroom._new_motion_living_room(None, None, None)
+
+    def no_more_motion_bathroom(self):
+        self.bathroom._no_more_motion_bathroom(
+            None,  None, None, None, None)
+
+    def click_bathroom_button(self):
+        self.bathroom._new_click_bathroom_button(None, None, None)
+
+    def debug(self):
+        self.bathroom.debug(None, {'click_type': 'single'}, None)
 
 
 @pytest.fixture
 def when_new(bathroom):
-    class WhenNewWrapper:
-        def time(self, hour=None):
-            bathroom._time_triggered({'hour': hour})
+    return WhenNewWrapper(bathroom)
 
-        def motion_bathroom(self):
-            bathroom._new_motion_bathroom(None, None, None)
 
-        def motion_kitchen(self):
-            bathroom._new_motion_kitchen(None, None, None)
-
-        def motion_living_room(self):
-            bathroom._new_motion_living_room(None, None, None)
-
-        def no_more_motion_bathroom(self):
-            bathroom._no_more_motion_bathroom(
-                None,  None, None, None, None)
-
-        def click_bathroom_button(self):
-            bathroom._new_click_bathroom_button(None, None, None)
-
-        def debug(self):
-            bathroom.debug(None, {'click_type': 'single'}, None)
-    return WhenNewWrapper()
+@pytest.fixture
+def when_new_uninitialized(bathroom):
+    return WhenNewWrapper(bathroom, False)
 
 
 # Start at different times
@@ -399,17 +405,21 @@ class TestDuringAfterShower:
                 scenario()
                 assert_day_mode_started()
 
-        def test_during_evening_activate_evening_mode(self, given_that, when_new, assert_that, assert_evening_mode_started, start_after_shower_mode):
-            scenarios = [
-                when_new.motion_kitchen,
-                when_new.motion_living_room,
-                when_new.no_more_motion_bathroom
+        @pytest.mark.parametrize(
+            "scenerio_name",
+            [
+                ('motion_kitchen'),
+                ('motion_living_room'),
+                ('no_more_motion_bathroom'),
             ]
-            for scenario in scenarios:
-                given_that.time_is(time(hour=20))
-                start_after_shower_mode()
-                scenario()
-                assert_evening_mode_started()
+        )
+        def test_during_evening_activate_evening_mode(self, given_that, when_new_uninitialized, assert_that, assert_evening_mode_started, start_after_shower_mode, scenerio_name):
+            scenerio = getattr(when_new_uninitialized, scenerio_name)()
+            given_that.time_is(time(hour=20))
+            start_after_shower_mode()
+            scenario()
+            assert_evening_mode_started()
+
 
 def assert_bathroom_was_muted(assert_that):
     assert_that('media_player/volume_set').was.called_with(
