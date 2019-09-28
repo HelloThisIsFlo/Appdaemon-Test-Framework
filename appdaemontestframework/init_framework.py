@@ -27,13 +27,29 @@ def patch_hass():
         MockInfo(Hass, 'log'),
         MockInfo(Hass, 'error'),
 
-        # Callback registrations functions
-        MockInfo(Hass, 'run_daily'),
-        MockInfo(Hass, 'run_minutely'),
+        # Scheduler callback registrations functions
         MockInfo(Hass, 'run_in'),
+        MockInfo(Hass, 'run_once'),
+        MockInfo(Hass, 'run_at'),
+        MockInfo(Hass, 'run_daily'),
+        MockInfo(Hass, 'run_hourly'),
+        MockInfo(Hass, 'run_minutely'),
+        MockInfo(Hass, 'run_every'),
         MockInfo(Hass, 'cancel_timer'),
+
+        # Sunrise and sunset functions
+        MockInfo(Hass, 'run_at_sunrise'),
+        MockInfo(Hass, 'run_at_sunset'),
+
+        # Listener callback registrations functions
         MockInfo(Hass, 'listen_event'),
         MockInfo(Hass, 'listen_state'),
+
+        # Sunrise and sunset functions
+        MockInfo(Hass, 'run_at_sunrise'),
+        MockInfo(Hass, 'run_at_sunset'),
+
+        # Listener callback registrations functions
 
         # State functions / attr
         MockInfo(Hass, 'set_state'),
