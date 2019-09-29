@@ -121,8 +121,6 @@ def automation_fixture(*args, initialize=True):
                                        (upstairs.Bathroom, {'motion': 'binary_sensor.bathroom_motion'}),
                                    )
 
-    #TODO: update docs here and elsewhere for the new `initialize` kwarg
-
     When multiple classes are passed, tests will be generated for each automation.
     When using parameters, the injected object will be a tuple: `(Initialized_Automation, params)`
 
@@ -151,6 +149,20 @@ def automation_fixture(*args, initialize=True):
 
     Do not return anything, any returned object will be ignored
 
+    # Skipping initialization
+    Initialization can be skipped if further setup needs to be done in the test methods.
+
+    Example:
+    ```python
+    @automation_fixture(MyAutomation, initialize=False):
+    def my_automation:
+        pass
+
+    def test_with_uninitialized_fixture(my_automation, given_that):
+        # Note: this would raise an exception if any automatons have been initialized already
+        given_that.time_is(datetime.datetime(1999, 1, 1, 1, 34))
+        my_automation.initialize()
+    ```
     """
     if not args or isfunction(args[0]):
         raise AutomationFixtureError(
