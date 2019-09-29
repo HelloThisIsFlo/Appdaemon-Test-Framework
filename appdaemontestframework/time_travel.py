@@ -33,7 +33,7 @@ class TimeTravelWrapper:
         if duration:
             return UnitsWrapper(duration, self._fast_forward_seconds)
         else:
-            return AbsoluteWrapper(self._hass_mock._schedule_mocks.fast_forward)
+            return AbsoluteWrapper(self._hass_mock.fast_forward)
 
     def assert_current_time(self, expected_current_time):
         """
@@ -49,10 +49,10 @@ class TimeTravelWrapper:
         return UnitsWrapper(expected_current_time, self._assert_current_time_seconds)
 
     def _fast_forward_seconds(self, seconds_to_fast_forward):
-        self._hass_mock._schedule_mocks.fast_forward(datetime.timedelta(seconds=seconds_to_fast_forward))
+        self._hass_mock.fast_forward(datetime.timedelta(seconds=seconds_to_fast_forward))
 
     def _assert_current_time_seconds(self, expected_seconds_from_start):
-        assert self._hass_mock._schedule_mocks.elapsed_seconds() == expected_seconds_from_start
+        assert self._hass_mock.elapsed_seconds() == expected_seconds_from_start
 
 
 class AbsoluteWrapper:

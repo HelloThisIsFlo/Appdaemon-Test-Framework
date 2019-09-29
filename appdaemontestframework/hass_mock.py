@@ -87,6 +87,7 @@ class HassMock:
         for mock_handler in self._mock_handlers:
             mock_handler.patch.stop()
 
+
     ### Logging mocks
     @staticmethod
     def _log_error(msg, level='ERROR'):
@@ -98,9 +99,16 @@ class HassMock:
         get_logging_level_from_name = logging.getLevelName
         logging.log(get_logging_level_from_name(level), msg)
 
+
     ### Access to internal scheduler
     def set_start_time(self, time):
         self._schedule_mocks.set_start_time(time)
+
+    def fast_forward(self, time):
+        self._schedule_mocks.fast_forward(time)
+
+    def elapsed_seconds(self):
+        return self._schedule_mocks.elapsed_seconds()
 
     ### Internal state checkers
     def assert_automataions_initialized(self):

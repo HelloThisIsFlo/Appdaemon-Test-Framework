@@ -540,7 +540,7 @@ def living_room():
 * #### Skip initialization
   In some cases it is helpful to skip the call to `initialize()` so that further setup can happen in the test functions
   such as setting the start time or states. The `initialize` kwarg can be passed to `@automation_fixture` to control
-  this behavior.
+  this behavior. Note, this behavior applies to all automatons created in that test fixture.
   ```python
   @automation_fixture(MyAutomation, initialize=False):
   def my_automation:
