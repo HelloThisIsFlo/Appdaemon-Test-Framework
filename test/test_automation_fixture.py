@@ -87,6 +87,8 @@ class TestAutomationFixture:
             def test_was_initialized(mock_automation):
                 assert getattr(mock_automation, 'was_initialized', False) == True
         """)
+        result = testdir.runpytest()
+        result.assert_outcomes(passed=1)
 
     def test_automation_was_not_initialized_with_initialize_set_False(self, testdir):
         testdir.makepyfile(
