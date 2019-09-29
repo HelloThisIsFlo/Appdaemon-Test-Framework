@@ -108,7 +108,7 @@ class _AutomationFixtureDecoratorWithArgs:
         return automation_classes_with_args[0].__name__
 
 
-def automation_fixture(*args, **kwargs):
+def automation_fixture(*args, initialize=True):
     """
     Decorator to seamlessly initialize and inject an automation fixture
 
@@ -156,13 +156,9 @@ def automation_fixture(*args, **kwargs):
         raise AutomationFixtureError(
             'Do not forget to pass the automation class(es) as argument')
 
-    should_initialize = True
-    if 'initialize' in kwargs:
-        should_initialize = kwargs['initialize']
-
     if type(args[0]) is not tuple:
         automation_classes = args
-        return _AutomationFixtureDecoratorWithoutArgs(automation_classes, should_initialize)
+        return _AutomationFixtureDecoratorWithoutArgs(automation_classes, initialize)
     else:
         automation_classes_with_args = args
-        return _AutomationFixtureDecoratorWithArgs(automation_classes_with_args, should_initialize)
+        return _AutomationFixtureDecoratorWithArgs(automation_classes_with_args, initialize)
