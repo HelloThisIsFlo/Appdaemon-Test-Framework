@@ -137,6 +137,9 @@ The automation given to the fixture will be:
      given_that.passed_arg('color').is_set_to('blue')
      ```
 
+     Note: See [Pre-initialization Setup](#pre-initialization-setup) if
+     arguments are required in the `initialize()` method.
+
 *    #### State
      ```python
      # Command
