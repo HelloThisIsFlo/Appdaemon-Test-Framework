@@ -138,7 +138,7 @@ The automation given to the fixture will be:
      ```
 
      Note: See [Pre-initialization Setup](#pre-initialization-setup) if
-     arguments are required in the initialization method.
+     arguments are required in the `initialize()` method.
 
 *    #### State
      ```python
