@@ -13,7 +13,7 @@ class AutomationFixtureError(AppdaemonTestFrameworkError):
 def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions):
     _inject_helpers_and_call_function(function, given_that, hass_functions)
     automation = automation_class(
-        None, None, None, None, None, None, None, None)
+        None, automation_class.__name__, None, None, None, None, None, None)
     automation.initialize()
     given_that.mock_functions_are_cleared()
     return automation
