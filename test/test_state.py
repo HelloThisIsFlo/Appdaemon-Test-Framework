@@ -76,6 +76,5 @@ def test_get_complete_state_dictionary(given_that, automation: MockAutomation):
 @pytest.mark.only
 def test_throw_typeerror_when_attributes_arg_not_passed_via_keyword(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('on', attributes={'brightness': 11, 'color': 'blue'})
-    given_that.state_of(COVER).is_set_to('closed', attributes={'brightness': 11, 'color': 'blue'})
     with pytest.raises(TypeError):
         automation.get_without_using_keyword()
