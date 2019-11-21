@@ -7,7 +7,7 @@ class StateNotSetError(AppdaemonTestFrameworkError):
     def __init__(self, entity_id):
         super().__init__(f"""
         State for entity: '{entity_id}' was never set!
-        Please make sure to set the state with `given_that.state_of({entity_id}).is_set_to(STATE)` 
+        Please make sure to set the state with `given_that.state_of({entity_id}).is_set_to(STATE)`
         before trying to access the mocked state
         """)
 
@@ -25,20 +25,35 @@ class GivenThatWrapper:
     def _init_mocked_states(self):
         self.mocked_states = {}
 
-        def get_state_mock(entity_id, *, attribute=None):
-            if entity_id not in self.mocked_states:
-                raise StateNotSetError(entity_id)
-
-            state = self.mocked_states[entity_id]
-
-            if attribute is None:
-                return state['main']
-            elif attribute == 'all':
-                return state['attributes']
+        def get_state_mock(entity_id=None, *, attribute=None):
+            if entity_id is None:
+                resdict = dict()
+                for entityid in self.mocked_states:
+                    state = self.mocked_states[entityid]
+                    resdict.update({entityid: {"state" : state['main'], "attributes" : state['attributes']}})
+                return resdict
             else:
-                return state['attributes'].get(attribute)
+                if entity_id not in self.mocked_states:
+                    raise StateNotSetError(entity_id)
+
+                state = self.mocked_states[entity_id]
+
+                if attribute is None:
+                    return state['main']
+                elif attribute == 'all':
+                    return state['attributes']
+                else:
+                    return state['attributes'].get(attribute)
 
         self.hass_functions['get_state'].side_effect = get_state_mock
+
+        def entity_exists_mock(entity_id):
+            if entity_id in self.mocked_states:
+                return True
+            else:
+                return False
+
+        self.hass_functions['entity_exists'].side_effect = entity_exists_mock
 
     def _init_mocked_passed_args(self):
         def make_magic_mock_behave_like_a_dict(magic_mock, dict_to_simulate):
