@@ -66,6 +66,9 @@ def patch_hass():
         MockInfo(Hass, 'register_constraint'),
         MockInfo(Hass, 'now_is_between'),
         MockInfo(Hass, 'notify'),
+
+        # Miscellaneous Helper Functions
+        MockInfo(Hass, 'entity_exists')
     ]
 
     patches = []
