@@ -219,14 +219,15 @@ class LivingRoom(hass.Hass):
      ```python
      # Available commmands
      assert_that(ENTITY_ID).was.turned_on(OPTIONAL_KWARGS)
-     assert_that(ENTITY_ID).was.turned_off()
+     assert_that(ENTITY_ID).was.turned_off(OPTIONAL_KWARGS)
      assert_that(ENTITY_ID).was_not.turned_on(OPTIONAL_KWARGS)
-     assert_that(ENTITY_ID).was_not.turned_off()
+     assert_that(ENTITY_ID).was_not.turned_off(OPTIONAL_KWARGS)
 
      # Examples
      assert_that('light.living_room').was.turned_on()
      assert_that('light.living_room').was.turned_on(color_name=SHOWER_COLOR)
      assert_that('light.living_room').was_not.turned_off()
+     assert_that('light.living_room').was_not.turned_off(transition=2)
      ```
 
 *    #### Services
