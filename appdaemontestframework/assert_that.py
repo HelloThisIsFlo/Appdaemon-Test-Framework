@@ -84,7 +84,7 @@ class WasWrapper(Was):
         service_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('turn_on'),
-                {'entity_id': entity_id, **service_specific_parameters}))
+                **{'entity_id': entity_id, **service_specific_parameters}))
 
         turn_on_helper_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['turn_on'].assert_any_call(
@@ -95,18 +95,19 @@ class WasWrapper(Was):
             raise EitherOrAssertionError(
                 service_not_called, turn_on_helper_not_called)
 
-    def turned_off(self):
+    def turned_off(self, **service_specific_parameters):
         """ Assert that a given entity_id has been turned off """
         entity_id = self.thing_to_check
 
         service_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('turn_off'),
-                entity_id=entity_id))
+                **{'entity_id': entity_id, **service_specific_parameters}))
 
         turn_off_helper_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['turn_off'].assert_any_call(
-                entity_id))
+                entity_id,
+                **service_specific_parameters))
 
         if service_not_called and turn_off_helper_not_called:
             raise EitherOrAssertionError(
@@ -134,10 +135,10 @@ class WasNotWrapper(Was):
                 "Should NOT have been turned ON w/ the given params: "
                 + str(self.was_wrapper.thing_to_check))
 
-    def turned_off(self):
+    def turned_off(self, **service_specific_parameters):
         """ Assert that a given entity_id has NOT been turned OFF """
         thing_not_turned_off = _capture_assert_failure_exception(
-            lambda: self.was_wrapper.turned_off())
+            lambda: self.was_wrapper.turned_off(**service_specific_parameters))
 
         if not thing_not_turned_off:
             raise AssertionError(
