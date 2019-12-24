@@ -246,6 +246,7 @@ class RegisteredWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
                 registered_wrapper._run_at.assert_any_call(
+                    mock.ANY, # for `self`
                     callback,
                     time_,
                     **kwargs)
