@@ -65,6 +65,9 @@ class HassMock:
             MockHandler(Hass, 'get_now_ts', side_effect=self._schedule_mocks.get_now_ts_mock),
             MockHandler(Hass, 'args'),  # Not a function, attribute. But same patching logic
 
+            ### Miscellaneous Helper Functions
+            MockHandler(Hass, 'entity_exists'),
+
             ### Interactions functions
             MockHandler(Hass, 'call_service'),
             MockHandler(Hass, 'turn_on'),
