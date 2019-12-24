@@ -144,7 +144,7 @@ class MockHandler:
 
 
 class WrappedMockHandler(MockHandler):
-    """Heper class that privides a 'wrapped' mock. This will automatically call the original function while still providing
-    a Mock for asserts and the stuch."""
+    """Helper class that privides a 'wrapped' mock. This will automatically call the original function while still providing
+    a Mock for asserts and the such."""
     def __init__(self, object_to_patch, function_name):
         super().__init__(object_to_patch, function_name, side_effect=getattr(object_to_patch, function_name), autospec=True)
