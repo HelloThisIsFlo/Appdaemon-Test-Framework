@@ -85,7 +85,7 @@ class WasWrapper(Was):
         service_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('turn_on'),
-                {'entity_id': entity_id, **service_specific_parameters}))
+                **{'entity_id': entity_id, **service_specific_parameters}))
 
         turn_on_helper_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['turn_on'].assert_any_call(
@@ -96,18 +96,19 @@ class WasWrapper(Was):
             raise EitherOrAssertionError(
                 service_not_called, turn_on_helper_not_called)
 
-    def turned_off(self):
+    def turned_off(self, **service_specific_parameters):
         """ Assert that a given entity_id has been turned off """
         entity_id = self.thing_to_check
 
         service_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('turn_off'),
-                entity_id=entity_id))
+                **{'entity_id': entity_id, **service_specific_parameters}))
 
         turn_off_helper_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['turn_off'].assert_any_call(
-                entity_id))
+                entity_id,
+                **service_specific_parameters))
 
         if service_not_called and turn_off_helper_not_called:
             raise EitherOrAssertionError(
@@ -135,10 +136,10 @@ class WasNotWrapper(Was):
                 "Should NOT have been turned ON w/ the given params: "
                 + str(self.was_wrapper.thing_to_check))
 
-    def turned_off(self):
+    def turned_off(self, **service_specific_parameters):
         """ Assert that a given entity_id has NOT been turned OFF """
         thing_not_turned_off = _capture_assert_failure_exception(
-            lambda: self.was_wrapper.turned_off())
+            lambda: self.was_wrapper.turned_off(**service_specific_parameters))
 
         if not thing_not_turned_off:
             raise AssertionError(
@@ -193,6 +194,8 @@ class RegisteredWrapper:
         self.automation_thing_to_check = automation_thing_to_check
         self._run_daily = hass_functions['run_daily']
         self._run_mintely = hass_functions['run_minutely']
+        self._run_at = hass_functions['run_at']
+
 
     def run_daily(self, time_, **kwargs):
         registered_wrapper = self
@@ -216,6 +219,19 @@ class RegisteredWrapper:
                 registered_wrapper.automation_thing_to_check.initialize()
                 registered_wrapper._run_mintely.assert_any_call(
                     mock.ANY, # for `self`
+                    callback,
+                    time_,
+                    **kwargs)
+
+        return WithCallbackWrapper()
+
+    def run_at(self, time_, **kwargs):
+        registered_wrapper = self
+
+        class WithCallbackWrapper:
+            def with_callback(self, callback):
+                registered_wrapper.automation_thing_to_check.initialize()
+                registered_wrapper._run_at.assert_any_call(
                     callback,
                     time_,
                     **kwargs)

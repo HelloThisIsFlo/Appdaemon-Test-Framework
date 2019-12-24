@@ -137,6 +137,9 @@ The automation given to the fixture will be:
      given_that.passed_arg('color').is_set_to('blue')
      ```
 
+     Note: See [Pre-initialization Setup](#pre-initialization-setup) if
+     arguments are required in the `initialize()` method.
+
 *    #### State
      ```python
      # Command
@@ -268,14 +271,15 @@ assert_that('some_other/service').was.called()
      ```python
      # Available commmands
      assert_that(ENTITY_ID).was.turned_on(OPTIONAL_KWARGS)
-     assert_that(ENTITY_ID).was.turned_off()
+     assert_that(ENTITY_ID).was.turned_off(OPTIONAL_KWARGS)
      assert_that(ENTITY_ID).was_not.turned_on(OPTIONAL_KWARGS)
-     assert_that(ENTITY_ID).was_not.turned_off()
+     assert_that(ENTITY_ID).was_not.turned_off(OPTIONAL_KWARGS)
 
      # Examples
      assert_that('light.living_room').was.turned_on()
      assert_that('light.living_room').was.turned_on(color_name=SHOWER_COLOR)
      assert_that('light.living_room').was_not.turned_off()
+     assert_that('light.living_room').was_not.turned_off(transition=2)
      ```
 
 *    #### Services
@@ -478,11 +482,11 @@ def living_room(given_that):
 
 Also, for convenience, we could initialize the automation with its `initialize()` method to make it available in tests
 as it would be in production once Appdaemon is started, making sure the mocks are clear of any calls when the fixture
-is injected:
+is injected. We could also set the automation instance name to the name of the automation class.
 ```python
 @pytest.fixture
 def living_room(given_that):
-    living_room = LivingRoom(None, None, None, None, None, None, None, None)
+    living_room = LivingRoom(None, LivingRoom.__name__, None, None, None, None, None, None)
     living_room.initialize()
     given_that.mock_functions_are_cleared()
     return living_room

@@ -208,6 +208,27 @@ class TestAutomationFixture:
         result.assert_outcomes(error=1)
         assert expected_error_regex_was_found_in_stdout_lines(result, r"AutomationFixtureError.*argument")
 
+    def test_name_attribute_of_hass_object_set_to_automation_class_name(self, testdir):
+            testdir.makepyfile(
+                """
+                from appdaemon.plugins.hass.hassapi import Hass
+                from appdaemontestframework import automation_fixture
+
+                class MockAutomation(Hass):
+                    def initialize(self):
+                        pass
+
+                @automation_fixture(MockAutomation)
+                def mock_automation():
+                    pass
+
+                def test_name_attribute_of_hass_object_set_to_automation_class_name(mock_automation):
+                    assert mock_automation.name == 'MockAutomation'
+            """)
+
+            result = testdir.runpytest()
+            result.assert_outcomes(passed=1)
+
     class TestInvalidAutomation:
         @fixture
         def assert_automation_class_fails(self, testdir):
