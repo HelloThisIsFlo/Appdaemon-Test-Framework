@@ -240,45 +240,49 @@ class TestRegisteredRunMinutely:
                 .with_callback(automation._some_other_function)
 
 
-class TestRegisteredRunAt:
-    def test_success(self, automation: MockAutomation, assert_that):
-        automation.enable_register_run_at_during_initialize()
 
-        assert_that(automation) \
-            .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
-            .with_callback(automation._my_run_at_callback)
+### I'm pretty sure these are covered by my RunAt tests. confirm that then this can be removed.
+### Some of these might inspire new tests into mine too.
 
-    def test_failure__not_listening(self, automation: MockAutomation, assert_that):
-        with pytest.raises(AssertionError):
-            assert_that(automation) \
-                .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
-                .with_callback(automation._my_run_at_callback)
+# class TestRegisteredRunAt:
+#     def test_success(self, automation: MockAutomation, assert_that):
+#         automation.enable_register_run_at_during_initialize()
 
-    def test_failure__wrong_time(self, automation: MockAutomation, assert_that):
-        automation.enable_register_run_at_during_initialize()
+#         assert_that(automation) \
+#             .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
+#             .with_callback(automation._my_run_at_callback)
 
-        with pytest.raises(AssertionError):
-            assert_that(automation) \
-                .registered.run_at(datetime(2019,11,5,20,43,0,0), extra_param='ok') \
-                .with_callback(automation._my_run_at_callback)
+#     def test_failure__not_listening(self, automation: MockAutomation, assert_that):
+#         with pytest.raises(AssertionError):
+#             assert_that(automation) \
+#                 .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
+#                 .with_callback(automation._my_run_at_callback)
 
-    def test_failure__wrong_kwargs(self, automation: MockAutomation, assert_that):
-        automation.enable_register_run_at_during_initialize()
+#     def test_failure__wrong_time(self, automation: MockAutomation, assert_that):
+#         automation.enable_register_run_at_during_initialize()
 
-        with pytest.raises(AssertionError):
-            assert_that(automation) \
-                .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='WRONG') \
-                .with_callback(automation._my_run_at_callback)
+#         with pytest.raises(AssertionError):
+#             assert_that(automation) \
+#                 .registered.run_at(datetime(2019,11,5,20,43,0,0), extra_param='ok') \
+#                 .with_callback(automation._my_run_at_callback)
 
-        with pytest.raises(AssertionError):
-            assert_that(automation) \
-                .registered.run_at(datetime(2019,11,5,22,43,0,0), wrong='ok') \
-                .with_callback(automation._my_run_minutely_callback)
+#     def test_failure__wrong_kwargs(self, automation: MockAutomation, assert_that):
+#         automation.enable_register_run_at_during_initialize()
 
-    def test_failure__wrong_callback(self, automation: MockAutomation, assert_that):
-        automation.enable_register_run_at_during_initialize()
+#         with pytest.raises(AssertionError):
+#             assert_that(automation) \
+#                 .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='WRONG') \
+#                 .with_callback(automation._my_run_at_callback)
 
-        with pytest.raises(AssertionError):
-            assert_that(automation) \
-                .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
-                .with_callback(automation._some_other_function)
+#         with pytest.raises(AssertionError):
+#             assert_that(automation) \
+#                 .registered.run_at(datetime(2019,11,5,22,43,0,0), wrong='ok') \
+#                 .with_callback(automation._my_run_minutely_callback)
+
+#     def test_failure__wrong_callback(self, automation: MockAutomation, assert_that):
+#         automation.enable_register_run_at_during_initialize()
+
+#         with pytest.raises(AssertionError):
+#             assert_that(automation) \
+#                 .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
+#                 .with_callback(automation._some_other_function)
