@@ -47,6 +47,7 @@ class Test_init:
 #### This was taken from up stream, need to figure out how to merge this in with my changes.
 
 # from datetime import time, datetime
+from datetime import time, datetime
 
 # import appdaemon.plugins.hass.hassapi as hass
 # import pytest
