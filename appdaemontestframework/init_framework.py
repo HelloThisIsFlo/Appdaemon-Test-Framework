@@ -1,7 +1,12 @@
 import logging
-
+import random
 import mock
+import sys
 from appdaemon.plugins.hass.hassapi import Hass
+
+def random_int(*args, **kwargs):
+    #return pseudo random number, should be ok for testing
+    return random.randrange(0, sys.maxsize)
 
 
 def patch_hass():
@@ -12,13 +17,14 @@ def patch_hass():
     """
     class MockInfo:
         """Holds information about a function that will be mocked"""
-        def __init__(self, object_to_patch, function_name, autospec=False):
+        def __init__(self, object_to_patch, function_name, autospec=False, side_effect=None):
             self.object_to_patch = object_to_patch
             self.function_name = function_name
             # Autospec will include `self` in the mock signature.
             # Useful if you want a sideeffect that modifies the actual object instance.
             self.autospec = autospec
-
+            self.side_effect = side_effect
+    
     actionable_functions_to_patch = [
         # Meta
         MockInfo(Hass, '__init__', autospec=True),  # Patch the __init__ method to skip Hass initialization
@@ -28,26 +34,26 @@ def patch_hass():
         MockInfo(Hass, 'error'),
 
         # Scheduler callback registrations functions
-        MockInfo(Hass, 'run_in'),
-        MockInfo(Hass, 'run_once'),
-        MockInfo(Hass, 'run_at'),
-        MockInfo(Hass, 'run_daily'),
-        MockInfo(Hass, 'run_hourly'),
-        MockInfo(Hass, 'run_minutely'),
-        MockInfo(Hass, 'run_every'),
+        MockInfo(Hass, 'run_in', side_effect=random_int),
+        MockInfo(Hass, 'run_once', side_effect=random_int),
+        MockInfo(Hass, 'run_at', side_effect=random_int),
+        MockInfo(Hass, 'run_daily', side_effect=random_int),
+        MockInfo(Hass, 'run_hourly', side_effect=random_int),
+        MockInfo(Hass, 'run_minutely', side_effect=random_int),
+        MockInfo(Hass, 'run_every', side_effect=random_int),
         MockInfo(Hass, 'cancel_timer'),
 
         # Sunrise and sunset functions
-        MockInfo(Hass, 'run_at_sunrise'),
-        MockInfo(Hass, 'run_at_sunset'),
+        MockInfo(Hass, 'run_at_sunrise', side_effect=random_int),
+        MockInfo(Hass, 'run_at_sunset', side_effect=random_int),
 
         # Listener callback registrations functions
-        MockInfo(Hass, 'listen_event'),
-        MockInfo(Hass, 'listen_state'),
+        MockInfo(Hass, 'listen_event', side_effect=random_int),
+        MockInfo(Hass, 'listen_state', side_effect=random_int),
 
         # Sunrise and sunset functions
-        MockInfo(Hass, 'run_at_sunrise'),
-        MockInfo(Hass, 'run_at_sunset'),
+        MockInfo(Hass, 'run_at_sunrise', side_effect=random_int),
+        MockInfo(Hass, 'run_at_sunset', side_effect=random_int),
 
         # Listener callback registrations functions
 
@@ -78,6 +84,8 @@ def patch_hass():
                                            autospec=mock_info.autospec)
         patches.append(patch_function)
         patched_function = patch_function.start()
+        if mock_info.side_effect is not None:
+            patched_function.side_effect = mock_info.side_effect
         patched_function.return_value = None
         hass_functions[mock_info.function_name] = patched_function
 

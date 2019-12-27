@@ -6,13 +6,13 @@ from pytest import mark
 
 from appdaemontestframework import automation_fixture
 
-
 class MockAutomation(hass.Hass):
     should_listen_state = False
     should_listen_event = False
     should_register_run_daily = False
     should_register_run_minutely = False
     should_register_run_at = False
+    handles = list()
 
     def initialize(self):
         if self.should_listen_state:
@@ -24,7 +24,9 @@ class MockAutomation(hass.Hass):
         if self.should_register_run_minutely:
             self.run_minutely(self._my_run_minutely_callback, time(hour=3, minute=7), extra_param='ok')
         if self.should_register_run_at:
-            self.run_at(self._my_run_at_callback, datetime(2019,11,5,22,43,0,0), extra_param='ok')
+            ret = self.run_at(self._my_run_at_callback, datetime(2019,11,5,22,43,0,0), extra_param='ok')
+            self.handles.append(ret)
+            
 
     def _my_listen_state_callback(self, entity, attribute, old, new, kwargs):
         pass
@@ -282,3 +284,15 @@ class TestRegisteredRunAt:
             assert_that(automation) \
                 .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
                 .with_callback(automation._some_other_function)
+
+    def test_handle(self, automation: MockAutomation, assert_that):
+        automation.enable_register_run_at_during_initialize()
+
+        assert_that(automation) \
+            .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
+            .with_callback(automation._my_run_at_callback)
+
+        assert len(automation.handles) > 0
+
+        for h in automation.handles:
+            assert h is not None
