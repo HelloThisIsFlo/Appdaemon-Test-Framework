@@ -452,8 +452,12 @@ Every Automation in Appdaemon follows the same model:
 
 **AppdaemonTestFramework** captures all calls to the API and helpers make use of the information to implement common functionality needed in our tests.
 
-Methods from the `hass.Hass` class are patched globally, and injected in the helper classes.
-This is done with the `patch_hass()` wich returns a tuple containing:
+Methods from the `hass.Hass` class are patched globally in the `HassMocks` class, and injected in the helper classes as `hass_mocks`.
+After all tests have run, the `hass_mocks` test fixture will automatically unpatch all the mocks.
+
+**Deprecated `hass_functions`**
+Before `HassMocks` existed, `hass_functions` was used for interacting with the patch hass methods. Using the `hass_mocks` public interfaces should be used in preference to using `hass_functions` going forward.
+They are being kept around for the near future to ease backwards compatibility with this breaking change.
 
 1. **`hass_functions`**: **dictionary** with all patched functions
 1. **`unpatch_callback`**: **callback** to un-patch all patched functions
