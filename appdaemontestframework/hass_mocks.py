@@ -68,7 +68,7 @@ class HassMocks:
         # Generate a dictionary of mocked Hass functions for use by older code
         # Note: This interface is considered deprecated and should be replaced with calls to public
         # methods in the HassMocks object going forward.
-        self._hass_functions = {}
+        self._hass_functions = DeprecatedDict()
         for mock_handler in self._mock_handlers:
             self._hass_functions[mock_handler.function_name] = mock_handler.mock
 
@@ -85,7 +85,6 @@ class HassMocks:
     ### Access to the deprecated hass_functions dict.
     @property
     def hass_functions(self):
-        #warnings.warn("Direct usage of `hass_functions` is deprecated in favor of direct use of the `HassMocks` object.", warnings.DeprecationWarning)
         return self._hass_functions
 
     ### Logging mocks
@@ -121,3 +120,11 @@ class WrappedMockHandler(MockHandler):
     def __init__(self, object_to_patch, function_name):
         original_function = getattr(object_to_patch, function_name)
         super().__init__(object_to_patch, function_name, side_effect=original_function, autospec=True)
+
+
+class DeprecatedDict(dict):
+    """Helper class that will give a deprectaion warning when accessing any of it's members"""
+    def __getitem__(self, key):
+        message = "Direct usage of `hass_functions['{}']` is deprecated in favor of direct use of the `HassMocks` object.".format(key)
+        warnings.warn(message, DeprecationWarning, stacklevel=2)
+        return super().__getitem__(key)
