@@ -10,8 +10,8 @@ class AutomationFixtureError(AppdaemonTestFrameworkError):
     pass
 
 
-def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions):
-    _inject_helpers_and_call_function(function, given_that, hass_functions)
+def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks):
+    _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks)
     automation = automation_class(
         None, automation_class.__name__, None, None, None, None, None, None)
     automation.initialize()
@@ -19,10 +19,11 @@ def _instantiate_and_initialize_automation(function, automation_class, given_tha
     return automation
 
 
-def _inject_helpers_and_call_function(function, given_that, hass_functions):
+def _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks):
     injectable_fixtures = {
         'given_that': given_that,
-        'hass_functions': hass_functions
+        'hass_functions': hass_functions,
+        'hass_mocks': hass_mocks,
     }
 
     def _check_valid(param):
@@ -73,9 +74,9 @@ class _AutomationFixtureDecoratorWithoutArgs:
 
     def __call__(self, function):
         @pytest.fixture(params=self.automation_classes, ids=self._generate_id)
-        def automation_fixture_with_initialisation(request, given_that, hass_functions):
+        def automation_fixture_with_initialisation(request, given_that, hass_functions, hass_mocks):
             automation_class = request.param
-            return _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions)
+            return _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks)
 
         return automation_fixture_with_initialisation
 
@@ -91,11 +92,11 @@ class _AutomationFixtureDecoratorWithArgs:
 
     def __call__(self, function):
         @pytest.fixture(params=self.automation_classes_with_args, ids=self._generate_id)
-        def automation_fixture_with_initialisation(request, given_that, hass_functions):
+        def automation_fixture_with_initialisation(request, given_that, hass_functions, hass_mocks):
             automation_class = request.param[0]
             automation_args = request.param[1]
             automation = _instantiate_and_initialize_automation(
-                function, automation_class, given_that, hass_functions)
+                function, automation_class, given_that, hass_functions, hass_mocks)
             return (automation, automation_args)
 
         return automation_fixture_with_initialisation
