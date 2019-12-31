@@ -5,7 +5,9 @@ class TimeTravelWrapper:
     AppDaemon Test Framework Utility to simulate going forward in time
     """
 
-    def __init__(self, hass_functions):
+    def __init__(self, hass_mocks):
+        hass_functions = hass_mocks._hass_functions
+
         self.scheduler_mocks = SchedulerMocks()
 
         run_in_magic_mock = hass_functions['run_in']

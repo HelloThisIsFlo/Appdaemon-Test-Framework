@@ -17,8 +17,8 @@ class AttributeNotSetError(AppdaemonTestFrameworkError):
 
 
 class GivenThatWrapper:
-    def __init__(self, hass_functions):
-        self.hass_functions = hass_functions
+    def __init__(self, hass_mocks):
+        self.hass_functions = hass_mocks._hass_functions
         self._init_mocked_states()
         self._init_mocked_passed_args()
 

@@ -18,18 +18,18 @@ def hass_functions(hass_mocks):
 
 
 @fixture
-def given_that(hass_functions):
-    return GivenThatWrapper(hass_functions)
+def given_that(hass_mocks):
+    return GivenThatWrapper(hass_mocks)
 
 
 @fixture
-def assert_that(hass_functions):
-    return AssertThatWrapper(hass_functions)
+def assert_that(hass_mocks):
+    return AssertThatWrapper(hass_mocks)
 
 
 @fixture
-def time_travel(hass_functions):
-    return TimeTravelWrapper(hass_functions)
+def time_travel(hass_mocks):
+    return TimeTravelWrapper(hass_mocks)
 
 
 @fixture

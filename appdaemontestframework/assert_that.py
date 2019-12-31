@@ -251,8 +251,8 @@ def _ensure_init(property):
 
 
 class AssertThatWrapper:
-    def __init__(self, hass_functions):
-        self.hass_functions = hass_functions
+    def __init__(self, hass_mocks):
+        self.hass_functions = hass_mocks._hass_functions
         self._was = None
         self._was_not = None
         self._listens_to = None

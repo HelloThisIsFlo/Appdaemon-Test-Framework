@@ -68,7 +68,7 @@ class HassMocks:
         # Generate a dictionary of mocked Hass functions for use by older code
         # Note: This interface is considered deprecated and should be replaced with calls to public
         # methods in the HassMocks object going forward.
-        self._hass_functions = DeprecatedDict()
+        self._hass_functions = {}
         for mock_handler in self._mock_handlers:
             self._hass_functions[mock_handler.function_name] = mock_handler.mock
 
@@ -85,7 +85,7 @@ class HassMocks:
     ### Access to the deprecated hass_functions dict.
     @property
     def hass_functions(self):
-        return self._hass_functions
+        return DeprecatedDict(self._hass_functions)
 
     ### Logging mocks
     @staticmethod
