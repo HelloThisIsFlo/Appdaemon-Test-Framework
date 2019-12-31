@@ -37,6 +37,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
   * [Initial Setup](#initial-setup)
   * [Write you first unit test](#write-you-first-unit-test)
   * [Result](#result)
+  * [Deprecation Warnings](#deprecation-warnings)
 - [General Test Flow and Available helpers](#general-test-flow-and-available-helpers)
   * [0. Initialize the automation: `@automation_fixture`](#0-initialize-the-automation-automation_fixture)
   * [1. Set the stage to prepare for the test: `given_that`](#1-set-the-stage-to-prepare-for-the-test-given_that)
@@ -56,7 +57,10 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 ### Initial Setup
 1. Install **pytest**: `pip install pytest`
 1. Install the **framework**: `pip install appdaemontestframework`
-1. Copy [**`conftest.py`**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) at the **root** of your project
+1. Create a `conftest.py` file in the **root** of your project with the following code:
+```python
+from appdaemontestframework.pytest_conftest import *
+```
 
 ### Write you first unit test
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`
@@ -103,6 +107,23 @@ def test_during_day_light_DOES_NOT_turn_on(given_that, living_room, assert_that)
     assert_that('light.living_room').was_not.turned_on()
 ```
 
+### Deprecation Warnings
+As development continues of this test framework, some interfaces and test fixtures need to get
+deprecated. In general, the following method is used to ease the transitions
+1. Mark deprecated calls with a warning
+1. Provide an expressive message directing you how to change your code
+1. At least one release will include the warning
+1. In a future release, this warning will change to an error and/or the deprecated code will be
+   removed all together.
+
+**Silencing deprecation warnings**
+
+The deprecation warnings can be a bit overwhelming depending on the current state of the codebase.
+If you would like to run tests and ignore these warnings use the following pytest options:
+
+```sh
+pytest -W ignore::DeprecationWarning
+```
 
 ---
 ## General Test Flow and Available helpers
@@ -445,8 +466,8 @@ Setup and teardown are handled in the [`conftest.py`](https://github.com/Florian
 
 #### Appdaemon Test Framework flow
 ###### 1. Setup
-* **Patch** `hass.Hass` functions
-* **Inject** `hass_functions` in helpers: `given_that`, `assert_that`, `time_travel`
+* **Patch** `hass.Hass` functions and create `HassMocks` instance for tracking state.
+* **Inject** `hass_mocks` in helpers: `given_that`, `assert_that`, `time_travel`
 ###### 2. Test run
 * **Run** the test suite
 ###### 3. Teardown
@@ -500,6 +521,7 @@ def living_room():
   following 2 arguments:
   * `given_that` _- For configuring the state_
   * `hass_functions` _- For more complex setup steps_
+    * Note: `hass_functions` is deprecated in favor of `hass_mocks` going forward.
 
   Any code written in the fixture will be executed **before** initializing the automation. That way your
   `initialize()` function can safely rely on the Appdaemon framework and call some of its methods, all you
@@ -565,6 +587,10 @@ It is pretty easy to replicate the same behavior with your test framework of cho
 You can inject `hass_functions` directly in your tests, patched functions are `MagicMocks`.
 The list of patched functions can be found in the [**`init_framework` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/init_framework.py#L14).
 
+**Note:** direct use of `hass_functions` is now deprecated in favor of using the `hass_mocks` object.
+You can inject `hass_mocks` to your tests and use it's public interfaces for manipulating the test
+environment. The transition to `hass_mocks` is ongoing and there may not yet be all the functionality
+you are looking for. Until then you can continue to use the `hass_functions` fixture.
 
 
 ---
