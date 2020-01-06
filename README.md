@@ -58,9 +58,9 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 1. Install **pytest**: `pip install pytest`
 1. Install the **framework**: `pip install appdaemontestframework`
 1. Create a `conftest.py` file in the **root** of your project with the following code:
-```python
-from appdaemontestframework.pytest_conftest import *
-```
+   ```python
+   from appdaemontestframework.pytest_conftest import *
+   ```
 
 ### Write you first unit test
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`
@@ -455,9 +455,9 @@ Every Automation in Appdaemon follows the same model:
 Methods from the `hass.Hass` class are patched globally in the `HassMocks` class, and injected in the helper classes as `hass_mocks`.
 After all tests have run, the `hass_mocks` test fixture will automatically unpatch all the mocks.
 
-**Deprecated `hass_functions`**
-Before `HassMocks` existed, `hass_functions` was used for interacting with the patch hass methods. Using the `hass_mocks` public interfaces should be used in preference to using `hass_functions` going forward.
-They are being kept around for the near future to ease backwards compatibility with this breaking change.
+> **Deprecated `hass_functions`**
+> Before `HassMocks` existed, `hass_functions` was used for interacting with the patch hass methods. Using the `hass_mocks` public interfaces should be used in preference to using `hass_functions` going forward.
+> They are being kept around for the near future to ease backwards compatibility with this breaking change.
 
 1. **`hass_functions`**: **dictionary** with all patched functions
 1. **`unpatch_callback`**: **callback** to un-patch all patched functions
@@ -592,7 +592,7 @@ You can inject `hass_functions` directly in your tests, patched functions are `M
 The list of patched functions can be found in the [**`init_framework` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/init_framework.py#L14).
 
 **Note:** direct use of `hass_functions` is now deprecated in favor of using the `hass_mocks` object.
-You can inject `hass_mocks` to your tests and use it's public interfaces for manipulating the test
+You can inject `hass_mocks` to your tests and use its public interfaces for manipulating the test
 environment. The transition to `hass_mocks` is ongoing and there may not yet be all the functionality
 you are looking for. Until then you can continue to use the `hass_functions` fixture.
 
