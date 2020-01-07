@@ -2,6 +2,7 @@ from inspect import isfunction, signature
 
 import pytest
 from appdaemon.plugins.hass.hassapi import Hass
+import warnings
 
 from appdaemontestframework.common import AppdaemonTestFrameworkError
 
@@ -29,7 +30,16 @@ def _inject_helpers_and_call_function(function, given_that, hass_functions, hass
     def _check_valid(param):
         if param not in injectable_fixtures:
             raise AutomationFixtureError(
-                f"'{param}' is not a valid fixture! | The only fixtures injectable in '@automation_fixture' are: {injectable_fixtures.keys()}")
+                f"'{param}' is not a valid fixture! | The only fixtures injectable in '@automation_fixture' are: {list(injectable_fixtures.keys())}")
+
+        if param == 'hass_functions':
+            warnings.warn(
+                """
+                Injecting `hass_functions` into automation fixtures is deprecated.
+                Replace `hass_functions` with `hass_mocks` injections and access hass_functions with `hass_mocks.hass_functions`
+                """,
+                DeprecationWarning)
+
 
     args = []
     for param in signature(function).parameters:
@@ -124,7 +134,8 @@ def automation_fixture(*args):
     # Pre-initialization setup
     All code in the `@automation_fixture` function will be executed before initializing the `automation_class`
 
-    2 fixtures are injectable in `@automation_fixture`: 'given_that' and 'hass_functions'
+    3 fixtures are injectable in `@automation_fixture`: 'given_that', 'hass_mocks' and 'hass_functions'
+    'hass_functions' is deprecated in favor of 'hass_mocks'
 
     Examples:
     ```python
