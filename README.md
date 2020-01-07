@@ -106,6 +106,7 @@ def test_during_day_light_DOES_NOT_turn_on(given_that, living_room, assert_that)
     assert_that('light.living_room').was_not.turned_on()
 ```
 
+
 ---
 ## General Test Flow and Available helpers
 ### 0. Initialize the automation: `@automation_fixture`
@@ -433,12 +434,12 @@ Every Automation in Appdaemon follows the same model:
 
 **AppdaemonTestFramework** captures all calls to the API and helpers make use of the information to implement common functionality needed in our tests.
 
-Methods from the `hass.Hass` class are patched globally in the `HassMocks` class, and injected in the helper classes as `hass_mocks`.
+Methods from the `hass.Hass` class are patched globally in the `HassMocks` class and the mocks can be accessed with the `hass_functions` property. The test fixture is injected in the helper classes as `hass_mocks`.
 After all tests have run, the `hass_mocks` test fixture will automatically unpatch all the mocks.
 
-> **Deprecated `hass_functions`**
-> Before `HassMocks` existed, `hass_functions` was used for interacting with the patch hass methods. Using the `hass_mocks` public interfaces should be used in preference to using `hass_functions` going forward.
-> They are being kept around for the near future to ease backwards compatibility with this breaking change.
+> **Deprecated `hass_functions` test fixture**
+> Before `HassMocks` existed, `hass_functions` was used for interacting with the patch hass methods. The `hass_mocks` test fixture now contains `hass_functions` and should be accessed through there.
+> A `hass_functions` test fixture that returns `hass_mocus.hass_fuctions` will be kept for a while to ease transition, but wil generate a deprecation warning.
 
 1. **`hass_functions`**: **dictionary** with all patched functions
 1. **`unpatch_callback`**: **callback** to un-patch all patched functions
@@ -446,7 +447,7 @@ After all tests have run, the `hass_mocks` test fixture will automatically unpat
 **`hass_functions`** are injected in the helpers when creating their instances.
 After all tests, **`unpatch_callback`** is used to un-patch all patched functions.
 
-Setup and teardown are handled in the [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file.
+Setup and teardown are handled in the [`pytest_conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/pytest_conftest.py) file.
 
 
 #### Appdaemon Test Framework flow
@@ -587,13 +588,8 @@ It is pretty easy to replicate the same behavior with your test framework of cho
 > /!\ WARNING — EXPERIMENTAL /!\
 
 **Want a functionality not implemented by the helpers?**
-You can inject `hass_functions` directly in your tests, patched functions are `MagicMocks`.
-The list of patched functions can be found in the [**`init_framework` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/init_framework.py#L14).
-
-**Note:** direct use of `hass_functions` is now deprecated in favor of using the `hass_mocks` object.
-You can inject `hass_mocks` to your tests and use its public interfaces for manipulating the test
-environment. The transition to `hass_mocks` is ongoing and there may not yet be all the functionality
-you are looking for. Until then you can continue to use the `hass_functions` fixture.
+You can inject `hass_mocks` directly in your tests and use `hass_mocks.hass_functions`, patched functions are `MagicMocks`.
+The list of patched functions can be found in the [**`hass_mocks` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/hass_mocks.py#L20framework.py#L14).
 
 
 ---
