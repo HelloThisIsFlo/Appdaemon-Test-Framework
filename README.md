@@ -37,7 +37,6 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
   * [Initial Setup](#initial-setup)
   * [Write you first unit test](#write-you-first-unit-test)
   * [Result](#result)
-  * [Deprecation Warnings](#deprecation-warnings)
 - [General Test Flow and Available helpers](#general-test-flow-and-available-helpers)
   * [0. Initialize the automation: `@automation_fixture`](#0-initialize-the-automation-automation_fixture)
   * [1. Set the stage to prepare for the test: `given_that`](#1-set-the-stage-to-prepare-for-the-test-given_that)
@@ -105,24 +104,6 @@ def test_during_day_light_DOES_NOT_turn_on(given_that, living_room, assert_that)
     given_that.state_of('sensor.living_room_illumination').is_set_to(1000) # 1000lm == sunlight
     living_room._new_motion(None, None, None)
     assert_that('light.living_room').was_not.turned_on()
-```
-
-### Deprecation Warnings
-As development continues of this test framework, some interfaces and test fixtures need to get
-deprecated. In general, the following method is used to ease the transitions
-1. Mark deprecated calls with a warning
-1. Provide an expressive message directing you how to change your code
-1. At least one release will include the warning
-1. In a future release, this warning will change to an error and/or the deprecated code will be
-   removed all together.
-
-**Silencing deprecation warnings**
-
-The deprecation warnings can be a bit overwhelming depending on the current state of the codebase.
-If you would like to run tests and ignore these warnings use the following pytest options:
-
-```sh
-pytest -W ignore::DeprecationWarning
 ```
 
 ---
@@ -576,6 +557,24 @@ def living_room():
   The alternate versions can be useful for parametrized testing:
   * When multiple classes are passed, tests will be generated for each automation.
   * When using parameters, the injected object will be a tuple: `(Initialized_Automation, params)`
+
+### Deprecation Warnings
+As development continues of this test framework, some interfaces and test fixtures need to get
+deprecated. In general, the following method is used to ease the transitions
+1. Mark deprecated calls with a warning
+1. Provide an expressive message directing you how to change your code
+1. At least one release will include the warning
+1. In a future release, this warning will change to an error and/or the deprecated code will be
+   removed all together.
+
+**Silencing deprecation warnings**
+
+The deprecation warnings can be a bit overwhelming depending on the current state of the codebase.
+If you would like to run tests and ignore these warnings use the following pytest options:
+
+```sh
+pytest -W ignore::DeprecationWarning
+```
 
 ### Without `pytest`
 If you do no wish to use `pytest`, first maybe reconsider, `pytest` is awesome :)
