@@ -30,11 +30,3 @@ def assert_that(hass_mocks):
 @fixture
 def time_travel(hass_mocks):
     return TimeTravelWrapper(hass_mocks)
-
-
-@fixture
-def configure_appdaemontestframework_for_pytester(testdir):
-    testdir.makeconftest(
-        """
-        from appdaemontestframework.pytest_conftest import *
-    """)
