@@ -622,7 +622,7 @@ Two types of tests can be found:
 - Unit tests for recent features
 - Integration tests using the framework in a real-life scenario
 
-While it most likely isn't sufficient to guarantee a behavior coverage to fully rely on, it still provides some nice backwards compatility safety 🙂
+While it most likely isn't sufficient to guarantee a behavior coverage to fully rely on, it still provides some nice backwards compatibility safety 🙂
 
 When adding new feature, you can TDD it, add unit tests later, or only rely on integration tests. Whichever way you go is totally fine for this project, but new features will need to have at least some sort of tests, even if they're super basic 🙂
 
