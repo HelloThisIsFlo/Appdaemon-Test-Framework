@@ -507,7 +507,7 @@ def living_room():
   following 2 arguments:
   * `given_that` _- For configuring the state_
   * `hass_mocks` _- For more complex setup steps_
-    * Note: hass_functions was deprecated in favor of using hass_mocks
+    * Note: `hass_functions` was deprecated in favor of using `hass_mocks`
 
   Any code written in the fixture will be executed **before** initializing the automation. That way your
   `initialize()` function can safely rely on the Appdaemon framework and call some of its methods, all you
