@@ -4,17 +4,14 @@ from mock import patch, MagicMock
 from apps.entity_ids import ID
 
 # TODO: Put this in config (through apps.yml, check doc)
+from appdaemontestframework import automation_fixture
+
 PHONE_PUSHBULLET_ID = "device/OnePlus 5T"
 
 
-@pytest.fixture
+@automation_fixture(Kitchen)
 def kitchen(given_that):
-    kitchen = Kitchen(
-        None, None, None, None, None, None, None, None)
-    kitchen.initialize()
-
-    given_that.mock_functions_are_cleared()
-    return kitchen
+    pass
 
 
 @pytest.fixture

@@ -4,6 +4,7 @@ from mock import patch, MagicMock
 import pytest
 from datetime import time
 from apps.entity_ids import ID
+from appdaemontestframework import automation_fixture
 
 MORNING_STEP1_COLOR = 'BLUE'
 SHOWER_COLOR = 'GREEN'
@@ -14,7 +15,7 @@ EVENING_HOUR = 20
 DAY_HOUR = 4
 
 
-@pytest.fixture
+@automation_fixture(Bathroom)
 def bathroom(given_that):
     # Set initial state
     speakers = [
@@ -29,13 +30,8 @@ def bathroom(given_that):
 
     given_that.time_is(time(hour=15))
 
-    bathroom = Bathroom(
-        None, None, None, None, None, None, None, None)
-    bathroom.initialize()
-
     # Clear calls recorded during initialisation
     given_that.mock_functions_are_cleared()
-    return bathroom
 
 
 @pytest.fixture
