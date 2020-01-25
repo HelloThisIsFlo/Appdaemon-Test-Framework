@@ -56,7 +56,10 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
 ### Initial Setup
 1. Install **pytest**: `pip install pytest`
 1. Install the **framework**: `pip install appdaemontestframework`
-1. Copy [**`conftest.py`**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) at the **root** of your project
+1. Create a `conftest.py` file in the **root** of your project with the following code:
+   ```python
+   from appdaemontestframework.pytest_conftest import *
+   ```
 
 ### Write you first unit test
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`
@@ -431,8 +434,12 @@ Every Automation in Appdaemon follows the same model:
 
 **AppdaemonTestFramework** captures all calls to the API and helpers make use of the information to implement common functionality needed in our tests.
 
-Methods from the `hass.Hass` class are patched globally, and injected in the helper classes.
-This is done with the `patch_hass()` wich returns a tuple containing:
+Methods from the `hass.Hass` class are patched globally in the `HassMocks` class and the mocks can be accessed with the `hass_functions` property. The test fixture is injected in the helper classes as `hass_mocks`.
+After all tests have run, the `hass_mocks` test fixture will automatically unpatch all the mocks.
+
+> **Deprecated `hass_functions` test fixture**
+> Before `HassMocks` existed, `hass_functions` was used for interacting with the patch hass methods. The `hass_mocks` test fixture now contains `hass_functions` and should be accessed through there.
+> A `hass_functions` test fixture that returns `hass_mocus.hass_fuctions` will be kept for a while to ease transition, but wil generate a deprecation warning.
 
 1. **`hass_functions`**: **dictionary** with all patched functions
 1. **`unpatch_callback`**: **callback** to un-patch all patched functions
@@ -440,13 +447,13 @@ This is done with the `patch_hass()` wich returns a tuple containing:
 **`hass_functions`** are injected in the helpers when creating their instances.
 After all tests, **`unpatch_callback`** is used to un-patch all patched functions.
 
-Setup and teardown are handled in the [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file.
+Setup and teardown are handled in the [`pytest_conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/pytest_conftest.py) file.
 
 
 #### Appdaemon Test Framework flow
 ###### 1. Setup
-* **Patch** `hass.Hass` functions
-* **Inject** `hass_functions` in helpers: `given_that`, `assert_that`, `time_travel`
+* **Patch** `hass.Hass` functions and create `HassMocks` instance for tracking state.
+* **Inject** `hass_mocks` in helpers: `given_that`, `assert_that`, `time_travel`
 ###### 2. Test run
 * **Run** the test suite
 ###### 3. Teardown
@@ -499,7 +506,8 @@ def living_room():
   Such pre-initialization setup is possible with the `@automation_fixture`. The fixture can be injected with the
   following 2 arguments:
   * `given_that` _- For configuring the state_
-  * `hass_functions` _- For more complex setup steps_
+  * `hass_mocks` _- For more complex setup steps_
+    * Note: `hass_functions` was deprecated in favor of using `hass_mocks`
 
   Any code written in the fixture will be executed **before** initializing the automation. That way your
   `initialize()` function can safely rely on the Appdaemon framework and call some of its methods, all you
@@ -551,6 +559,28 @@ def living_room():
   * When multiple classes are passed, tests will be generated for each automation.
   * When using parameters, the injected object will be a tuple: `(Initialized_Automation, params)`
 
+### Deprecation Warnings
+As development continues of this test framework, some interfaces and test fixtures need to get
+deprecated. In general, the following method is used to ease the transitions
+
+1. Mark deprecated calls with a warning
+1. Provide an expressive message directing you how to change your code
+1. At least one minor release will include the warning
+1. In a future MAJOR release, this warning will change to an error and/or the deprecated code will be
+   removed all together.
+
+This deprecation strategy allows you to keep using Appdaemon Test Framework as you always have, as long as you don't update to a new MAJOR version.
+
+
+**Silencing deprecation warnings**
+
+The deprecation warnings can be a bit overwhelming depending on the current state of the codebase.
+If you would like to run tests and ignore these warnings use the following pytest options:
+
+```sh
+pytest -W ignore::DeprecationWarning
+```
+
 ### Without `pytest`
 If you do no wish to use `pytest`, first maybe reconsider, `pytest` is awesome :)
 If you're really set on using something else, worry not it's pretty straighforward too ;)
@@ -562,9 +592,8 @@ It is pretty easy to replicate the same behavior with your test framework of cho
 > /!\ WARNING — EXPERIMENTAL /!\
 
 **Want a functionality not implemented by the helpers?**
-You can inject `hass_functions` directly in your tests, patched functions are `MagicMocks`.
-The list of patched functions can be found in the [**`init_framework` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/init_framework.py#L14).
-
+You can inject `hass_mocks` directly in your tests and use `hass_mocks.hass_functions`, patched functions are `MagicMocks`.
+The list of patched functions can be found in the [**`hass_mocks` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/hass_mocks.py#L20framework.py#L14).
 
 
 ---
@@ -597,7 +626,7 @@ Two types of tests can be found:
 - Unit tests for recent features
 - Integration tests using the framework in a real-life scenario
 
-While it most likely isn't sufficient to guarantee a behavior coverage to fully rely on, it still provides some nice backwards compatility safety 🙂
+While it most likely isn't sufficient to guarantee a behavior coverage to fully rely on, it still provides some nice backwards compatibility safety 🙂
 
 When adding new feature, you can TDD it, add unit tests later, or only rely on integration tests. Whichever way you go is totally fine for this project, but new features will need to have at least some sort of tests, even if they're super basic 🙂
 

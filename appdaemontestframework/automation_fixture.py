@@ -2,6 +2,7 @@ from inspect import isfunction, signature
 
 import pytest
 from appdaemon.plugins.hass.hassapi import Hass
+import warnings
 
 from appdaemontestframework.common import AppdaemonTestFrameworkError
 
@@ -10,8 +11,8 @@ class AutomationFixtureError(AppdaemonTestFrameworkError):
     pass
 
 
-def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions):
-    _inject_helpers_and_call_function(function, given_that, hass_functions)
+def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks):
+    _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks)
     automation = automation_class(
         None, automation_class.__name__, None, None, None, None, None, None)
     automation.initialize()
@@ -19,16 +20,26 @@ def _instantiate_and_initialize_automation(function, automation_class, given_tha
     return automation
 
 
-def _inject_helpers_and_call_function(function, given_that, hass_functions):
+def _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks):
     injectable_fixtures = {
         'given_that': given_that,
-        'hass_functions': hass_functions
+        'hass_functions': hass_functions,
+        'hass_mocks': hass_mocks,
     }
 
     def _check_valid(param):
         if param not in injectable_fixtures:
             raise AutomationFixtureError(
-                f"'{param}' is not a valid fixture! | The only fixtures injectable in '@automation_fixture' are: {injectable_fixtures.keys()}")
+                f"'{param}' is not a valid fixture! | The only fixtures injectable in '@automation_fixture' are: {list(injectable_fixtures.keys())}")
+
+        if param == 'hass_functions':
+            warnings.warn(
+                """
+                Injecting `hass_functions` into automation fixtures is deprecated.
+                Replace `hass_functions` with `hass_mocks` injections and access hass_functions with `hass_mocks.hass_functions`
+                """,
+                DeprecationWarning)
+
 
     args = []
     for param in signature(function).parameters:
@@ -73,9 +84,9 @@ class _AutomationFixtureDecoratorWithoutArgs:
 
     def __call__(self, function):
         @pytest.fixture(params=self.automation_classes, ids=self._generate_id)
-        def automation_fixture_with_initialisation(request, given_that, hass_functions):
+        def automation_fixture_with_initialisation(request, given_that, hass_functions, hass_mocks):
             automation_class = request.param
-            return _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions)
+            return _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks)
 
         return automation_fixture_with_initialisation
 
@@ -91,11 +102,11 @@ class _AutomationFixtureDecoratorWithArgs:
 
     def __call__(self, function):
         @pytest.fixture(params=self.automation_classes_with_args, ids=self._generate_id)
-        def automation_fixture_with_initialisation(request, given_that, hass_functions):
+        def automation_fixture_with_initialisation(request, given_that, hass_functions, hass_mocks):
             automation_class = request.param[0]
             automation_args = request.param[1]
             automation = _instantiate_and_initialize_automation(
-                function, automation_class, given_that, hass_functions)
+                function, automation_class, given_that, hass_functions, hass_mocks)
             return (automation, automation_args)
 
         return automation_fixture_with_initialisation
@@ -123,7 +134,8 @@ def automation_fixture(*args):
     # Pre-initialization setup
     All code in the `@automation_fixture` function will be executed before initializing the `automation_class`
 
-    2 fixtures are injectable in `@automation_fixture`: 'given_that' and 'hass_functions'
+    3 fixtures are injectable in `@automation_fixture`: 'given_that', 'hass_mocks' and 'hass_functions'
+    'hass_functions' is deprecated in favor of 'hass_mocks'
 
     Examples:
     ```python

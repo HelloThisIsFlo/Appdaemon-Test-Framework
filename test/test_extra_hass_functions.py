@@ -19,11 +19,11 @@ def with_extra_hass_functions():
     pass
 
 
-def test_now_is_between(given_that, with_extra_hass_functions, hass_functions):
+def test_now_is_between(given_that, with_extra_hass_functions, hass_mocks):
     with_extra_hass_functions.call_now_is_between()
-    hass_functions['now_is_between'].assert_called_with("sunset - 00:45:00", "sunrise + 00:45:00")
+    hass_mocks.hass_functions['now_is_between'].assert_called_with("sunset - 00:45:00", "sunrise + 00:45:00")
 
 
-def test_notify(given_that, with_extra_hass_functions, hass_functions):
+def test_notify(given_that, with_extra_hass_functions, hass_mocks):
     with_extra_hass_functions.call_notify()
-    hass_functions['notify'].assert_called_with(message="test", name="html5")
+    hass_mocks.hass_functions['notify'].assert_called_with(message="test", name="html5")

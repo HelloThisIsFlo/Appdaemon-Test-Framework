@@ -5,6 +5,12 @@ build
 *.egg-info
 .tox
 
+# vscode dirs
+.vscode/
+
+# Python virtual envrionments
+/venv*/
+
 # Created by https://www.gitignore.io/api/pycharm
 # Edit at https://www.gitignore.io/?templates=pycharm
 

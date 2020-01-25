@@ -251,8 +251,10 @@ def _ensure_init(property):
 
 
 class AssertThatWrapper:
-    def __init__(self, hass_functions):
-        self.hass_functions = hass_functions
+    def __init__(self, hass_mocks):
+        # Access the `_hass_functions` through private member for now to avoid genearting deprecation
+        # warnings while keeping compatibility.
+        self.hass_functions = hass_mocks._hass_functions
         self._was = None
         self._was_not = None
         self._listens_to = None
