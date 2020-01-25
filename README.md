@@ -562,11 +562,15 @@ def living_room():
 ### Deprecation Warnings
 As development continues of this test framework, some interfaces and test fixtures need to get
 deprecated. In general, the following method is used to ease the transitions
+
 1. Mark deprecated calls with a warning
 1. Provide an expressive message directing you how to change your code
-1. At least one release will include the warning
-1. In a future release, this warning will change to an error and/or the deprecated code will be
+1. At least one minor release will include the warning
+1. In a future MAJOR release, this warning will change to an error and/or the deprecated code will be
    removed all together.
+
+This deprecation strategy allows you to keep using Appdaemon Test Framework as you always have, as long as you don't update to a new MAJOR version.
+
 
 **Silencing deprecation warnings**
 
