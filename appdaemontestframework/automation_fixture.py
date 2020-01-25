@@ -1,20 +1,45 @@
+import warnings
 from inspect import isfunction, signature
+import pkg_resources
 
 import pytest
 from appdaemon.plugins.hass.hassapi import Hass
-import warnings
 
 from appdaemontestframework.common import AppdaemonTestFrameworkError
+
+APPDAEMON_VERSION = pkg_resources.get_distribution('appdaemon').version
 
 
 class AutomationFixtureError(AppdaemonTestFrameworkError):
     pass
 
+def is_using_appdaemon_version_3_or_below():
+    return APPDAEMON_VERSION <= '4.0.0'
 
 def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks):
     _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks)
-    automation = automation_class(
-        None, automation_class.__name__, None, None, None, None, None, None)
+
+    if is_using_appdaemon_version_3_or_below():
+        automation = automation_class(
+                None,
+                automation_class.__name__,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+        )
+    else:
+        automation = automation_class(
+                None,
+                automation_class.__name__,
+                None,
+                None,
+                None,
+                None,
+                None
+        )
     automation.initialize()
     given_that.mock_functions_are_cleared()
     return automation

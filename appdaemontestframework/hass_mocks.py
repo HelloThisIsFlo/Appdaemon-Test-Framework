@@ -11,7 +11,8 @@ class HassMocks:
         # It needs to be in this scope so it can get access to variables used here like `_hass_instances`
         _hass_instances = [] # use a local variable so we can access it below in `_hass_init_mock`
         self._hass_instances = _hass_instances # list of all hass instances
-        def _hass_init_mock(self, _ad, name, _logger, _error, _args, _config, _app_config, _global_vars):
+
+        def _hass_init_mock(self, _ad, name, *_args):
             _hass_instances.append(self)
             self.name = name
 
