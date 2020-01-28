@@ -10,7 +10,7 @@ PHONE_PUSHBULLET_ID = "device/OnePlus 5T"
 @pytest.fixture
 def kitchen(given_that):
     kitchen = Kitchen(
-        None, None, None, None, None, None, None, None)
+        None, None, None, None, None, None, None)
     kitchen.initialize()
 
     given_that.mock_functions_are_cleared()

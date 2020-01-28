@@ -58,6 +58,8 @@ class GivenThatWrapper:
     def _init_mocked_passed_args(self):
         def make_magic_mock_behave_like_a_dict(magic_mock, dict_to_simulate):
             def should_mock(dict_method):
+                if dict_method == "__reversed__":
+                    return False
                 dict_method_in_magic_mock = getattr(magic_mock, dict_method)
                 return isinstance(dict_method_in_magic_mock, MagicMock)
 

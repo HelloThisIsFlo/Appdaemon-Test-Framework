@@ -30,7 +30,7 @@ def bathroom(given_that):
     given_that.time_is(time(hour=15))
 
     bathroom = Bathroom(
-        None, None, None, None, None, None, None, None)
+        None, None, None, None, None, None, None)
     bathroom.initialize()
 
     # Clear calls recorded during initialisation

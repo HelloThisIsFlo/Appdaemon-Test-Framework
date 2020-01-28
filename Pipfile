@@ -4,16 +4,17 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-appdaemon = "*"
+appdaemon = ">=4.0.0"
 mock = "*"
 coverage = "*"
 
 [dev-packages]
-pytest = "*"
+pytest = ">=5.3.4"
 pytest-watch = "*"
 pylint = "*"
 "autopep8" = "*"
 tox = "*"
+mock = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"
