@@ -1,12 +1,32 @@
 import logging
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
+import appdaemon.utils
+from packaging import version
 import textwrap
 import warnings
 
 
+class _DeprecatedAppdaemonWarning:
+    # Use class vars so we can keep sticky state to only warn once per test session
+    already_warned_deprecated_appdaemon_version = False
+    min_supported_version = version.Version('4.0.0')
+
+    def __init__(self):
+        if self.already_warned_deprecated_appdaemon_version:
+            return
+        self.already_warned_deprecated_appdaemon_version = True
+
+        appdaemon_version = version.Version(appdaemon.utils.__version__)
+        if appdaemon_version < self.min_supported_version :
+            warnings.warn("Appdaemon-Test-Framework will only support Appdaemon >={} in the next major release. Your current Appdemon version is {}"
+                            .format(self.min_supported_version, appdaemon_version), DeprecationWarning)
+
+
 class HassMocks:
     def __init__(self):
+        _DeprecatedAppdaemonWarning()
+
         # Mocked out init for Hass class.
         # It needs to be in this scope so it can get access to variables used here like `_hass_instances`
         _hass_instances = [] # use a local variable so we can access it below in `_hass_init_mock`
