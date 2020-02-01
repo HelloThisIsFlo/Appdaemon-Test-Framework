@@ -35,10 +35,10 @@ def when_new(kitchen):
 
 
 class TestInitialization:
-    def test_callbacks_are_registered(self, kitchen, hass_functions):
+    def test_callbacks_are_registered(self, kitchen, hass_mocks):
         # Given: The mocked callback Appdaemon registration functions
-        listen_event = hass_functions['listen_event']
-        listen_state = hass_functions['listen_state']
+        listen_event = hass_mocks.hass_functions['listen_event']
+        listen_state = hass_mocks.hass_functions['listen_state']
 
         # When: Calling `initialize`
         kitchen.initialize()
