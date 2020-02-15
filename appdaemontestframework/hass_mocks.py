@@ -13,9 +13,9 @@ class _DeprecatedAppdaemonWarning:
     min_supported_version = version.Version('4.0.0')
 
     def __init__(self):
-        if self.already_warned_deprecated_appdaemon_version:
+        if _DeprecatedAppdaemonWarning.already_warned_deprecated_appdaemon_version:
             return
-        self.already_warned_deprecated_appdaemon_version = True
+        _DeprecatedAppdaemonWarning.already_warned_deprecated_appdaemon_version = True
 
         appdaemon_version = version.Version(appdaemon.utils.__version__)
         if appdaemon_version < self.min_supported_version :
