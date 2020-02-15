@@ -1,16 +1,22 @@
 import logging
+import warnings
+
+import appdaemon.utils
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
-import appdaemon.utils
-from packaging import version
-import textwrap
-import warnings
+from packaging.version import Version
+
+CURRENT_APPDAEMON_VERSION = Version(appdaemon.utils.__version__)
+
+
+def is_appdaemon_version_at_least(version_as_string):
+    expected_appdaemon_version = Version(version_as_string)
+    return CURRENT_APPDAEMON_VERSION >= expected_appdaemon_version
 
 
 class _DeprecatedAppdaemonVersionWarning:
     already_warned_during_this_test_session = False
-    min_supported_appdaemon_version = version.Version('4.0.0')
-    appdaemon_version = version.Version(appdaemon.utils.__version__)
+    min_supported_appdaemon_version = '4.0.0'
 
     @classmethod
     def show_warning_only_once(cls):
@@ -18,13 +24,16 @@ class _DeprecatedAppdaemonVersionWarning:
             return
         cls.already_warned_during_this_test_session = True
 
-        if cls.appdaemon_version < cls.min_supported_appdaemon_version:
+        appdaemon_version_supported = is_appdaemon_version_at_least(
+                cls.min_supported_appdaemon_version
+        )
+        if not appdaemon_version_supported:
             warnings.warn(
                     "Appdaemon-Test-Framework will only support Appdaemon >={} "
                     "in the next major release. "
                     "Your current Appdemon version is {}".format(
                             cls.min_supported_appdaemon_version,
-                            cls.appdaemon_version
+                            CURRENT_APPDAEMON_VERSION
                     ),
                     DeprecationWarning)
 
