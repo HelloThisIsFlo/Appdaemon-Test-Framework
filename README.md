@@ -620,6 +620,18 @@ Thanks for your contribution 😀 👍
 
 When adding new feature, you can TDD it, add unit tests later, or only rely on integration tests. Whichever way you go is totally fine for this project, but new features will need to have at least some sort of tests, even if they're super basic 🙂
 
+### Using `Pipenv`
+This project has been developed using `Pipenv`.
+It is totally optional, but if you are interested, here is a quick guide to get you started:
+1. Install `pipenv` -> `brew install pipenv` (or whichever methods works best for you)
+2. `cd` in the project directory
+3. Run `pipenv install --dev`  
+  _That will create a `virtualenv` and automatically install all required dependencies_
+4. Run `pipenv shell`  
+  _That will activate the `virtualenv` in the current shell_
+5. Run `pytest` to ensure that everything is working as expected
+6. You're good to go and can start contributing 😊
+
 ---
 ## Author Information
 Follow me on Twitter: [@ThisIsFlorianK](https://twitter.com/ThisIsFlorianK)
