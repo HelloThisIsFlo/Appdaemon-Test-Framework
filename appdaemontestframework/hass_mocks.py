@@ -7,25 +7,31 @@ import textwrap
 import warnings
 
 
-class _DeprecatedAppdaemonWarning:
-    # Use class vars so we can keep sticky state to only warn once per test session
-    already_warned_deprecated_appdaemon_version = False
-    min_supported_version = version.Version('4.0.0')
+class _DeprecatedAppdaemonVersionWarning:
+    already_warned_during_this_test_session = False
+    min_supported_appdaemon_version = version.Version('4.0.0')
+    appdaemon_version = version.Version(appdaemon.utils.__version__)
 
-    def __init__(self):
-        if _DeprecatedAppdaemonWarning.already_warned_deprecated_appdaemon_version:
+    @classmethod
+    def show_warning_only_once(cls):
+        if cls.already_warned_during_this_test_session is True:
             return
-        _DeprecatedAppdaemonWarning.already_warned_deprecated_appdaemon_version = True
+        cls.already_warned_during_this_test_session = True
 
-        appdaemon_version = version.Version(appdaemon.utils.__version__)
-        if appdaemon_version < self.min_supported_version :
-            warnings.warn("Appdaemon-Test-Framework will only support Appdaemon >={} in the next major release. Your current Appdemon version is {}"
-                            .format(self.min_supported_version, appdaemon_version), DeprecationWarning)
+        if cls.appdaemon_version < cls.min_supported_appdaemon_version:
+            warnings.warn(
+                    "Appdaemon-Test-Framework will only support Appdaemon >={} "
+                    "in the next major release. "
+                    "Your current Appdemon version is {}".format(
+                            cls.min_supported_appdaemon_version,
+                            cls.appdaemon_version
+                    ),
+                    DeprecationWarning)
 
 
 class HassMocks:
     def __init__(self):
-        _DeprecatedAppdaemonWarning()
+        _DeprecatedAppdaemonVersionWarning.show_warning_only_once()
 
         # Mocked out init for Hass class.
         # It needs to be in this scope so it can get access to variables used here like `_hass_instances`
