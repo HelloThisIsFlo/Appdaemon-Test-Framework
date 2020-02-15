@@ -6,24 +6,20 @@ import pytest
 from appdaemon.plugins.hass.hassapi import Hass
 
 from appdaemontestframework.common import AppdaemonTestFrameworkError
-
-APPDAEMON_VERSION = pkg_resources.get_distribution('appdaemon').version
+from appdaemontestframework.hass_mocks import is_appdaemon_version_at_least
 
 
 class AutomationFixtureError(AppdaemonTestFrameworkError):
     pass
 
-def is_using_appdaemon_version_3_or_below():
-    return APPDAEMON_VERSION <= '4.0.0'
 
 def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks):
     _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks)
 
-    if is_using_appdaemon_version_3_or_below():
+    if is_appdaemon_version_at_least('4.0.0'):
         automation = automation_class(
                 None,
                 automation_class.__name__,
-                None,
                 None,
                 None,
                 None,
@@ -34,6 +30,7 @@ def _instantiate_and_initialize_automation(function, automation_class, given_tha
         automation = automation_class(
                 None,
                 automation_class.__name__,
+                None,
                 None,
                 None,
                 None,
