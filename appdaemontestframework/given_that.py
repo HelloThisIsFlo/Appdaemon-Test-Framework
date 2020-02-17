@@ -1,5 +1,3 @@
-from mock import MagicMock
-
 from appdaemontestframework.common import AppdaemonTestFrameworkError
 
 
@@ -18,8 +16,8 @@ class AttributeNotSetError(AppdaemonTestFrameworkError):
 
 class GivenThatWrapper:
     def __init__(self, hass_mocks):
-        # Access the `_hass_functions` through private member for now to avoid genearting deprecation
-        # warnings while keeping compatibility.
+        # Access the `_hass_functions` through private member for now
+        # to avoid generating deprecation warnings while keeping compatibility.
         self.hass_functions = hass_mocks._hass_functions
         self._init_mocked_states()
         self._init_mocked_passed_args()
@@ -32,7 +30,12 @@ class GivenThatWrapper:
                 resdict = dict()
                 for entityid in self.mocked_states:
                     state = self.mocked_states[entityid]
-                    resdict.update({entityid: {"state" : state['main'], "attributes" : state['attributes']}})
+                    resdict.update({
+                        entityid: {
+                            "state": state['main'],
+                            "attributes": state['attributes']
+                        }
+                    })
                 return resdict
             else:
                 if entity_id not in self.mocked_states:
@@ -68,8 +71,10 @@ class GivenThatWrapper:
             def is_set_to(self, state, attributes=None):
                 if not attributes:
                     attributes = {}
-                given_that_wrapper.mocked_states[entity_id] = {'main': state,
-                                                               'attributes': attributes}
+                given_that_wrapper.mocked_states[entity_id] = {
+                    'main': state,
+                    'attributes': attributes
+                }
 
         return IsWrapper()
 
@@ -77,15 +82,18 @@ class GivenThatWrapper:
         given_that_wrapper = self
 
         class IsWrapper:
-            def is_set_to(self, argument_value):
-                given_that_wrapper.mocked_passed_args[argument_key] = argument_value
+            @staticmethod
+            def is_set_to(argument_value):
+                given_that_wrapper.mocked_passed_args[argument_key] = \
+                    argument_value
 
         return IsWrapper()
 
     def time_is(self, time_as_datetime):
         self.hass_functions['time'].return_value = time_as_datetime
 
-    def mock_functions_are_cleared(self, clear_mock_states=False, clear_mock_passed_args=False):
+    def mock_functions_are_cleared(self, clear_mock_states=False,
+                                   clear_mock_passed_args=False):
         for mocked_function in self.hass_functions.values():
             mocked_function.reset_mock()
         if clear_mock_states:
