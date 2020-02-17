@@ -50,7 +50,7 @@ class HassMocks:
             MockHandler(Hass, 'set_state'),
             MockHandler(Hass, 'get_state'),
             MockHandler(Hass, 'time'),
-            MockHandler(Hass, 'args'),  # Not a function, attribute. But same patching logic
+            DictMockHandler(Hass, 'args'),
 
             ### Interactions functions
             MockHandler(Hass, 'call_service'),
@@ -71,10 +71,8 @@ class HassMocks:
         # methods in the HassMocks object going forward.
         self._hass_functions = {}
         for mock_handler in self._mock_handlers:
-            self._hass_functions[mock_handler.function_name] = mock_handler.mock
+            self._hass_functions[mock_handler.function_or_field_name] = mock_handler.mock
 
-        # ensure compatibility with older versions of AppDaemon
-        self._hass_functions['passed_args'] = self._hass_functions['args']
 
     ### Mock handling
     def unpatch_mocks(self):
@@ -103,19 +101,35 @@ class HassMocks:
 class MockHandler:
     """A class for generating a mock in an object and holding on to info about it.
     :param object_to_patch: The object to patch
-    :param function_name: the name of the function to patch in the object
+    :param function_or_field_name: the name of the function to patch in the object
     :param side_effect: side effect method to call. If not set, it will just return `None`
     :param autospec: If `True` will autospec the Mock signature. Useful for getting `self` in side effects.
     """
-    def __init__(self, object_to_patch, function_name, side_effect=None, autospec=False):
-        self.function_name = function_name
+    def __init__(self, object_to_patch, function_or_field_name, side_effect=None, autospec=False):
+        self.function_or_field_name = function_or_field_name
         return_value = None
-        self.patch = mock.patch.object(object_to_patch, self.function_name, create=True,
+        self.patch = mock.patch.object(object_to_patch, function_or_field_name, create=True,
                                        autospec=autospec, side_effect=side_effect, return_value=None)
         self.mock = self.patch.start()
 
 
-class WrappedMockHandler(MockHandler):
+class DictMockHandler:
+
+    def __init__(self, object_to_patch, field_name):
+        class MockDict(mock.Mock, dict):
+            pass
+
+        self.function_or_field_name = field_name
+        self.patch = mock.patch.object(
+                object_to_patch,
+                field_name,
+                create=True,
+                new=MockDict()
+        )
+        self.mock = self.patch.start()
+
+
+class SpyMockHandler(MockHandler):
     """Helper class that privides a 'wrapped' mock. This will automatically call the original function while still providing
     a Mock for asserts and the such."""
     def __init__(self, object_to_patch, function_name):

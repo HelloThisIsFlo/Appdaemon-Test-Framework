@@ -58,21 +58,8 @@ class GivenThatWrapper:
         self.hass_functions['entity_exists'].side_effect = entity_exists_mock
 
     def _init_mocked_passed_args(self):
-        def make_magic_mock_behave_like_a_dict(magic_mock, dict_to_simulate):
-            def should_mock(dict_method):
-                dict_method_in_magic_mock = getattr(magic_mock, dict_method)
-                return isinstance(dict_method_in_magic_mock, MagicMock)
-
-            for dict_method in dir(dict_to_simulate):
-                if should_mock(dict_method):
-                    dict_method_in_magic_mock = getattr(
-                        magic_mock, dict_method)
-                    dict_method_in_magic_mock.side_effect = getattr(
-                        dict_to_simulate, dict_method)
-
-        self.mocked_passed_args = dict()
-        make_magic_mock_behave_like_a_dict(
-            self.hass_functions['passed_args'], self.mocked_passed_args)
+        self.mocked_passed_args = self.hass_functions['args']
+        self.mocked_passed_args.clear()
 
     def state_of(self, entity_id):
         given_that_wrapper = self
