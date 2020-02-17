@@ -150,23 +150,9 @@ class MockHandler:
                  object_to_patch,
                  function_or_field_name,
                  side_effect=None,
-                 autospec=False,
-                 new_callable=None):
-
+                 autospec=False):
         self.function_or_field_name = function_or_field_name
-
-        patch_kwargs = {'create': True,
-                        'side_effect': side_effect,
-                        'return_value': None}
-
-        if new_callable and autospec:
-            raise ValueError(
-                    "Cannot use 'autospec' and 'new_callable' together")
-        if new_callable:
-            patch_kwargs['new_callable'] = new_callable
-        else:
-            patch_kwargs['autospec'] = autospec
-
+        patch_kwargs = self._patch_kwargs(side_effect, autospec)
         self.patch = mock.patch.object(
                 object_to_patch,
                 function_or_field_name,
@@ -174,13 +160,28 @@ class MockHandler:
         )
         self.mock = self.patch.start()
 
+    def _patch_kwargs(self, side_effect, autospec):
+        return {
+            'create': True,
+            'side_effect': side_effect,
+            'return_value': None,
+            'autospec': autospec
+        }
+
 
 class DictMockHandler(MockHandler):
-    def __init__(self, object_to_patch, field_name):
-        class MockDict(mock.Mock, dict):
+    class MockDict(dict):
+        def reset_mock(self):
             pass
 
-        super().__init__(object_to_patch, field_name, new_callable=MockDict)
+    def __init__(self, object_to_patch, field_name):
+        super().__init__(object_to_patch, field_name)
+
+    def _patch_kwargs(self, _side_effect, _autospec):
+        return {
+            'create': True,
+            'new': self.MockDict()
+        }
 
 
 class SpyMockHandler(MockHandler):
