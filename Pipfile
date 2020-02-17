@@ -4,11 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-appdaemon = "*"
-mock = "*"
-coverage = "*"
+appdaemontestframework = {editable=true, path="."}
 
 [dev-packages]
+coverage = "*"
 pytest = "*"
 pytest-watch = "*"
 pylint = "*"

@@ -618,17 +618,19 @@ Thanks for your contribution 😀 👍
 
 ### Tests
 
-> **Note on the current state of tests:**
-> The funny thing with this project is: it's the offspring of a test suite I was building as I worked on my home automation project. I ended up extracting these functions and published them online for others, like you, to use. Which means . . . most of the project itself doesn't have any unit tests 😮 That being said, there are _some_ tests.
-
-
-Two types of tests can be found:
-- Unit tests for recent features
-- Integration tests using the framework in a real-life scenario
-
-While it most likely isn't sufficient to guarantee a behavior coverage to fully rely on, it still provides some nice backwards compatibility safety 🙂
-
 When adding new feature, you can TDD it, add unit tests later, or only rely on integration tests. Whichever way you go is totally fine for this project, but new features will need to have at least some sort of tests, even if they're super basic 🙂
+
+### Using `Pipenv`
+This project has been developed using `Pipenv`.
+It is totally optional, but if you are interested, here is a quick guide to get you started:
+1. Install `pipenv` -> `brew install pipenv` (or whichever methods works best for you)
+2. `cd` in the project directory
+3. Run `pipenv install --dev`  
+  _That will create a `virtualenv` and automatically install all required dependencies_
+4. Run `pipenv shell`  
+  _That will activate the `virtualenv` in the current shell_
+5. Run `pytest` to ensure that everything is working as expected
+6. You're good to go and can start contributing 😊
 
 ---
 ## Author Information
