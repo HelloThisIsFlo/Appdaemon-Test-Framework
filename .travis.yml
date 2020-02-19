@@ -3,14 +3,22 @@ jobs:
   include:
 
     - stage: test
-      python: '3.6'
+      name: "Tests with Python 3.7"
+      python: '3.7'
+      env: TOXENV=py37
+      install: pip install tox-travis
+      script: tox
+
+    - name: "Tests with Python 3.8"
+      python: '3.8'
+      env: TOXENV=py38
       install: pip install tox-travis
       script: tox
 
     - stage: deploy
       script: skip
       python:
-         - '3.6'
+        - '3.8'
       deploy:
         provider: pypi
         user: FlorianKempenich

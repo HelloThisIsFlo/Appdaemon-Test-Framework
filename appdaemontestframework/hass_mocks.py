@@ -43,27 +43,29 @@ class HassMocks:
         _DeprecatedAppdaemonVersionWarning.show_warning_only_once()
 
         # Mocked out init for Hass class.
-        # It needs to be in this scope so it can get access to variables used here like `_hass_instances`
-        _hass_instances = [] # use a local variable so we can access it below in `_hass_init_mock`
-        self._hass_instances = _hass_instances # list of all hass instances
+        self._hass_instances = []  # list of all hass instances
+
+        hass_mocks = self
 
         def _hass_init_mock(self, _ad, name, *_args):
-            _hass_instances.append(self)
+            hass_mocks._hass_instances.append(self)
             self.name = name
-
 
         # This is a list of all mocked out functions.
         self._mock_handlers = [
             ### Meta
-            # Patch the __init__ method to skip Hass initialization. Use autospec so we can access the `self` object
-            MockHandler(Hass, '__init__', side_effect=_hass_init_mock, autospec=True),
+            # Patch the __init__ method to skip Hass initialization.
+            # Use autospec so we can access the `self` object
+            MockHandler(Hass, '__init__',
+                        side_effect=_hass_init_mock, autospec=True),
 
             ### logging
             MockHandler(Hass, 'log', side_effect=self._log_log),
             MockHandler(Hass, 'error', side_effect=self._log_error),
 
             ### Scheduler callback registrations functions
-            # Wrap all these so we can re-use the AppDaemon code, but check if they were called
+            # Wrap all these so we can re-use the AppDaemon code, but check
+            # if they were called
             MockHandler(Hass, 'run_in'),
             MockHandler(Hass, 'run_once'),
             MockHandler(Hass, 'run_at'),
@@ -85,7 +87,7 @@ class HassMocks:
             MockHandler(Hass, 'set_state'),
             MockHandler(Hass, 'get_state'),
             MockHandler(Hass, 'time'),
-            MockHandler(Hass, 'args'),  # Not a function, attribute. But same patching logic
+            DictMockHandler(Hass, 'args'),
 
             ### Interactions functions
             MockHandler(Hass, 'call_service'),
@@ -102,21 +104,18 @@ class HassMocks:
         ]
 
         # Generate a dictionary of mocked Hass functions for use by older code
-        # Note: This interface is considered deprecated and should be replaced with calls to public
-        # methods in the HassMocks object going forward.
+        # Note: This interface is considered deprecated and should be replaced
+        # with calls to public methods in the HassMocks object going forward.
         self._hass_functions = {}
         for mock_handler in self._mock_handlers:
-            self._hass_functions[mock_handler.function_name] = mock_handler.mock
-
-        # ensure compatibility with older versions of AppDaemon
-        self._hass_functions['passed_args'] = self._hass_functions['args']
+            self._hass_functions[
+                mock_handler.function_or_field_name] = mock_handler.mock
 
     ### Mock handling
     def unpatch_mocks(self):
         """Stops all mocks this class handles."""
         for mock_handler in self._mock_handlers:
             mock_handler.patch.stop()
-
 
     ### Access to the deprecated hass_functions dict.
     @property
@@ -136,23 +135,66 @@ class HassMocks:
 
 
 class MockHandler:
-    """A class for generating a mock in an object and holding on to info about it.
-    :param object_to_patch: The object to patch
-    :param function_name: the name of the function to patch in the object
-    :param side_effect: side effect method to call. If not set, it will just return `None`
-    :param autospec: If `True` will autospec the Mock signature. Useful for getting `self` in side effects.
     """
-    def __init__(self, object_to_patch, function_name, side_effect=None, autospec=False):
-        self.function_name = function_name
-        return_value = None
-        self.patch = mock.patch.object(object_to_patch, self.function_name, create=True,
-                                       autospec=autospec, side_effect=side_effect, return_value=None)
+    A class for generating a mock in an object and holding on to info about it.
+    :param object_to_patch: The object to patch
+    :param function_or_field_name: the name of the function to patch in the
+    object
+    :param side_effect: side effect method to call. If not set, it will just
+    return `None`
+    :param autospec: If `True` will autospec the Mock signature. Useful for
+    getting `self` in side effects.
+    """
+
+    def __init__(self,
+                 object_to_patch,
+                 function_or_field_name,
+                 side_effect=None,
+                 autospec=False):
+        self.function_or_field_name = function_or_field_name
+        patch_kwargs = self._patch_kwargs(side_effect, autospec)
+        self.patch = mock.patch.object(
+                object_to_patch,
+                function_or_field_name,
+                **patch_kwargs
+        )
         self.mock = self.patch.start()
 
+    def _patch_kwargs(self, side_effect, autospec):
+        return {
+            'create': True,
+            'side_effect': side_effect,
+            'return_value': None,
+            'autospec': autospec
+        }
 
-class WrappedMockHandler(MockHandler):
-    """Helper class that privides a 'wrapped' mock. This will automatically call the original function while still providing
-    a Mock for asserts and the such."""
+
+class DictMockHandler(MockHandler):
+    class MockDict(dict):
+        def reset_mock(self):
+            pass
+
+    def __init__(self, object_to_patch, field_name):
+        super().__init__(object_to_patch, field_name)
+
+    def _patch_kwargs(self, _side_effect, _autospec):
+        return {
+            'create': True,
+            'new': self.MockDict()
+        }
+
+
+class SpyMockHandler(MockHandler):
+    """
+    Mock Handler that provides a Spy. That is, when invoke it will call the
+    original function but still provide all Mock-related functionality
+    """
+
     def __init__(self, object_to_patch, function_name):
         original_function = getattr(object_to_patch, function_name)
-        super().__init__(object_to_patch, function_name, side_effect=original_function, autospec=True)
+        super().__init__(
+                object_to_patch,
+                function_name,
+                side_effect=original_function,
+                autospec=True
+        )
