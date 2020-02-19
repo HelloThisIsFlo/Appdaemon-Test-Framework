@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [Unreleased]
 ## Features
-* Add `CHANGELOG.md` which follow Keep a Changelog format
-* Officially adopt to Semantic Versioning
+*
 
 ## Fixes
+*
+
+## Breaking Changes
 * None
+
+
+# [2.8.0] 2020-02-19
+## Features
+* Add `CHANGELOG.md` which follow Keep a Changelog format
+* Officially adopt to Semantic Versioning
+* Appdaemon 3 is now deprecated, using it will throw a warning
+
+## Fixes
+* Support for Python 3.8
 
 ## Breaking Changes
 * None
