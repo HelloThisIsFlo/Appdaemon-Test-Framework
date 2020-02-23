@@ -9,6 +9,7 @@ appdaemontestframework = {editable=true, path="."}
 [dev-packages]
 coverage = "*"
 pytest = "*"
+pytest-asyncio = "*"
 pytest-watch = "*"
 pylint = "*"
 "autopep8" = "*"

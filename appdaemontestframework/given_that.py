@@ -1,4 +1,5 @@
 from appdaemontestframework.common import AppdaemonTestFrameworkError
+from appdaemontestframework.hass_mocks import HassMocks
 
 
 class StateNotSetError(AppdaemonTestFrameworkError):
@@ -15,10 +16,8 @@ class AttributeNotSetError(AppdaemonTestFrameworkError):
 
 
 class GivenThatWrapper:
-    def __init__(self, hass_mocks):
-        # Access the `_hass_functions` through private member for now
-        # to avoid generating deprecation warnings while keeping compatibility.
-        self.hass_functions = hass_mocks._hass_functions
+    def __init__(self, hass_mocks: HassMocks):
+        self._hass_mocks = hass_mocks
         self._init_mocked_states()
         self._init_mocked_passed_args()
 
@@ -50,7 +49,7 @@ class GivenThatWrapper:
                 else:
                     return state['attributes'].get(attribute)
 
-        self.hass_functions['get_state'].side_effect = get_state_mock
+        self._hass_mocks.hass_functions['get_state'].side_effect = get_state_mock
 
         def entity_exists_mock(entity_id):
             if entity_id in self.mocked_states:
@@ -58,10 +57,10 @@ class GivenThatWrapper:
             else:
                 return False
 
-        self.hass_functions['entity_exists'].side_effect = entity_exists_mock
+        self._hass_mocks.hass_functions['entity_exists'].side_effect = entity_exists_mock
 
     def _init_mocked_passed_args(self):
-        self.mocked_passed_args = self.hass_functions['args']
+        self.mocked_passed_args = self._hass_mocks.hass_functions['args']
         self.mocked_passed_args.clear()
 
     def state_of(self, entity_id):
@@ -90,11 +89,11 @@ class GivenThatWrapper:
         return IsWrapper()
 
     def time_is(self, time_as_datetime):
-        self.hass_functions['time'].return_value = time_as_datetime
+        self._hass_mocks.AD.sched.sim_set_start_time(time_as_datetime)
 
     def mock_functions_are_cleared(self, clear_mock_states=False,
                                    clear_mock_passed_args=False):
-        for mocked_function in self.hass_functions.values():
+        for mocked_function in self._hass_mocks.hass_functions.values():
             mocked_function.reset_mock()
         if clear_mock_states:
             self._init_mocked_states()
