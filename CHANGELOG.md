@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * None
 
 
+# [3.0.0] 2020-03-03
+## Features
+* None
+
+## Fixes
+* Return value when using 'all' in `get_state(ENTITY, attribute='all')`
+
+## Breaking Changes
+* Api to set state in `given_that.state_of(ENTITY).is_set_to(...)`
+
+
 # [2.8.0] 2020-02-19
 ## Features
 * Add `CHANGELOG.md` which follow Keep a Changelog format
