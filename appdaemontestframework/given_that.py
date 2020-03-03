@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from appdaemontestframework.common import AppdaemonTestFrameworkError
 
 
@@ -46,11 +48,15 @@ class GivenThatWrapper:
                 if attribute is None:
                     return state['main']
                 elif attribute == 'all':
-                    last_updated = state["attributes"].pop("last_updated", None)
-                    last_changed = state["attributes"].pop("last_changed", None)
+                    def format_time(timestamp: datetime):
+                        if not timestamp: return None
+                        return timestamp.isoformat()
+
                     return {
-                        "last_updated": last_updated, "last_changed": last_changed,
-                        "state": state["main"], "attributes": state['attributes'],
+                        "last_updated": format_time(state['last_updated']),
+                        "last_changed": format_time(state['last_changed']),
+                        "state": state["main"],
+                        "attributes": state['attributes'],
                         "entity_id": entity_id,
                     }
                 else:
@@ -74,12 +80,18 @@ class GivenThatWrapper:
         given_that_wrapper = self
 
         class IsWrapper:
-            def is_set_to(self, state, attributes=None):
+            def is_set_to(self,
+                          state,
+                          attributes=None,
+                          last_updated: datetime = None,
+                          last_changed: datetime = None):
                 if not attributes:
                     attributes = {}
                 given_that_wrapper.mocked_states[entity_id] = {
                     'main': state,
-                    'attributes': attributes
+                    'attributes': attributes,
+                    'last_updated': last_updated,
+                    'last_changed': last_changed
                 }
 
         return IsWrapper()
