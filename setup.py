@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='appdaemontestframework',
-    version='3.0.0',
+    version='3.0.2',
     description='Clean, human-readable tests for Appdaemon',
     long_description='See: https://floriankempenich.github.io/Appdaemon-Test-Framework/',
     keywords='appdaemon homeassistant test tdd clean-code home-automation',
