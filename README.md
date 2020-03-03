@@ -148,11 +148,19 @@ The automation given to the fixture will be:
      # Command
      given_that.state_of(ENTITY_ID).is_set_to(STATE_TO_SET)
      given_that.state_of(ENTITY_ID).is_set_to(STATE_TO_SET, ATTRIBUTES_AS_DICT)
+     given_that.state_of(ENTITY_ID).is_set_to(STATE_TO_SET,
+                                              ATTRIBUTES_AS_DICT,
+                                              LAST_UPDATED_AS_DATETIME,
+                                              LAST_CHANGED_AS_DATETIME)
 
      # Example
      given_that.state_of('media_player.speaker').is_set_to('playing')
      given_that.state_of('light.kitchen').is_set_to('on', {'brightness': 50,
                                                            'color_temp': 450})
+
+     given_that.state_of('light.kitchen').is_set_to(
+                                            'on', 
+                                            last_updated=datetime(2020, 3, 3, 11, 27))
      ```
 
 *    #### Time
