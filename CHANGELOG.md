@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 *
 
 ## Fixes
+* 
+
+## Breaking Changes
+* None
+
+
+# [3.0.5] 2020-03-18
+## Features
+* None
+
+## Fixes
 * Automations can fire events without crashing the test framework
 
 ## Breaking Changes
