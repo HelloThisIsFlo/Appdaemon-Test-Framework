@@ -68,6 +68,7 @@ class HassMocks:
             MockHandler(Hass, 'call_service'),
             MockHandler(Hass, 'turn_on'),
             MockHandler(Hass, 'turn_off'),
+            MockHandler(Hass, 'fire_event'),
 
             ### Custom callback functions
             MockHandler(Hass, 'register_constraint'),

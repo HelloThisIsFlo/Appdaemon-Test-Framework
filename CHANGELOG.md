@@ -10,10 +10,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 *
 
 ## Fixes
-*
+* 
 
 ## Breaking Changes
 * None
+
+
+# [3.0.5] 2020-03-18
+## Features
+* None
+
+## Fixes
+* Automations can fire events without crashing the test framework
+
+## Breaking Changes
+* None
+
+
+# [3.0.1-4] 2020-03-03
+Minor releases to test CD pipeline
+
+
+# [3.0.0] 2020-03-03
+## Features
+* None
+
+## Fixes
+* Return value when using 'all' in `get_state(ENTITY, attribute='all')`
+
+## Breaking Changes
+* Api to set state in `given_that.state_of(ENTITY).is_set_to(...)`
 
 
 # [2.8.0] 2020-02-19
