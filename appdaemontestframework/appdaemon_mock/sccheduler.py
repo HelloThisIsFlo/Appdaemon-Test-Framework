@@ -134,6 +134,11 @@ class Scheduler:
 
         self._now = target_datetime
 
+    def __getattr__(self, name: str):
+        raise RuntimeError(
+                f"'{name}' has not been mocked in {self.__class__.__name__}"
+        )
+
 
 class CallbackInfo:
     """Class to hold info about a scheduled callback"""

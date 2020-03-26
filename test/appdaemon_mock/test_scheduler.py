@@ -12,6 +12,16 @@ def scheduler() -> Scheduler:
     return Scheduler(AppDaemon(None, None))
 
 
+def test_calling_a_scheduler_method_not_mocked_raises_a_helpful_error_message(
+        scheduler):
+    # For instance `parse_time` is a method that's not mocked because it is
+    # not needed with the current time travel logic.
+    with pytest.raises(RuntimeError) as error:
+        scheduler.parse_time("2020/01/01T23:11")
+
+    assert "'parse_time' has not been mocked" in str(error.value)
+
+
 class Test_get_now:
     """tests for SchedulerMocks.get_now_*() calls"""
     @pytest.mark.asyncio
