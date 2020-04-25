@@ -1,4 +1,4 @@
-from appdaemontestframework.appdaemon_mock.sccheduler import Scheduler
+from appdaemontestframework.appdaemon_mock.scheduler import Scheduler
 from appdaemontestframework.appdaemon_mock.appdaemon import AppDaemon
 import asyncio
 import pytest
