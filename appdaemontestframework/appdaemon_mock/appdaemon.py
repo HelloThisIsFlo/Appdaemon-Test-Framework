@@ -9,7 +9,7 @@ class AppDaemon:
         # Import various AppDaemon bits and pieces now to avoid circular import
         #
 
-        from appdaemontestframework.appdaemon_mock.sccheduler import Scheduler
+        from appdaemontestframework.appdaemon_mock.scheduler import Scheduler
 
         # Use UTC timezone just for testing.
         self.tz = pytz.timezone('UTC')
