@@ -17,7 +17,7 @@ class MockScheduler:
     ### Implement the AppDaemon APIs for Scheduler
     async def get_now(self):
         """Return current localized naive datetime"""
-        return pytz.utc.localize(self._now)
+        return self.get_now_sync()
 
     def get_now_sync(self):
         """Same as `get_now` but synchronous"""
