@@ -175,3 +175,16 @@ class Test_scheduling_and_dispatch:
 
         callback_mock.assert_called_once_with({'arg1': 'asdf', 'arg2': 'qwerty'})
 
+    @pytest.mark.asyncio
+    async def test_callback_with_interval_is_rescheduled_after_being_run(self, scheduler: MockScheduler):
+        callback_mock = mock.Mock()
+        now = await scheduler.get_now()
+        handle = await scheduler.insert_schedule('', now + datetime.timedelta(seconds=10), callback_mock, False, None, interval=10)
+
+        # Advance 3 time and make sure it's called each time
+        scheduler.sim_fast_forward(datetime.timedelta(seconds=10))
+        assert  callback_mock.call_count == 1
+        scheduler.sim_fast_forward(datetime.timedelta(seconds=10))
+        assert  callback_mock.call_count == 2
+        scheduler.sim_fast_forward(datetime.timedelta(seconds=10))
+        assert  callback_mock.call_count == 3
