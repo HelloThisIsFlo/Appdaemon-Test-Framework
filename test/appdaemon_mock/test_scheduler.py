@@ -1,5 +1,5 @@
-from appdaemontestframework.appdaemon_mock.scheduler import Scheduler
-from appdaemontestframework.appdaemon_mock.appdaemon import AppDaemon
+from appdaemontestframework.appdaemon_mock.mock_scheduler import MockScheduler
+from appdaemontestframework.appdaemon_mock.mock_appdaemon import MockAppDaemon
 import asyncio
 import pytest
 import mock
@@ -8,8 +8,8 @@ import pytz
 
 
 @pytest.fixture
-def scheduler() -> Scheduler:
-    return Scheduler(AppDaemon(None, None))
+def scheduler() -> MockScheduler:
+    return MockScheduler(MockAppDaemon())
 
 
 def test_calling_a_scheduler_method_not_mocked_raises_a_helpful_error_message(
@@ -81,18 +81,18 @@ class Test_time_movement:
 
 class Test_scheduling_and_dispatch:
     @pytest.mark.asyncio
-    async def test_schedule_in_the_future_succeeds(self, scheduler: Scheduler):
+    async def test_schedule_in_the_future_succeeds(self, scheduler: MockScheduler):
         scheduled_time = await scheduler.get_now() + datetime.timedelta(seconds=10)
         await scheduler.insert_schedule('', scheduled_time, lambda: None, False, None)
 
     @pytest.mark.asyncio
-    async def test_schedule_in_the_past_raises_exception(self, scheduler: Scheduler):
+    async def test_schedule_in_the_past_raises_exception(self, scheduler: MockScheduler):
         scheduled_time = await scheduler.get_now() - datetime.timedelta(seconds=10)
         with pytest.raises(ValueError):
             await scheduler.insert_schedule('', scheduled_time, lambda: None, False, None)
 
     @pytest.mark.asyncio
-    async def test_callbacks_are_run_in_time_order(self, scheduler:Scheduler):
+    async def test_callbacks_are_run_in_time_order(self, scheduler:MockScheduler):
         first_mock = mock.Mock()
         second_mock = mock.Mock()
         third_mock = mock.Mock()
@@ -115,7 +115,7 @@ class Test_scheduling_and_dispatch:
         assert manager.mock_calls == expected_call_order
 
     @pytest.mark.asyncio
-    async def test_callback_not_called_before_timeout(self, scheduler: Scheduler):
+    async def test_callback_not_called_before_timeout(self, scheduler: MockScheduler):
         callback_mock = mock.Mock()
         now = await scheduler.get_now()
         await scheduler.insert_schedule('', now + datetime.timedelta(seconds=10), callback_mock, False, None),
@@ -124,7 +124,7 @@ class Test_scheduling_and_dispatch:
         callback_mock.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_callback_called_after_timeout(self, scheduler: Scheduler):
+    async def test_callback_called_after_timeout(self, scheduler: MockScheduler):
         callback_mock = mock.Mock()
         now = await scheduler.get_now()
         await scheduler.insert_schedule('', now + datetime.timedelta(seconds=10), callback_mock, False, None),
@@ -133,7 +133,7 @@ class Test_scheduling_and_dispatch:
         callback_mock.assert_called()
 
     @pytest.mark.asyncio
-    async def test_canceled_timer_does_not_run_callback(self, scheduler: Scheduler):
+    async def test_canceled_timer_does_not_run_callback(self, scheduler: MockScheduler):
         callback_mock = mock.Mock()
         now = await scheduler.get_now()
         handle = await scheduler.insert_schedule('', now + datetime.timedelta(seconds=10), callback_mock, False, None)
@@ -144,7 +144,7 @@ class Test_scheduling_and_dispatch:
         callback_mock.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_time_is_correct_when_callback_it_run(self, scheduler: Scheduler):
+    async def test_time_is_correct_when_callback_it_run(self, scheduler: MockScheduler):
         scheduler.sim_set_start_time(datetime.datetime(2020, 1, 1, 12, 0))
 
         time_when_called = []
@@ -167,7 +167,7 @@ class Test_scheduling_and_dispatch:
         assert expected_call_times == time_when_called
 
     @pytest.mark.asyncio
-    async def test_callback_called_with_correct_args(self, scheduler: Scheduler):
+    async def test_callback_called_with_correct_args(self, scheduler: MockScheduler):
         callback_mock = mock.Mock()
         now = await scheduler.get_now()
         handle = await scheduler.insert_schedule('', now + datetime.timedelta(seconds=1), callback_mock, False, None, arg1='asdf', arg2='qwerty')

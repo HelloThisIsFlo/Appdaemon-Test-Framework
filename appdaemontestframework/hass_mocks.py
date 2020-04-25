@@ -1,7 +1,7 @@
 import logging
 import warnings
 
-from appdaemontestframework.appdaemon_mock.appdaemon import AppDaemon
+from appdaemontestframework.appdaemon_mock.mock_appdaemon import MockAppDaemon
 import appdaemon.utils
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
@@ -57,7 +57,7 @@ class HassMocks:
         self._hass_instances = []  # list of all hass instances
 
         hass_mocks = self
-        AD = AppDaemon(None, None)
+        AD = MockAppDaemon()
         self.AD = AD
 
         def _hass_init_mock(self, _ad, name, *_args):

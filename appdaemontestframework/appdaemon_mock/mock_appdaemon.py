@@ -1,18 +1,18 @@
 import asyncio
 import pytz
 
-class AppDaemon:
+class MockAppDaemon:
     """Implementation of appdaemon's internal AppDaemon class suitable for testing"""
-    def __init__(self, logging, loop, **kwargs):
+    def __init__(self, **kwargs):
 
         #
         # Import various AppDaemon bits and pieces now to avoid circular import
         #
 
-        from appdaemontestframework.appdaemon_mock.scheduler import Scheduler
+        from appdaemontestframework.appdaemon_mock.mock_scheduler import MockScheduler
 
         # Use UTC timezone just for testing.
         self.tz = pytz.timezone('UTC')
 
-        self.sched = Scheduler(self)
+        self.sched = MockScheduler(self)
 

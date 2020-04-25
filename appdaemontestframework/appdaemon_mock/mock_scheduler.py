@@ -2,11 +2,11 @@
 import datetime
 import uuid
 import pytz
-from appdaemontestframework.appdaemon_mock.appdaemon import AppDaemon
+from appdaemontestframework.appdaemon_mock.mock_appdaemon import MockAppDaemon
 
-class Scheduler:
+class MockScheduler:
     """Implement the AppDaemon Scheduler appropriate for testing and provide extra interfaces for adjusting the simulation"""
-    def __init__(self, AD: AppDaemon):
+    def __init__(self, AD: MockAppDaemon):
         self.AD = AD
         self._registered_callbacks = []
 
