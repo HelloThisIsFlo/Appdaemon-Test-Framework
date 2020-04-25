@@ -2,7 +2,7 @@
 import datetime
 import uuid
 import pytz
-from appdaemontestframework.appdaemon_mock.mock_appdaemon import MockAppDaemon
+from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
 
 class MockScheduler:
     """Implement the AppDaemon Scheduler appropriate for testing and provide extra interfaces for adjusting the simulation"""

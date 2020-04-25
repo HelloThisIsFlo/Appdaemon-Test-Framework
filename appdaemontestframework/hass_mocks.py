@@ -1,7 +1,7 @@
 import logging
 import warnings
 
-from appdaemontestframework.appdaemon_mock.mock_appdaemon import MockAppDaemon
+from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
 import appdaemon.utils
 import mock
 from appdaemon.plugins.hass.hassapi import Hass

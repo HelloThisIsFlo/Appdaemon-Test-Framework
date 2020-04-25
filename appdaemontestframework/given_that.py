@@ -64,10 +64,7 @@ class GivenThatWrapper:
         self._hass_mocks.hass_functions['get_state'].side_effect = get_state_mock
 
         def entity_exists_mock(entity_id):
-            if entity_id in self.mocked_states:
-                return True
-            else:
-                return False
+            return entity_id in self.mocked_states
 
         self._hass_mocks.hass_functions['entity_exists'].side_effect = entity_exists_mock
 
