@@ -63,7 +63,6 @@ class HassMocks:
         def _hass_init_mock(self, _ad, name, *_args):
             hass_mocks._hass_instances.append(self)
             self.name = name
-            # TODO: should this really be a singleton or passed in from a single global? Maybe handled in automation fixture?
             self.AD = AD
             self.logger = logging.getLogger(__name__)
 
