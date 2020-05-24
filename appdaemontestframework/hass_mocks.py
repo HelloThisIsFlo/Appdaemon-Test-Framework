@@ -1,6 +1,7 @@
 import logging
 import warnings
 
+from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
 import appdaemon.utils
 import mock
 from appdaemon.plugins.hass.hassapi import Hass
@@ -14,9 +15,10 @@ def is_appdaemon_version_at_least(version_as_string):
     return CURRENT_APPDAEMON_VERSION >= expected_appdaemon_version
 
 
-class _DeprecatedAppdaemonVersionWarning:
+class _DeprecatedAndUnsupportedAppdaemonCheck:
     already_warned_during_this_test_session = False
     min_supported_appdaemon_version = '4.0.0'
+    min_deprecated_appdaemon_version = '4.0.0'
 
     @classmethod
     def show_warning_only_once(cls):
@@ -24,15 +26,25 @@ class _DeprecatedAppdaemonVersionWarning:
             return
         cls.already_warned_during_this_test_session = True
 
-        appdaemon_version_supported = is_appdaemon_version_at_least(
+        appdaemon_version_unsupported = not is_appdaemon_version_at_least(
                 cls.min_supported_appdaemon_version
         )
-        if not appdaemon_version_supported:
+        appdaemon_version_deprecated = not is_appdaemon_version_at_least(
+                cls.min_deprecated_appdaemon_version
+        )
+
+        if appdaemon_version_unsupported:
+            raise Exception("Appdaemon-Test-Framework only support Appdemon >={} "
+                            "Your current Appdemon version is {}".format(
+                                cls.min_supported_appdaemon_version,
+                                CURRENT_APPDAEMON_VERSION))
+
+        if appdaemon_version_deprecated:
             warnings.warn(
                     "Appdaemon-Test-Framework will only support Appdaemon >={} "
-                    "in the next major release. "
+                    "until the next major release. "
                     "Your current Appdemon version is {}".format(
-                            cls.min_supported_appdaemon_version,
+                            cls.min_deprecated_appdaemon_version,
                             CURRENT_APPDAEMON_VERSION
                     ),
                     DeprecationWarning)
@@ -40,16 +52,19 @@ class _DeprecatedAppdaemonVersionWarning:
 
 class HassMocks:
     def __init__(self):
-        _DeprecatedAppdaemonVersionWarning.show_warning_only_once()
-
+        _DeprecatedAndUnsupportedAppdaemonCheck.show_warning_only_once()
         # Mocked out init for Hass class.
         self._hass_instances = []  # list of all hass instances
 
         hass_mocks = self
+        AD = MockAppDaemon()
+        self.AD = AD
 
         def _hass_init_mock(self, _ad, name, *_args):
             hass_mocks._hass_instances.append(self)
             self.name = name
+            self.AD = AD
+            self.logger = logging.getLogger(__name__)
 
         # This is a list of all mocked out functions.
         self._mock_handlers = [
@@ -66,14 +81,14 @@ class HassMocks:
             ### Scheduler callback registrations functions
             # Wrap all these so we can re-use the AppDaemon code, but check
             # if they were called
-            MockHandler(Hass, 'run_in'),
+            SpyMockHandler(Hass, 'run_in'),
             MockHandler(Hass, 'run_once'),
             MockHandler(Hass, 'run_at'),
             MockHandler(Hass, 'run_daily'),
             MockHandler(Hass, 'run_hourly'),
             MockHandler(Hass, 'run_minutely'),
             MockHandler(Hass, 'run_every'),
-            MockHandler(Hass, 'cancel_timer'),
+            SpyMockHandler(Hass, 'cancel_timer'),
 
             ### Sunrise and sunset functions
             MockHandler(Hass, 'run_at_sunrise'),
@@ -86,7 +101,7 @@ class HassMocks:
             ### State functions / attr
             MockHandler(Hass, 'set_state'),
             MockHandler(Hass, 'get_state'),
-            MockHandler(Hass, 'time'),
+            SpyMockHandler(Hass, 'time'),
             DictMockHandler(Hass, 'args'),
 
             ### Interactions functions

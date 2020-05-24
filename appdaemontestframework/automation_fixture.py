@@ -6,7 +6,6 @@ import pytest
 from appdaemon.plugins.hass.hassapi import Hass
 
 from appdaemontestframework.common import AppdaemonTestFrameworkError
-from appdaemontestframework.hass_mocks import is_appdaemon_version_at_least
 
 
 class AutomationFixtureError(AppdaemonTestFrameworkError):
@@ -16,27 +15,15 @@ class AutomationFixtureError(AppdaemonTestFrameworkError):
 def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks):
     _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks)
 
-    if is_appdaemon_version_at_least('4.0.0'):
-        automation = automation_class(
-                None,
-                automation_class.__name__,
-                None,
-                None,
-                None,
-                None,
-                None
-        )
-    else:
-        automation = automation_class(
-                None,
-                automation_class.__name__,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None
-        )
+    automation = automation_class(
+            None,
+            automation_class.__name__,
+            None,
+            None,
+            None,
+            None,
+            None
+    )
     automation.initialize()
     given_that.mock_functions_are_cleared()
     return automation

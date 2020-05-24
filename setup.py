@@ -20,8 +20,9 @@ setup(
     author_email='Flori@nKempenich.com',
     packages=['appdaemontestframework'],
     license='MIT',
+    python_requires=">=3.6",
     install_requires=[
-        'appdaemon>=3.0,<5.0',
+        'appdaemon>=4.0,<5.0',
         'mock>=3.0.5,<4.0',
         'packaging>=20.1,<21.0',
     ],
