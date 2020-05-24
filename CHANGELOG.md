@@ -16,6 +16,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * None
 
 
+# [4.0.0b0]
+## Features
+* User-facing: None
+* Internal architecture: Rework of the entire scheduler mocking mechanism preparing for some seriously cool features 😃
+
+## Fixes
+* None
+
+## Breaking Changes
+* None
+
+
 # [3.0.5] 2020-03-18
 ## Features
 * None
