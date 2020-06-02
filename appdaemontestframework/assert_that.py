@@ -124,18 +124,19 @@ class WasWrapper(Was):
         self.hass_functions['call_service'].assert_any_call(
             service_full_name, **kwargs)
 
-    def set_to_option(self, newvalue, **service_specific_parameters):
-        """ Assert that a given entity_id has been set to the choosen value """
+    def set_to_option(self, option_selected, **service_specific_parameters):
+        """ Assert that a given entity_id has been set to the chosen value """
         entity_id = self.thing_to_check
 
         service_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['call_service'].assert_any_call(
                 ServiceOnAnyDomain('select_option'),
-                **{'entity_id': entity_id, 'option': newvalue, **service_specific_parameters}))
+                **{'entity_id': entity_id, 'option': option_selected, **service_specific_parameters}))
 
         set_option_helper_not_called = _capture_assert_failure_exception(
             lambda: self.hass_functions['select_option'].assert_any_call(
-                entity_id, newvalue
+                entity_id,
+                option_selected,
                 **service_specific_parameters))
 
         if service_not_called and set_option_helper_not_called:

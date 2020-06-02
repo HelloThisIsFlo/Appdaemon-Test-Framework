@@ -143,9 +143,10 @@ class TestTurnedOff:
             automation.turn_off_light_with_transition(via_helper=True)
             assert_that(LIGHT).was.turned_off(transition=TRANSITION_DURATION)
 
+
 class TestSelectOption:
     class TestViaService:
         def test_option_is_set(self, assert_that, automation):
             assert_that(INPUT_SELECT).was_not.set_to_option('new_option')
-            automation.select_option('new_option')
+            automation.select_option(INPUT_SELECT, 'new_option')
             assert_that(INPUT_SELECT).was.set_to_option('new_option')
