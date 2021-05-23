@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * None
 
 
+# [4.0.0b1]
+## Features
+*
+
+## Fixes
+* Missing sub-packages are added to the distribution
+
+## Breaking Changes
+* None
+
+
 # [4.0.0b0]
 ## Features
 * User-facing: None
