@@ -3,13 +3,6 @@ jobs:
   include:
 
     - stage: test
-      name: "Tests with Python 3.6"
-      python: '3.6'
-      env: TOXENV=py36
-      install: pip install tox-travis
-      script: tox
-
-    - stage: test
       name: "Tests with Python 3.7"
       python: '3.7'
       env: TOXENV=py37
