@@ -1,5 +1,5 @@
 # Appdaemon Test Framework
-[![Build Status](https://travis-ci.org/FlorianKempenich/Appdaemon-Test-Framework.svg?branch=master)](https://travis-ci.org/FlorianKempenich/Appdaemon-Test-Framework) [![PyPI](https://img.shields.io/pypi/v/appdaemontestframework.svg)](https://pypi.org/project/appdaemontestframework/)
+[![Build Status](https://www.travis-ci.com/FlorianKempenich/Appdaemon-Test-Framework.svg?branch=master)](https://travis-ci.com/github/FlorianKempenich/Appdaemon-Test-Framework) [![PyPI](https://img.shields.io/pypi/v/appdaemontestframework.svg)](https://pypi.org/project/appdaemontestframework/)
 
 Clean, human-readable tests for your Appdaemon automations.
 
