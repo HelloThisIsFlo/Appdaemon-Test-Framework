@@ -18,7 +18,7 @@ setup(
     url='https://floriankempenich.github.io/Appdaemon-Test-Framework',
     author='Florian Kempenich',
     author_email='Flori@nKempenich.com',
-    packages=find_packages(include='appdaemontestframework/*'),
+    packages=find_packages(),
     license='MIT',
     python_requires=">=3.7",
     install_requires=[
