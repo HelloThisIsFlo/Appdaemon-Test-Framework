@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='appdaemontestframework',
-    version='4.0.0b1',
+    version='4.0.0b2',
     description='Clean, human-readable tests for Appdaemon',
     long_description='See: https://floriankempenich.github.io/Appdaemon-Test-Framework/',
     keywords='appdaemon homeassistant test tdd clean-code home-automation',
@@ -18,9 +18,9 @@ setup(
     url='https://floriankempenich.github.io/Appdaemon-Test-Framework',
     author='Florian Kempenich',
     author_email='Flori@nKempenich.com',
-    packages=find_packages(include='appdaemontestframework'),
+    packages=find_packages(),
     license='MIT',
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
         'appdaemon>=4.0,<5.0',
         'mock>=3.0.5,<4.0',
