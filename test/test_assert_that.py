@@ -154,13 +154,18 @@ class TestServiceNameValidation:
                 .was.called_with(entity_id=SWITCH)
 
         def test_valid_service_asserted_and_is_not_called_raises_assertion_error(self, assert_that, automation):
-            automation.turn_off_switch(via_helper=False)
-            assert_that('switch/turn_off') \
-                .was.called_with(entity_id=SWITCH)
+            with pytest.raises(AssertionError):
+                assert_that('switch/turn_off') \
+                    .was.called_with(entity_id=SWITCH)
 
     class TestInvalidServiceName:
         def test_invalid_service_asserted_and_is_called_raises_value_error(self, assert_that, automation):
             automation.call_invalid_service_name()
             with pytest.raises(ValueError):
+                assert_that('switch.turn_off')\
+                    .was.called_with(entity_id=SWITCH)
+
+        def test_invalid_service_asserted_and_is_not_called_raises_value_or_assertion_error(self, assert_that, automation):
+            with pytest.raises((ValueError, AssertionError)):
                 assert_that('switch.turn_off')\
                     .was.called_with(entity_id=SWITCH)
