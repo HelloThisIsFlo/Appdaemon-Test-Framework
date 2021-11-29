@@ -17,4 +17,4 @@ jobs:
       - uses: actions/setup-python@v2
 
       - name: Build wheels
-        run: python wheel .
+        run: python wheel -w wheels .
