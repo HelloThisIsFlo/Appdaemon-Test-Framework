@@ -21,7 +21,7 @@ jobs:
 
       - name: Build wheels
       #  run: python -m cibuildwheel --output-dir wheelhouse
-        run: python setup.py bdist_wheel
+        run: python setup.py build
         # to supply options, put them in 'env', like:
         # env:
         #   CIBW_SOME_OPTION: value
