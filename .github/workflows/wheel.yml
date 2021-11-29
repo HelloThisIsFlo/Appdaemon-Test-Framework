@@ -16,5 +16,15 @@ jobs:
       # Used to host cibuildwheel
       - uses: actions/setup-python@v2
 
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.3.0
+
       - name: Build wheels
-        run: python wheel -w wheels .
+        run: python -m cibuildwheel --output-dir wheelhouse
+        # to supply options, put them in 'env', like:
+        # env:
+        #   CIBW_SOME_OPTION: value
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
