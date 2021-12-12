@@ -12,7 +12,7 @@ class MockAutomation(hass.Hass):
     should_register_run_daily = False
     should_register_run_minutely = False
     should_register_run_at = False
-    handles = list()
+    list_of_recorded_handles = list()
 
     def initialize(self):
         if self.should_listen_state:
@@ -20,12 +20,14 @@ class MockAutomation(hass.Hass):
         if self.should_listen_event:
             self.listen_event(self._my_listen_event_callback, 'zwave.scene_activated', scene_id=3)
         if self.should_register_run_daily:
-            self.run_daily(self._my_run_daily_callback, time(hour=3, minute=7), extra_param='ok')
+            handle_to_record = self.run_daily(self._my_run_daily_callback, time(hour=3, minute=7), extra_param='ok')
+            self.list_of_recorded_handles.append(handle_to_record)
         if self.should_register_run_minutely:
-            self.run_minutely(self._my_run_minutely_callback, time(hour=3, minute=7), extra_param='ok')
+            handle_to_record = self.run_minutely(self._my_run_minutely_callback, time(hour=3, minute=7), extra_param='ok')
+            self.list_of_recorded_handles.append(handle_to_record)
         if self.should_register_run_at:
-            ret = self.run_at(self._my_run_at_callback, datetime(2019,11,5,22,43,0,0), extra_param='ok')
-            self.handles.append(ret)
+            handle_to_record = self.run_at(self._my_run_at_callback, datetime(2019,11,5,22,43,0,0), extra_param='ok')
+            self.list_of_recorded_handles.append(handle_to_record)
             
 
     def _my_listen_state_callback(self, entity, attribute, old, new, kwargs):
@@ -197,6 +199,19 @@ class TestRegisteredRunDaily:
                 .registered.run_daily(time(hour=3, minute=7), extra_param='ok') \
                 .with_callback(automation._some_other_function)
 
+    def test_callback_handles_are_recorded(self, automation: MockAutomation, assert_that):
+        automation.enable_register_run_daily_during_initialize()
+
+        with pytest.raises(AssertionError):
+            assert_that(automation) \
+                .registered.run_daily(time(hour=3, minute=7), extra_param='ok') \
+                .with_callback(automation._some_other_function)
+
+        assert len(automation.list_of_recorded_handles) > 0
+
+        for recorded_handle in automation.list_of_recorded_handles:
+            #all recorded handles must be not none
+            assert recorded_handle is not None
 
 class TestRegisteredRunMinutely:
     def test_success(self, automation: MockAutomation, assert_that):
@@ -240,6 +255,20 @@ class TestRegisteredRunMinutely:
             assert_that(automation) \
                 .registered.run_minutely(time(hour=3, minute=7), extra_param='ok') \
                 .with_callback(automation._some_other_function)
+    
+    def test_callback_handles_are_recorded(self, automation: MockAutomation, assert_that):
+        automation.enable_register_run_minutely_during_initialize()
+
+        with pytest.raises(AssertionError):
+            assert_that(automation) \
+                .registered.run_minutely(time(hour=3, minute=7), extra_param='ok') \
+                .with_callback(automation._some_other_function)
+
+        assert len(automation.list_of_recorded_handles) > 0
+
+        for recorded_handle in automation.list_of_recorded_handles:
+            #all recorded handles must be not none
+            assert recorded_handle is not None
 
 
 class TestRegisteredRunAt:
@@ -285,14 +314,15 @@ class TestRegisteredRunAt:
                 .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
                 .with_callback(automation._some_other_function)
 
-    def test_handle(self, automation: MockAutomation, assert_that):
+    def test_callback_handles_are_recorded(self, automation: MockAutomation, assert_that):
         automation.enable_register_run_at_during_initialize()
 
         assert_that(automation) \
             .registered.run_at(datetime(2019,11,5,22,43,0,0), extra_param='ok') \
             .with_callback(automation._my_run_at_callback)
 
-        assert len(automation.handles) > 0
+        assert len(automation.list_of_recorded_handles) > 0
 
-        for h in automation.handles:
-            assert h is not None
+        for recorded_handle in automation.list_of_recorded_handles:
+            #all recorded handles must be not none
+            assert recorded_handle is not None
