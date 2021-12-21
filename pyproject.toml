@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "appdaemontestframework"
+version = "4.0.0b5"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+appdaemon = "^4.1.0"
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.12.2"
+autopep8 = "^1.6.0"
+pytest = "^6.2.5"
+#pytest = ">=5.3.0,<5.4.0"
+pytest-asyncio = "*"
+mock = "^4.0.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

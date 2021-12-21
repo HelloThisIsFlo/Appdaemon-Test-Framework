@@ -2,6 +2,7 @@ from textwrap import dedent
 
 import pytest
 from pytest import mark
+from _pytest.outcomes import Failed
 
 
 @mark.using_pytester
@@ -30,7 +31,7 @@ class TestLearningTest:
                 assert 1 == 1
             """)
         result = testdir.runpytest()
-        with pytest.raises(ValueError):
+        with pytest.raises(Failed):
             result.stdout.re_match_lines_random(r'.*logging success.*')
 
 
@@ -98,7 +99,7 @@ class TestLogging:
                 mock_automation.log_error("should show", 'INFO')
                 assert 1 == 2
             """)
-        with pytest.raises(ValueError):
+        with pytest.raises(Failed):
             result.stdout.fnmatch_lines_random('*INFO*should not show*')
         result.stdout.fnmatch_lines_random('*INFO*should show*')
 
@@ -117,7 +118,7 @@ class TestLogging:
                 assert 1 == 2
             """)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(Failed):
             result.stdout.fnmatch_lines_random('*INFO*should not show*')
         result.stdout.fnmatch_lines_random('*INFO*should show*')
 
@@ -139,7 +140,7 @@ class TestLogging:
                 mock_automation.log_log("should show", 'INFO')
                 assert 1 == 2
             """)
-        with pytest.raises(ValueError):
+        with pytest.raises(Failed):
             result.stdout.fnmatch_lines_random('*INFO*should not show*')
         result.stdout.fnmatch_lines_random('*INFO*should show*')
         result.stdout.fnmatch_lines_random('*WARNING*should show*')
