@@ -41,6 +41,9 @@ def test_state_was_never_set__raise_error(given_that,
     with raises(StateNotSetError, match=r'.*State.*was never set.*'):
         automation.get_light_brightness()
 
+    with raises(StateNotSetError, match=r'.*State.*namespace was never set.*'):
+        automation.get_light_brightness(namespace='test')
+
 
 def test_set_and_get_state(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('off')

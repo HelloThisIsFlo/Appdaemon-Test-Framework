@@ -6,12 +6,19 @@ from appdaemontestframework.hass_mocks import HassMocks
 
 
 class StateNotSetError(AppdaemonTestFrameworkError):
-    def __init__(self, entity_id, namespace=None):
-        super().__init__(f"""
-        State for entity: '{entity_id}' was never set!
-        Please make sure to set the state with `given_that.state_of({entity_id}).is_set_to(STATE)`
-        before trying to access the mocked state
-        """)
+    def __init__(self, entity_id, namespace):
+        if namespace != 'default':
+            super().__init__(f"""
+            State for entity: '{entity_id}' in '{namespace}' namespace was never set!
+            Please make sure to set the state with `given_that.state_of({entity_id}, NAMESPACE).is_set_to(STATE)`
+            before trying to access the mocked state
+            """)
+        else:
+            super().__init__(f"""
+            State for entity: '{entity_id}' was never set!
+            Please make sure to set the state with `given_that.state_of({entity_id}).is_set_to(STATE)`
+            before trying to access the mocked state
+            """)
 
 
 class AttributeNotSetError(AppdaemonTestFrameworkError):
@@ -42,7 +49,7 @@ class GivenThatWrapper:
                 return resdict
             else:
                 if entity_id not in self.mocked_states[namespace]:
-                    raise StateNotSetError(entity_id)
+                    raise StateNotSetError(entity_id, namespace)
 
                 state = self.mocked_states[namespace][entity_id]
 
