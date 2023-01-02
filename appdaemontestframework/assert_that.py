@@ -1,3 +1,4 @@
+import re
 import textwrap
 from abc import ABC, abstractmethod
 
@@ -76,7 +77,6 @@ class WasWrapper(Was):
     def __init__(self, thing_to_check, hass_functions):
         self.thing_to_check = thing_to_check
         self.hass_functions = hass_functions
-
     def turned_on(self, **service_specific_parameters):
         """ Assert that a given entity_id has been turned on """
         entity_id = self.thing_to_check
@@ -116,15 +116,20 @@ class WasWrapper(Was):
     def called_with(self, **kwargs):
         """ Assert that a given service has been called with the given arguments"""
         service_full_name = self.thing_to_check
+        if not _is_valid_service_name(service_full_name):
+            raise ValueError('Service names should be given as: domain/service in AppDaemon.')
 
         self.hass_functions['call_service'].assert_any_call(
             service_full_name, **kwargs)
 
 
+def _is_valid_service_name(service_full_name: str):
+    return re.match(r'[\w]+/[\w]+', service_full_name) is not None
+
+
 class WasNotWrapper(Was):
     def __init__(self, was_wrapper):
         self.was_wrapper = was_wrapper
-
     def turned_on(self, **service_specific_parameters):
         """ Assert that a given entity_id has NOT been turned ON w/ the given parameters"""
         thing_not_turned_on_with_given_params = _capture_assert_failure_exception(
@@ -160,7 +165,6 @@ class ListensToWrapper:
         self.automation_thing_to_check = automation_thing_to_check
         self.listen_event = hass_functions['listen_event']
         self.listen_state = hass_functions['listen_state']
-
     def event(self, event, **event_data):
         listens_to_wrapper = self
 
@@ -194,8 +198,6 @@ class RegisteredWrapper:
         self._run_daily = hass_functions['run_daily']
         self._run_mintely = hass_functions['run_minutely']
         self._run_at = hass_functions['run_at']
-
-
     def run_daily(self, time_, **kwargs):
         registered_wrapper = self
 
