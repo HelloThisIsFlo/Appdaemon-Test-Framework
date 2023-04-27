@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "Appdaemon-Test-Framework"
+version = "4.0.0"
+description = ""
+authors = ["Flo Kempenich <flo@kempenich.dev>"]
+packages = [{include = "appdaemontestframework"}]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "3.8.16"
+appdaemon = "4.0.8"
+
