@@ -1,0 +1,74 @@
+version: 2.1
+
+executors:
+  python:
+    docker:
+      - image: "python:3.8"
+    environment:
+      PATH: "/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.local/bin"
+
+commands:
+  validate:
+    parameters:
+      env:
+        type: string
+      poetry-version:
+        default: "1.3.2"
+        type: string
+    steps:
+      - checkout
+
+      # Poetry
+      - restore_cache:
+          name: Restore Poetry
+          keys:
+            - poetry-<<parameters.poetry-version>>-v1
+      - run:
+          name: Install Poetry
+          command: pip install --user poetry==<<parameters.poetry-version>>
+      - save_cache:
+          name: Cache Poetry
+          key: poetry-<<parameters.poetry-version>>-v1
+          paths:
+            - /root/.local/
+
+      # Python dependencies
+      - restore_cache:
+          name: Restore Python Dependencies
+          keys:
+            - python-packages-{{ checksum "poetry.lock" }}-v1
+      - run:
+          name: Install Python Dependencies
+          command: poetry install --no-ansi
+      - save_cache:
+          name: Save Python Dependencies
+          key: python-packages-{{ checksum "poetry.lock" }}-v1
+          paths:
+            - /root/.cache/pypoetry/
+
+      # Tox
+      - restore_cache:
+          name: Restore Tox Dependencies
+          keys:
+            - tox-<<parameters.env>>-{{ checksum "poetry.lock" }}-v1
+      - run:
+          name: <<parameters.env>>
+          command: poetry run tox -e <<parameters.env>>
+      - save_cache:
+          name: Save Tox Dependencies
+          key: tox-<<parameters.env>>-{{ checksum "poetry.lock" }}-v1
+          paths:
+            - .tox/<<parameters.env>>/lib
+
+jobs:
+  pytest:
+    executor: python
+    steps:
+      - validate:
+          env: python3.8
+
+workflows:
+  version: 2
+  ValidationWorkflow:
+    jobs:
+      - pytest
