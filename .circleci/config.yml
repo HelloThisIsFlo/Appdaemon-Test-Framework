@@ -3,7 +3,7 @@ version: 2.1
 executors:
   python:
     docker:
-      - image: "python:3.8"
+      - image: "homeassistant/home-assistant:2023.4.6"
     environment:
       PATH: "/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.local/bin"
 
