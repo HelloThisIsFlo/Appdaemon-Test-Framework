@@ -1,0 +1,16 @@
+[run]
+source =
+    appdaemontestframework
+
+omit =
+    test/*
+
+concurrency = multiprocessing
+
+branch = True
+
+[report]
+show_missing = True
+precision = 3
+skip_covered = True
+fail_under = 94.38
