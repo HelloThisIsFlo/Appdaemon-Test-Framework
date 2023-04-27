@@ -2,7 +2,7 @@ from appdaemontestframework.appdaemon_mock.scheduler import MockScheduler
 from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
 import asyncio
 import pytest
-import mock
+from unittest import mock
 import datetime
 import pytz
 

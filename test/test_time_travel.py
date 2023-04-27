@@ -1,6 +1,6 @@
 from appdaemon.plugins.hass.hassapi import Hass
 from appdaemontestframework import automation_fixture
-import mock
+from unittest import mock
 import pytest
 import datetime
 

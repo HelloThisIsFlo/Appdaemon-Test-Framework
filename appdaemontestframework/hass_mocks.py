@@ -3,7 +3,7 @@ import warnings
 
 from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
 import appdaemon.utils
-import mock
+from unittest import mock
 from appdaemon.plugins.hass.hassapi import Hass
 from packaging.version import Version
 
