@@ -28,3 +28,12 @@ pytest-cov = "4.0.0"
 pytest-mock = "3.10.0"
 pytest-xdist = "3.2.1"
 tox = "4.5.1"
+types-pytz = "^2023.3.0.0"
+
+[tool.black]
+line-length = 79
+
+[tool.pydocstyle]
+convention = "google"
+match = ".*\\.py"
+add-ignore = "D107,D104,D106"
