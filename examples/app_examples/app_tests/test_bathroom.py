@@ -1,6 +1,5 @@
 from apps.bathroom import Bathroom, BATHROOM_VOLUMES, DEFAULT_VOLUMES, FAKE_MUTE_VOLUME
 from appdaemon.plugins.hass.hassapi import Hass
-from mock import patch, MagicMock
 import pytest
 from datetime import time
 from apps.entity_ids import ID

@@ -1,6 +1,5 @@
 from apps.kitchen import Kitchen
 import pytest
-from mock import patch, MagicMock
 from apps.entity_ids import ID
 
 # TODO: Put this in config (through apps.yml, check doc)
