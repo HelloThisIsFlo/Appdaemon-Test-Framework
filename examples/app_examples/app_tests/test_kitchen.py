@@ -4,17 +4,14 @@ from mock import patch, MagicMock
 from apps.entity_ids import ID
 
 # TODO: Put this in config (through apps.yml, check doc)
+from appdaemontestframework import automation_fixture
+
 PHONE_PUSHBULLET_ID = "device/OnePlus 5T"
 
 
-@pytest.fixture
+@automation_fixture(Kitchen)
 def kitchen(given_that):
-    kitchen = Kitchen(
-        None, None, None, None, None, None, None, None)
-    kitchen.initialize()
-
-    given_that.mock_functions_are_cleared()
-    return kitchen
+    pass
 
 
 @pytest.fixture
@@ -38,10 +35,10 @@ def when_new(kitchen):
 
 
 class TestInitialization:
-    def test_callbacks_are_registered(self, kitchen, hass_functions):
+    def test_callbacks_are_registered(self, kitchen, hass_mocks):
         # Given: The mocked callback Appdaemon registration functions
-        listen_event = hass_functions['listen_event']
-        listen_state = hass_functions['listen_state']
+        listen_event = hass_mocks.hass_functions['listen_event']
+        listen_state = hass_mocks.hass_functions['listen_state']
 
         # When: Calling `initialize`
         kitchen.initialize()

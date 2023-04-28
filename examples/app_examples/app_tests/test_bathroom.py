@@ -4,6 +4,7 @@ from mock import patch, MagicMock
 import pytest
 from datetime import time
 from apps.entity_ids import ID
+from appdaemontestframework import automation_fixture
 
 MORNING_STEP1_COLOR = 'BLUE'
 SHOWER_COLOR = 'GREEN'
@@ -14,7 +15,7 @@ EVENING_HOUR = 20
 DAY_HOUR = 4
 
 
-@pytest.fixture
+@automation_fixture(Bathroom)
 def bathroom(given_that):
     # Set initial state
     speakers = [
@@ -29,13 +30,8 @@ def bathroom(given_that):
 
     given_that.time_is(time(hour=15))
 
-    bathroom = Bathroom(
-        None, None, None, None, None, None, None, None)
-    bathroom.initialize()
-
     # Clear calls recorded during initialisation
     given_that.mock_functions_are_cleared()
-    return bathroom
 
 
 @pytest.fixture
@@ -78,11 +74,11 @@ class TestInitialize:
         bathroom.initialize()
         assert_evening_mode_started()
 
-    def test_callbacks_are_registered(self, bathroom, hass_functions):
+    def test_callbacks_are_registered(self, bathroom, hass_mocks):
         # Given: The mocked callback Appdaemon registration functions
-        listen_event = hass_functions['listen_event']
-        listen_state = hass_functions['listen_state']
-        run_daily = hass_functions['run_daily']
+        listen_event = hass_mocks.hass_functions['listen_event']
+        listen_state = hass_mocks.hass_functions['listen_state']
+        run_daily = hass_mocks.hass_functions['run_daily']
 
         # When: Calling `initialize`
         bathroom.initialize()
