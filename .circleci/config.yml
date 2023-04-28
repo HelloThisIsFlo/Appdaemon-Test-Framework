@@ -1,7 +1,7 @@
 version: 2.1
 
 executors:
-  python:
+  homeassistant:
     docker:
       - image: "homeassistant/home-assistant:2023.4.6"
     environment:
@@ -62,13 +62,52 @@ commands:
 
 jobs:
   pytest:
-    executor: python
+    executor: homeassistant
     steps:
       - validate:
           env: pytest
+  flake8:
+    executor: homeassistant
+    steps:
+      - validate:
+          env: flake8
+  black:
+    executor: homeassistant
+    steps:
+      - validate:
+          env: black
+  mypy:
+    executor: homeassistant
+    steps:
+      - validate:
+          env: mypy
+  pylint:
+    executor: homeassistant
+    steps:
+      - validate:
+          env: pylint
+  pylint-tests:
+    executor: homeassistant
+    steps:
+      - validate:
+          env: pylint-tests
+  pydocstyle:
+    executor: homeassistant
+    steps:
+      - validate:
+          env: pydocstyle
+  pydocstyle-tests:
+    executor: homeassistant
+    steps:
+      - validate:
+          env: pydocstyle-tests
 
 workflows:
   version: 2
   ValidationWorkflow:
     jobs:
       - pytest
+      - flake8
+      - black
+      - pylint
+      - pylint-tests
