@@ -5,6 +5,7 @@ from myrooms import LivingRoom
 # For this example to work, do not forget to copy the `conftest.py` file.
 # See README.md for more info
 
+
 @pytest.fixture
 def living_room(given_that):
     living_room = LivingRoom(None, None, None, None, None, None, None, None)
@@ -14,11 +15,18 @@ def living_room(given_that):
 
 
 def test_during_night_light_turn_on(given_that, living_room, assert_that):
-    given_that.state_of('sensor.living_room_illumination').is_set_to(200) # 200lm == night
+    given_that.state_of("sensor.living_room_illumination").is_set_to(
+        200
+    )  # 200lm == night
     living_room._new_motion(None, None, None)
-    assert_that('light.living_room').was.turned_on()
+    assert_that("light.living_room").was.turned_on()
 
-def test_during_day_light_DOES_NOT_turn_on(given_that, living_room, assert_that):
-    given_that.state_of('sensor.living_room_illumination').is_set_to(1000) # 1000lm == sunlight
+
+def test_during_day_light_DOES_NOT_turn_on(
+    given_that, living_room, assert_that
+):
+    given_that.state_of("sensor.living_room_illumination").is_set_to(
+        1000
+    )  # 1000lm == sunlight
     living_room._new_motion(None, None, None)
-    assert_that('light.living_room').was_not.turned_on()
+    assert_that("light.living_room").was_not.turned_on()

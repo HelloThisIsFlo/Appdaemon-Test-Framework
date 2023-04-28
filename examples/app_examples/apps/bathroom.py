@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
-import appdaemon.plugins.hass.hassapi as hass
 from datetime import time
+
+import appdaemon.plugins.hass.hassapi as hass
+
 try:
     # Module namespaces when Automation Modules are loaded in AppDaemon
     # is different from the 'real' python one.
@@ -10,15 +11,12 @@ except ModuleNotFoundError:
     from entity_ids import ID
 
 FAKE_MUTE_VOLUME = 0.1
-BATHROOM_VOLUMES = {
-    'regular': 0.4,
-    'shower': 0.7
-}
+BATHROOM_VOLUMES = {"regular": 0.4, "shower": 0.7}
 DEFAULT_VOLUMES = {
-    'kitchen': 0.40,
-    'living_room_soundbar': 0.25,
-    'living_room_controller': 0.57,
-    'bathroom': FAKE_MUTE_VOLUME
+    "kitchen": 0.40,
+    "living_room_soundbar": 0.25,
+    "living_room_controller": 0.57,
+    "bathroom": FAKE_MUTE_VOLUME,
 }
 """
 4 Behaviors as States of a State Machine:
@@ -104,57 +102,76 @@ class Bathroom(hass.Hass):
 
     def _initialize_behaviors(self):
         self.behaviors = {
-            'day': DayBehavior(self),
-            'evening': EveningBehavior(self),
-            'shower': ShowerBehavior(self),
-            'after_shower': AfterShowerBehavior(self)
+            "day": DayBehavior(self),
+            "evening": EveningBehavior(self),
+            "shower": ShowerBehavior(self),
+            "after_shower": AfterShowerBehavior(self),
         }
 
     def start_initial_behavior(self):
         current_hour = self.time().hour
         if current_hour < 4 or current_hour >= 20:
-            self.start_behavior('evening')
+            self.start_behavior("evening")
         else:
-            self.start_behavior('day')
+            self.start_behavior("day")
 
     def _register_time_callbacks(self):
         self.run_daily(self._time_triggered, time(hour=4), hour=4)
         self.run_daily(self._time_triggered, time(hour=20), hour=20)
 
     def _register_motion_callbacks(self):
-        self.listen_event(self._new_motion_bathroom, 'motion',
-                          entity_id=ID['bathroom']['motion_sensor'])
-        self.listen_event(self._new_motion_kitchen, 'motion',
-                          entity_id=ID['kitchen']['motion_sensor'])
-        self.listen_event(self._new_motion_living_room, 'motion',
-                          entity_id=ID['living_room']['motion_sensor'])
-        self.listen_state(self._no_more_motion_bathroom,
-                          ID['bathroom']['motion_sensor'], new='off')
+        self.listen_event(
+            self._new_motion_bathroom,
+            "motion",
+            entity_id=ID["bathroom"]["motion_sensor"],
+        )
+        self.listen_event(
+            self._new_motion_kitchen,
+            "motion",
+            entity_id=ID["kitchen"]["motion_sensor"],
+        )
+        self.listen_event(
+            self._new_motion_living_room,
+            "motion",
+            entity_id=ID["living_room"]["motion_sensor"],
+        )
+        self.listen_state(
+            self._no_more_motion_bathroom,
+            ID["bathroom"]["motion_sensor"],
+            new="off",
+        )
 
     def _register_button_click_callback(self):
-        self.listen_event(self._new_click_bathroom_button, 'click',
-                          entity_id=ID['bathroom']['button'],
-                          click_type='single')
+        self.listen_event(
+            self._new_click_bathroom_button,
+            "click",
+            entity_id=ID["bathroom"]["button"],
+            click_type="single",
+        )
 
     def _register_debug_callback(self):
         def _debug(self, _e, data, _k):
-            if data['click_type'] == 'single':
-                self.call_service('xiaomi_aqara/play_ringtone',
-                                  ringtone_id=10001, ringtone_vol=20)
+            if data["click_type"] == "single":
+                self.call_service(
+                    "xiaomi_aqara/play_ringtone",
+                    ringtone_id=10001,
+                    ringtone_vol=20,
+                )
                 # self.pause_media_entire_flat()
                 # self.turn_on_bathroom_light('blue')
-            elif data['click_type'] == 'double':
+            elif data["click_type"] == "double":
                 pass
 
-        self.listen_event(_debug, 'flic_click',
-                          entity_id=ID['debug']['flic_black'])
+        self.listen_event(
+            _debug, "flic_click", entity_id=ID["debug"]["flic_black"]
+        )
 
     """
     Callbacks
     """
 
     def _time_triggered(self, kwargs):
-        self.current_behavior.time_triggered(kwargs['hour'])
+        self.current_behavior.time_triggered(kwargs["hour"])
 
     def _new_motion_bathroom(self, _e, _d, _k):
         self.current_behavior.new_motion_bathroom()
@@ -181,78 +198,87 @@ class Bathroom(hass.Hass):
         self.current_behavior.start()
 
     def reset_all_volumes(self):
-        self._set_volume(ID['kitchen']['speaker'], DEFAULT_VOLUMES['kitchen'])
-        self._set_volume(ID['bathroom']['speaker'],
-                         DEFAULT_VOLUMES['bathroom'])
-        self._set_volume(ID['living_room']['soundbar'],
-                         DEFAULT_VOLUMES['living_room_soundbar'])
-        self._set_volume(ID['living_room']['controller'],
-                         DEFAULT_VOLUMES['living_room_controller'])
+        self._set_volume(ID["kitchen"]["speaker"], DEFAULT_VOLUMES["kitchen"])
+        self._set_volume(
+            ID["bathroom"]["speaker"], DEFAULT_VOLUMES["bathroom"]
+        )
+        self._set_volume(
+            ID["living_room"]["soundbar"],
+            DEFAULT_VOLUMES["living_room_soundbar"],
+        )
+        self._set_volume(
+            ID["living_room"]["controller"],
+            DEFAULT_VOLUMES["living_room_controller"],
+        )
 
     def mute_all_except_bathroom(self):
-        # Bug with sound bar firmware: Can only increase the volume by 10% at a time
-        # to prevent this being a problem, we're not muting it
+        # Bug with sound bar firmware: Can only increase the volume by 10% at
+        # a time to prevent this being a problem, we're not muting it
         # self._set_volume(ID['living_room']['soundbar'], FAKE_MUTE_VOLUME)
-        self._set_volume(ID['living_room']['controller'], FAKE_MUTE_VOLUME)
-        self._set_volume(ID['kitchen']['speaker'], FAKE_MUTE_VOLUME)
+        self._set_volume(ID["living_room"]["controller"], FAKE_MUTE_VOLUME)
+        self._set_volume(ID["kitchen"]["speaker"], FAKE_MUTE_VOLUME)
 
     def mute_bathroom(self):
-        self._set_volume(ID['bathroom']['speaker'], FAKE_MUTE_VOLUME)
+        self._set_volume(ID["bathroom"]["speaker"], FAKE_MUTE_VOLUME)
 
     def unmute_bathroom(self):
-        self._set_volume(ID['bathroom']['speaker'],
-                         BATHROOM_VOLUMES['regular'])
+        self._set_volume(
+            ID["bathroom"]["speaker"], BATHROOM_VOLUMES["regular"]
+        )
 
     def set_shower_volume_bathroom(self):
-        self._set_volume(ID['bathroom']['speaker'], BATHROOM_VOLUMES['shower'])
+        self._set_volume(ID["bathroom"]["speaker"], BATHROOM_VOLUMES["shower"])
 
     def is_media_casting_bathroom(self):
-        return (self._is_media_casting(ID['bathroom']['speaker'])
-                or self._is_media_casting(ID['cast_groups']['entire_flat']))
+        return self._is_media_casting(
+            ID["bathroom"]["speaker"]
+        ) or self._is_media_casting(ID["cast_groups"]["entire_flat"])
 
     def pause_media_playback_entire_flat(self):
-        self._pause_media(ID['bathroom']['speaker'])
-        self._pause_media(ID['cast_groups']['entire_flat'])
+        self._pause_media(ID["bathroom"]["speaker"])
+        self._pause_media(ID["cast_groups"]["entire_flat"])
 
     def resume_media_playback_entire_flat(self):
-        self._play_media(ID['bathroom']['speaker'])
-        self._play_media(ID['cast_groups']['entire_flat'])
+        self._play_media(ID["bathroom"]["speaker"])
+        self._play_media(ID["cast_groups"]["entire_flat"])
 
     def turn_on_bathroom_light(self, color_name):
-        self.turn_on(ID['bathroom']['led_light'], color_name=color_name)
+        self.turn_on(ID["bathroom"]["led_light"], color_name=color_name)
 
     def turn_off_bathroom_light(self):
-        self.turn_off(ID['bathroom']['led_light'])
+        self.turn_off(ID["bathroom"]["led_light"])
 
     def turn_off_water_heater(self):
-        self.turn_off(ID['bathroom']['water_heater'])
+        self.turn_off(ID["bathroom"]["water_heater"])
 
     def turn_on_water_heater(self):
-        self.turn_on(ID['bathroom']['water_heater'])
+        self.turn_on(ID["bathroom"]["water_heater"])
 
     def play_notification_sound(self):
-        self.call_service('xiaomi_aqara/play_ringtone',
-                          ringtone_id=10001, ringtone_vol=20, gw_mac=ID['bathroom']['gateway_mac_address'])
+        self.call_service(
+            "xiaomi_aqara/play_ringtone",
+            ringtone_id=10001,
+            ringtone_vol=20,
+            gw_mac=ID["bathroom"]["gateway_mac_address"],
+        )
 
     """
     Private functions
     """
 
     def _set_volume(self, entity_id, volume):
-        self.call_service('media_player/volume_set',
-                          entity_id=entity_id,
-                          volume_level=volume)
+        self.call_service(
+            "media_player/volume_set", entity_id=entity_id, volume_level=volume
+        )
 
     def _is_media_casting(self, media_player_id):
-        return self.get_state(media_player_id) != 'off'
+        return self.get_state(media_player_id) != "off"
 
     def _pause_media(self, entity_id):
-        self.call_service('media_player/media_pause',
-                          entity_id=entity_id)
+        self.call_service("media_player/media_pause", entity_id=entity_id)
 
     def _play_media(self, entity_id):
-        self.call_service('media_player/media_play',
-                          entity_id=entity_id)
+        self.call_service("media_player/media_play", entity_id=entity_id)
 
 
 """
@@ -266,12 +292,12 @@ class ShowerBehavior(BathroomBehavior):
 
     def start(self):
         self.bathroom.play_notification_sound()
-        self.bathroom.turn_on_bathroom_light('GREEN')
+        self.bathroom.turn_on_bathroom_light("GREEN")
         self.bathroom.set_shower_volume_bathroom()
         self.bathroom.mute_all_except_bathroom()
 
     def click_on_bathroom_button(self):
-        self.bathroom.start_behavior('after_shower')
+        self.bathroom.start_behavior("after_shower")
 
 
 class AfterShowerBehavior(BathroomBehavior):
@@ -280,7 +306,7 @@ class AfterShowerBehavior(BathroomBehavior):
 
     def start(self):
         self.bathroom.play_notification_sound()
-        self.bathroom.turn_on_bathroom_light('YELLOW')
+        self.bathroom.turn_on_bathroom_light("YELLOW")
         self.bathroom.pause_media_playback_entire_flat()
         self.bathroom.mute_bathroom()
         self.bathroom.turn_off_water_heater()
@@ -296,7 +322,6 @@ class AfterShowerBehavior(BathroomBehavior):
         self.bathroom.start_initial_behavior()
 
 
-
 class DayBehavior(BathroomBehavior):
     def __init__(self, bathroom):
         self.bathroom = bathroom
@@ -307,7 +332,7 @@ class DayBehavior(BathroomBehavior):
         self.bathroom.reset_all_volumes()
 
     def new_motion_bathroom(self):
-        self.bathroom.turn_on_bathroom_light('WHITE')
+        self.bathroom.turn_on_bathroom_light("WHITE")
         if self.bathroom.is_media_casting_bathroom():
             self.bathroom.unmute_bathroom()
 
@@ -317,10 +342,10 @@ class DayBehavior(BathroomBehavior):
 
     def time_triggered(self, hour_of_day):
         if hour_of_day == 20:
-            self.bathroom.start_behavior('evening')
+            self.bathroom.start_behavior("evening")
 
     def click_on_bathroom_button(self):
-        self.bathroom.start_behavior('shower')
+        self.bathroom.start_behavior("shower")
 
 
 class EveningBehavior(BathroomBehavior):
@@ -328,7 +353,7 @@ class EveningBehavior(BathroomBehavior):
         self.bathroom = bathroom
 
     def new_motion_bathroom(self):
-        self.bathroom.turn_on_bathroom_light('RED')
+        self.bathroom.turn_on_bathroom_light("RED")
         if self.bathroom.is_media_casting_bathroom():
             self.bathroom.unmute_bathroom()
 
@@ -342,4 +367,4 @@ class EveningBehavior(BathroomBehavior):
 
     def time_triggered(self, hour_of_day):
         if hour_of_day == 4:
-            self.bathroom.start_behavior('day')
+            self.bathroom.start_behavior("day")

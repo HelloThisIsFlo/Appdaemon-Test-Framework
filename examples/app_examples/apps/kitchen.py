@@ -1,5 +1,7 @@
-import appdaemon.plugins.hass.hassapi as hass
 from uuid import uuid4
+
+import appdaemon.plugins.hass.hassapi as hass
+
 try:
     # Module namespaces when Automation Modules are loaded in AppDaemon
     # is different from the 'real' python one.
@@ -21,22 +23,34 @@ MSG_ON = "was turned back on"
 
 class Kitchen(hass.Hass):
     def initialize(self):
-        self.listen_event(self._new_motion, 'motion',
-                          entity_id=ID['kitchen']['motion_sensor'])
-        self.listen_state(self._no_more_motion,
-                          ID['kitchen']['motion_sensor'], new='off')
-        self.listen_event(self._new_button_click, 'click',
-                          entity_id=ID['kitchen']['button'], click_type='single')
-        self.listen_event(self._new_button_double_click, 'click',
-                          entity_id=ID['kitchen']['button'], click_type='double')
+        self.listen_event(
+            self._new_motion,
+            "motion",
+            entity_id=ID["kitchen"]["motion_sensor"],
+        )
+        self.listen_state(
+            self._no_more_motion, ID["kitchen"]["motion_sensor"], new="off"
+        )
+        self.listen_event(
+            self._new_button_click,
+            "click",
+            entity_id=ID["kitchen"]["button"],
+            click_type="single",
+        )
+        self.listen_event(
+            self._new_button_double_click,
+            "click",
+            entity_id=ID["kitchen"]["button"],
+            click_type="double",
+        )
 
         self.scheduled_callbacks_uuids = []
 
     def _new_motion(self, _event, _data, _kwargs):
-        self.turn_on(ID['kitchen']['light'])
+        self.turn_on(ID["kitchen"]["light"])
 
     def _no_more_motion(self, _entity, _attribute, _old, _new, _kwargs):
-        self.turn_off(ID['kitchen']['light'])
+        self.turn_off(ID["kitchen"]["light"])
 
     def _new_button_click(self, _e, _d, _k):
         self._turn_off_water_heater_for_X_minutes(SHORT_DELAY)
@@ -50,22 +64,24 @@ class Kitchen(hass.Hass):
         pass
 
     def _turn_off_water_heater_for_X_minutes(self, minutes):
-        self.turn_off(ID['bathroom']['water_heater'])
+        self.turn_off(ID["bathroom"]["water_heater"])
         callback_uuid = uuid4()
         self.run_in(self._after_delay, minutes * 60, unique_id=callback_uuid)
         self.scheduled_callbacks_uuids.append(callback_uuid)
 
     def _send_water_heater_notification(self, message):
-        self.call_service('notify/pushbullet',
-                          target=PHONE_PUSHBULLET_ID,
-                          title=MSG_TITLE,
-                          message=message)
+        self.call_service(
+            "notify/pushbullet",
+            target=PHONE_PUSHBULLET_ID,
+            title=MSG_TITLE,
+            message=message,
+        )
 
     def _after_delay(self, kwargs):
         last_callback_uuid = self.scheduled_callbacks_uuids[-1]
-        this_callback_uuid = kwargs['unique_id']
+        this_callback_uuid = kwargs["unique_id"]
         if this_callback_uuid == last_callback_uuid:
-            self.turn_on(ID['bathroom']['water_heater'])
+            self.turn_on(ID["bathroom"]["water_heater"])
             self._send_water_heater_notification(MSG_ON)
         else:
             self.scheduled_callbacks_uuids.remove(this_callback_uuid)

@@ -1,6 +1,7 @@
-from appdaemontestframework.pytest_conftest import *
+from appdaemontestframework.pytest_conftest import *  # noqa: F403
 
-@fixture
+
+@fixture  # noqa: F405
 def configure_appdaemontestframework_for_pytester(testdir):
     """
     Extra test fixtue use for testing pytest runners.
@@ -8,4 +9,5 @@ def configure_appdaemontestframework_for_pytester(testdir):
     testdir.makeconftest(
         """
         from appdaemontestframework.pytest_conftest import *
-    """)
+    """
+    )

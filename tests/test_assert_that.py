@@ -1,11 +1,6 @@
-from datetime import time, datetime
-
 import appdaemon.plugins.hass.hassapi as hass
-import pytest
-from pytest import mark
 
 from appdaemontestframework import automation_fixture
-
 
 """
 Note:
@@ -20,8 +15,8 @@ through `integration_tests`.
 New feature should come with the proper unit tests.
 """
 
-LIGHT = 'light.some_light'
-SWITCH = 'switch.some_switch'
+LIGHT = "light.some_light"
+SWITCH = "switch.some_switch"
 TRANSITION_DURATION = 2
 
 
@@ -33,34 +28,34 @@ class MockAutomation(hass.Hass):
         if via_helper:
             self.turn_on(LIGHT)
         else:
-            self.call_service('light/turn_on', entity_id=LIGHT)
+            self.call_service("light/turn_on", entity_id=LIGHT)
 
     def turn_off_light(self, via_helper=False):
         if via_helper:
             self.turn_off(LIGHT)
         else:
-            self.call_service('light/turn_off', entity_id=LIGHT)
+            self.call_service("light/turn_off", entity_id=LIGHT)
 
     def turn_on_switch(self, via_helper=False):
         if via_helper:
             self.turn_on(SWITCH)
         else:
-            self.call_service('switch/turn_on', entity_id=SWITCH)
+            self.call_service("switch/turn_on", entity_id=SWITCH)
 
     def turn_off_switch(self, via_helper=False):
         if via_helper:
             self.turn_off(SWITCH)
         else:
-            self.call_service('switch/turn_off', entity_id=SWITCH)
+            self.call_service("switch/turn_off", entity_id=SWITCH)
 
     def turn_on_light_with_transition(self, via_helper=False):
         if via_helper:
             self.turn_on(LIGHT, transition=TRANSITION_DURATION)
         else:
             self.call_service(
-                'light/turn_on',
+                "light/turn_on",
                 entity_id=LIGHT,
-                transition=TRANSITION_DURATION
+                transition=TRANSITION_DURATION,
             )
 
     def turn_off_light_with_transition(self, via_helper=False):
@@ -68,9 +63,9 @@ class MockAutomation(hass.Hass):
             self.turn_off(LIGHT, transition=TRANSITION_DURATION)
         else:
             self.call_service(
-                'light/turn_off',
+                "light/turn_off",
                 entity_id=LIGHT,
-                transition=TRANSITION_DURATION
+                transition=TRANSITION_DURATION,
             )
 
 
