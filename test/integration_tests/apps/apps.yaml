@@ -1,7 +1,0 @@
-Kitchen:
-  module: kitchen
-  class: Kitchen
-
-Bathroom:
-  module: bathroom
-  class: Bathroom

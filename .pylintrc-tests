@@ -1,0 +1,28 @@
+[MASTER]
+
+# List of plugins (as comma separated values of python modules names) to load,
+# usually to register additional checkers.
+load-plugins=pylint.extensions.docparams,pylint.extensions.docstyle
+
+# Parallel jobs
+jobs=0
+
+# Reports
+reports=y
+
+max-line-length=79
+
+function-rgx=[a-z_][a-z0-9_]{2,50}$
+
+fail-under=6.38
+
+[MESSAGES CONTROL]
+
+disable=
+    unused-argument,
+    fixme,
+    redefined-outer-name,
+
+
+[SIMILARITIES]
+ignore-imports=yes
