@@ -1,4 +1,4 @@
-import logging
+import logging as liblogging
 import warnings
 
 # Sorting these imports make the whole app to fail, so...
@@ -66,11 +66,15 @@ class HassMocks:
         AD = MockAppDaemon()
         self.AD = AD
 
-        def _hass_init_mock(self, _ad, name, *_args):
+        def _hass_init_mock(
+            self, ad, name, logging, args, config, app_config, global_vars
+        ):
             hass_mocks._hass_instances.append(self)
             self.name = name
             self.AD = AD
-            self.logger = logging.getLogger(__name__)
+            self.logger = liblogging.getLogger(__name__)
+            if args:
+                self.args = args
 
         # This is a list of all mocked out functions.
         self._mock_handlers = [
@@ -146,8 +150,8 @@ class HassMocks:
     @staticmethod
     def _log_log(msg, level="INFO"):
         # Renamed the function to remove confusion
-        get_logging_level_from_name = logging.getLevelName
-        logging.log(get_logging_level_from_name(level), msg)
+        get_logging_level_from_name = liblogging.getLevelName
+        liblogging.log(get_logging_level_from_name(level), msg)
 
 
 class MockHandler:
