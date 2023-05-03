@@ -478,7 +478,7 @@ functions would be patched before the automation is created:
 @pytest.fixture
 def living_room(given_that):
     # `None` dependencies are mocked by the framework
-    living_room = LivingRoom(None, None, None, None, None, None, None, None)
+    living_room = LivingRoom(None, None, None, None, None, None, None)
     return living_room
 ```
 
@@ -488,7 +488,7 @@ is injected. We could also set the automation instance name to the name of the a
 ```python
 @pytest.fixture
 def living_room(given_that):
-    living_room = LivingRoom(None, LivingRoom.__name__, None, None, None, None, None, None)
+    living_room = LivingRoom(None, LivingRoom.__name__, None, None, None, None, None)
     living_room.initialize()
     given_that.mock_functions_are_cleared()
     return living_room
@@ -633,9 +633,9 @@ This project has been developed using `Pipenv`.
 It is totally optional, but if you are interested, here is a quick guide to get you started:
 1. Install `pipenv` -> `brew install pipenv` (or whichever methods works best for you)
 2. `cd` in the project directory
-3. Run `pipenv install --dev`  
+3. Run `pipenv install --dev`
   _That will create a `virtualenv` and automatically install all required dependencies_
-4. Run `pipenv shell`  
+4. Run `pipenv shell`
   _That will activate the `virtualenv` in the current shell_
 5. Run `pytest` to ensure that everything is working as expected
 6. You're good to go and can start contributing 😊
