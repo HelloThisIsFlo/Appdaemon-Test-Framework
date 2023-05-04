@@ -8,6 +8,7 @@ from appdaemontestframework import (
     GivenThatWrapper,
     HassMocks,
     TimeTravelWrapper,
+    WhenWrapper,
 )
 
 # Only expose the test fixtures and pytest needed things so `import *`
@@ -20,6 +21,7 @@ __all__ = [
     "given_that",
     "assert_that",
     "time_travel",
+    "when",
 ]
 
 pytest_plugins = "pytester"
@@ -58,6 +60,11 @@ def hass_functions(hass_mocks):
 @fixture
 def given_that(hass_mocks):
     return GivenThatWrapper(hass_mocks)
+
+
+@fixture
+def when(given_that):
+    return WhenWrapper(given_that)
 
 
 @fixture

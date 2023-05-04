@@ -73,6 +73,7 @@ class HassMocks:
             self.name = name
             self.AD = AD
             self.logger = liblogging.getLogger(__name__)
+            self._namespace = "default"
             if args:
                 self.args = args
 

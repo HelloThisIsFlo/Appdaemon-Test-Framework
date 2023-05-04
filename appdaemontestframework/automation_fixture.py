@@ -22,7 +22,6 @@ def _instantiate_and_initialize_automation(
         None, automation_class.__name__, None, None, None, None, None
     )
     automation.initialize()
-    given_that.mock_functions_are_cleared()
     return automation
 
 
