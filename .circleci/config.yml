@@ -3,7 +3,7 @@ version: 2.1
 executors:
   homeassistant:
     docker:
-      - image: "homeassistant/home-assistant:2023.5"
+      - image: "homeassistant/home-assistant:2023.5.1"
     environment:
       PATH: "/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.local/bin"
 
