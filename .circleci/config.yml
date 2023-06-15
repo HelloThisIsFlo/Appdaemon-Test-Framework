@@ -3,7 +3,7 @@ version: 2.1
 executors:
   homeassistant:
     docker:
-      - image: "homeassistant/home-assistant:2023.5.1"
+      - image: "ghcr.io/hassio-addons/base:14.0.0"
     environment:
       PATH: "/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.local/bin"
 
@@ -15,20 +15,26 @@ commands:
       poetry-version:
         default: "1.3.2"
         type: string
+      pip-version:
+        default: "23.1.2-r0"
+        type: string
     steps:
       - checkout
 
-      # Poetry
+      # Pip + Poetry
       - restore_cache:
-          name: Restore Poetry
+          name: Restore Pip + Poetry
           keys:
-            - poetry-<<parameters.poetry-version>>-v1
+            - pip-<<parameters.pip-version>>-poetry-<<parameters.poetry-version>>-v10
+      - run:
+          name: Install Pip
+          command: apk add --update py-pip=<<parameters.pip-version>>
       - run:
           name: Install Poetry
           command: pip install --user poetry==<<parameters.poetry-version>>
       - save_cache:
-          name: Cache Poetry
-          key: poetry-<<parameters.poetry-version>>-v1
+          name: Cache Pip + Poetry
+          key: pip-<<parameters.pip-version>>-poetry-<<parameters.poetry-version>>-v10
           paths:
             - /root/.local/
 
@@ -36,13 +42,13 @@ commands:
       - restore_cache:
           name: Restore Python Dependencies
           keys:
-            - python-packages-{{ checksum "poetry.lock" }}-v1
+            - python-packages-{{ checksum "poetry.lock" }}-v2
       - run:
           name: Install Python Dependencies
           command: poetry install --no-ansi
       - save_cache:
           name: Save Python Dependencies
-          key: python-packages-{{ checksum "poetry.lock" }}-v1
+          key: python-packages-{{ checksum "poetry.lock" }}-v2
           paths:
             - /root/.cache/pypoetry/
 
@@ -50,13 +56,13 @@ commands:
       - restore_cache:
           name: Restore Tox Dependencies
           keys:
-            - tox-<<parameters.env>>-{{ checksum "poetry.lock" }}-v1
+            - tox-<<parameters.env>>-{{ checksum "poetry.lock" }}-v2
       - run:
           name: <<parameters.env>>
           command: poetry run tox -e <<parameters.env>>
       - save_cache:
           name: Save Tox Dependencies
-          key: tox-<<parameters.env>>-{{ checksum "poetry.lock" }}-v1
+          key: tox-<<parameters.env>>-{{ checksum "poetry.lock" }}-v2
           paths:
             - .tox/<<parameters.env>>/lib
 
