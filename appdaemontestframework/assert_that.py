@@ -1,24 +1,25 @@
 import textwrap
 from abc import ABC, abstractmethod
+from typing import Callable, Optional, Union
 
 # Custom Matchers ##################################################
 
 
 class ServiceOnAnyDomain:
-    def __init__(self, service):
+    def __init__(self, service: str) -> None:
         self.service = "".join(["/", service])
 
     # Turn on service look like: 'DOMAIN/SERVICE'
     # We just check that the SERVICE part is equal
 
-    def __eq__(self, other):
+    def __eq__(self, other: str) -> bool:
         """
         Turn on service look like: 'DOMAIN/SERVICE'
         We just check that the SERVICE part is equal
         """
         return self.service in other
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "'ANY_DOMAIN" + self.service + "'"
 
 
@@ -36,7 +37,11 @@ assert "asdfasdf" == AnyString()
 
 # Custom Exception #################################################
 class EitherOrAssertionError(AssertionError):
-    def __init__(self, first_assertion_error, second_assertion_error):
+    def __init__(
+        self,
+        first_assertion_error: AssertionError,
+        second_assertion_error: AssertionError,
+    ) -> None:
         message = "\n".join(
             [
                 "",
@@ -81,7 +86,7 @@ class WasWrapper(Was):
         self.thing_to_check = thing_to_check
         self.hass_functions = hass_functions
 
-    def turned_on(self, **service_specific_parameters):
+    def turned_on(self, **service_specific_parameters) -> None:
         """Assert that a given entity_id has been turned on"""
         entity_id = self.thing_to_check
 
@@ -103,7 +108,7 @@ class WasWrapper(Was):
                 service_not_called, turn_on_helper_not_called
             )
 
-    def turned_off(self, **service_specific_parameters):
+    def turned_off(self, **service_specific_parameters) -> None:
         """Assert that a given entity_id has been turned off"""
         entity_id = self.thing_to_check
 
@@ -125,7 +130,7 @@ class WasWrapper(Was):
                 service_not_called, turn_off_helper_not_called
             )
 
-    def called_with(self, **kwargs):
+    def called_with(self, **kwargs) -> None:
         """Assert that a given service has been called with the given args."""
         service_full_name = self.thing_to_check
 
@@ -135,10 +140,10 @@ class WasWrapper(Was):
 
 
 class WasNotWrapper(Was):
-    def __init__(self, was_wrapper):
+    def __init__(self, was_wrapper: WasWrapper) -> None:
         self.was_wrapper = was_wrapper
 
-    def turned_on(self, **service_specific_parameters):
+    def turned_on(self, **service_specific_parameters) -> None:
         """Assert it hasn't been turned on.
 
         Assert that a given entity_id has NOT been turned ON w/ the given
@@ -158,7 +163,7 @@ class WasNotWrapper(Was):
                 + str(self.was_wrapper.thing_to_check)
             )
 
-    def turned_off(self, **service_specific_parameters):
+    def turned_off(self, **service_specific_parameters) -> None:
         """Assert that a given entity_id has NOT been turned OFF"""
         thing_not_turned_off = _capture_assert_failure_exception(
             lambda: self.was_wrapper.turned_off(**service_specific_parameters)
@@ -170,7 +175,7 @@ class WasNotWrapper(Was):
                 + str(self.was_wrapper.thing_to_check)
             )
 
-    def called_with(self, **kwargs):
+    def called_with(self, **kwargs) -> None:
         """Assert that a given service has NOT been called with given args."""
         service_not_called = _capture_assert_failure_exception(
             lambda: self.was_wrapper.called_with(**kwargs)
@@ -268,7 +273,11 @@ NOT_INIT_ERROR = textwrap.dedent(
 )
 
 
-def _ensure_init(property):
+def _ensure_init(
+    property: Union[
+        RegisteredWrapper, WasWrapper, WasNotWrapper, ListensToWrapper
+    ]
+) -> Union[RegisteredWrapper, WasWrapper, WasNotWrapper, ListensToWrapper]:
     if property is None:
         raise Exception(NOT_INIT_ERROR)
     return property
@@ -296,23 +305,25 @@ class AssertThatWrapper:
         return self
 
     @property
-    def was(self):
+    def was(self) -> WasWrapper:
         return _ensure_init(self._was)
 
     @property
-    def was_not(self):
+    def was_not(self) -> WasNotWrapper:
         return _ensure_init(self._was_not)
 
     @property
-    def listens_to(self):
+    def listens_to(self) -> ListensToWrapper:
         return _ensure_init(self._listens_to)
 
     @property
-    def registered(self):
+    def registered(self) -> RegisteredWrapper:
         return _ensure_init(self._registered)
 
 
-def _capture_assert_failure_exception(function_with_assertion):
+def _capture_assert_failure_exception(
+    function_with_assertion: Callable,
+) -> Optional[Union[AssertionError, EitherOrAssertionError]]:
     """Returns wether the assertion was successful or not.
 
     But does not throw.

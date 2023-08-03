@@ -1,4 +1,5 @@
-from uuid import uuid4
+from typing import Dict
+from uuid import UUID, uuid4
 
 import appdaemon.plugins.hass.hassapi as hass
 
@@ -22,7 +23,7 @@ MSG_ON = "was turned back on"
 
 
 class Kitchen(hass.Hass):
-    def initialize(self):
+    def initialize(self) -> None:
         self.listen_event(
             self._new_motion,
             "motion",
@@ -46,30 +47,37 @@ class Kitchen(hass.Hass):
 
         self.scheduled_callbacks_uuids = []
 
-    def _new_motion(self, _event, _data, _kwargs):
+    def _new_motion(self, _event: None, _data: None, _kwargs: None) -> None:
         self.turn_on(ID["kitchen"]["light"])
 
-    def _no_more_motion(self, _entity, _attribute, _old, _new, _kwargs):
+    def _no_more_motion(
+        self,
+        _entity: None,
+        _attribute: None,
+        _old: None,
+        _new: None,
+        _kwargs: None,
+    ) -> None:
         self.turn_off(ID["kitchen"]["light"])
 
-    def _new_button_click(self, _e, _d, _k):
+    def _new_button_click(self, _e: None, _d: None, _k: None) -> None:
         self._turn_off_water_heater_for_X_minutes(SHORT_DELAY)
         self._send_water_heater_notification(MSG_SHORT_OFF)
 
-    def _new_button_double_click(self, _e, _d, _k):
+    def _new_button_double_click(self, _e: None, _d: None, _k: None) -> None:
         self._turn_off_water_heater_for_X_minutes(LONG_DELAY)
         self._send_water_heater_notification(MSG_LONG_OFF)
 
     def _new_button_long_press(self, _e, _d, _k):
         pass
 
-    def _turn_off_water_heater_for_X_minutes(self, minutes):
+    def _turn_off_water_heater_for_X_minutes(self, minutes: int) -> None:
         self.turn_off(ID["bathroom"]["water_heater"])
         callback_uuid = uuid4()
         self.run_in(self._after_delay, minutes * 60, unique_id=callback_uuid)
         self.scheduled_callbacks_uuids.append(callback_uuid)
 
-    def _send_water_heater_notification(self, message):
+    def _send_water_heater_notification(self, message: str) -> None:
         self.call_service(
             "notify/pushbullet",
             target=PHONE_PUSHBULLET_ID,
@@ -77,7 +85,7 @@ class Kitchen(hass.Hass):
             message=message,
         )
 
-    def _after_delay(self, kwargs):
+    def _after_delay(self, kwargs: Dict[str, UUID]) -> None:
         last_callback_uuid = self.scheduled_callbacks_uuids[-1]
         this_callback_uuid = kwargs["unique_id"]
         if this_callback_uuid == last_callback_uuid:

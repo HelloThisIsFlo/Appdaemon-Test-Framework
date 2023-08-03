@@ -5,7 +5,7 @@ from appdaemontestframework.hass_mocks import HassMocks
 
 
 class StateNotSetError(AppdaemonTestFrameworkError):
-    def __init__(self, entity_id):
+    def __init__(self, entity_id: str) -> None:
         super().__init__(
             f"""
             State for entity: '{entity_id}' was never set!
@@ -21,12 +21,12 @@ class AttributeNotSetError(AppdaemonTestFrameworkError):
 
 
 class GivenThatWrapper:
-    def __init__(self, hass_mocks: HassMocks):
+    def __init__(self, hass_mocks: HassMocks) -> None:
         self._hass_mocks = hass_mocks
         self._init_mocked_states()
         self._init_mocked_passed_args()
 
-    def _init_mocked_states(self):
+    def _init_mocked_states(self) -> None:
         self.mocked_states = {}
 
         def get_state_mock(entity_id=None, *, attribute=None):
@@ -79,7 +79,7 @@ class GivenThatWrapper:
             "entity_exists"
         ].side_effect = entity_exists_mock
 
-    def _init_mocked_passed_args(self):
+    def _init_mocked_passed_args(self) -> None:
         self.mocked_passed_args = self._hass_mocks.hass_functions["args"]
         self.mocked_passed_args.clear()
 
@@ -117,12 +117,14 @@ class GivenThatWrapper:
 
         return IsWrapper()
 
-    def time_is(self, time_as_datetime):
+    def time_is(self, time_as_datetime) -> None:
         self._hass_mocks.AD.sched.sim_set_start_time(time_as_datetime)
 
     def mock_functions_are_cleared(
-        self, clear_mock_states=False, clear_mock_passed_args=False
-    ):
+        self,
+        clear_mock_states: bool = False,
+        clear_mock_passed_args: bool = False,
+    ) -> None:
         for mocked_function in self._hass_mocks.hass_functions.values():
             mocked_function.reset_mock()
         if clear_mock_states:

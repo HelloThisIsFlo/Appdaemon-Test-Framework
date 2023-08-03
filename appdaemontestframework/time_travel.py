@@ -1,4 +1,5 @@
 import datetime
+from typing import Callable
 
 from appdaemontestframework.hass_mocks import HassMocks
 
@@ -11,7 +12,7 @@ class TimeTravelWrapper:
     def __init__(self, hass_mocks: HassMocks):
         self._hass_mocks = hass_mocks
 
-    def fast_forward(self, duration):
+    def fast_forward(self, duration: int) -> "UnitsWrapper":
         """
         Simulate going forward in time.
 
@@ -29,7 +30,9 @@ class TimeTravelWrapper:
         """
         return UnitsWrapper(duration, self._fast_forward_seconds)
 
-    def assert_current_time(self, expected_current_time):
+    def assert_current_time(
+        self, expected_current_time: int
+    ) -> "UnitsWrapper":
         """
         Assert the current time is as expected
 
@@ -44,12 +47,14 @@ class TimeTravelWrapper:
             expected_current_time, self._assert_current_time_seconds
         )
 
-    def _fast_forward_seconds(self, seconds_to_fast_forward):
+    def _fast_forward_seconds(self, seconds_to_fast_forward: int) -> None:
         self._hass_mocks.AD.sched.sim_fast_forward(
             datetime.timedelta(seconds=seconds_to_fast_forward)
         )
 
-    def _assert_current_time_seconds(self, expected_seconds_from_start):
+    def _assert_current_time_seconds(
+        self, expected_seconds_from_start: int
+    ) -> None:
         sched = self._hass_mocks.AD.sched
         elapsed_seconds = (
             sched.get_now_sync() - sched.sim_get_start_time()
@@ -58,12 +63,14 @@ class TimeTravelWrapper:
 
 
 class UnitsWrapper:
-    def __init__(self, duration, function_with_arg_in_seconds):
+    def __init__(
+        self, duration: int, function_with_arg_in_seconds: Callable
+    ) -> None:
         self.duration = duration
         self.function_with_arg_in_seconds = function_with_arg_in_seconds
 
-    def minutes(self):
+    def minutes(self) -> None:
         self.function_with_arg_in_seconds(self.duration * 60)
 
-    def seconds(self):
+    def seconds(self) -> None:
         self.function_with_arg_in_seconds(self.duration)

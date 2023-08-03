@@ -1,8 +1,12 @@
 import textwrap
 import warnings
+from typing import Iterator
 
 from pytest import fixture
 
+import appdaemontestframework.assert_that
+import appdaemontestframework.given_that
+import appdaemontestframework.hass_mocks
 from appdaemontestframework import (
     AssertThatWrapper,
     GivenThatWrapper,
@@ -46,19 +50,23 @@ class DeprecatedDict(dict):
 
 
 @fixture
-def hass_mocks():
+def hass_mocks() -> Iterator[appdaemontestframework.hass_mocks.HassMocks]:
     hass_mocks = HassMocks()
     yield hass_mocks
     hass_mocks.unpatch_mocks()
 
 
 @fixture
-def hass_functions(hass_mocks):
+def hass_functions(
+    hass_mocks: appdaemontestframework.hass_mocks.HassMocks,
+) -> DeprecatedDict:
     return DeprecatedDict(hass_mocks.hass_functions)
 
 
 @fixture
-def given_that(hass_mocks):
+def given_that(
+    hass_mocks: appdaemontestframework.hass_mocks.HassMocks,
+) -> appdaemontestframework.given_that.GivenThatWrapper:
     return GivenThatWrapper(hass_mocks)
 
 
@@ -68,7 +76,9 @@ def when(given_that):
 
 
 @fixture
-def assert_that(hass_mocks):
+def assert_that(
+    hass_mocks: appdaemontestframework.hass_mocks.HassMocks,
+) -> appdaemontestframework.assert_that.AssertThatWrapper:
     return AssertThatWrapper(hass_mocks)
 
 

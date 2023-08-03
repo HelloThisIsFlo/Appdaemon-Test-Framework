@@ -1,6 +1,7 @@
 import datetime
 import uuid
-from typing import List
+from typing import Callable, Dict, List, Union
+from unittest.mock import Mock
 
 import pytz
 
@@ -13,7 +14,7 @@ class MockScheduler:
     And provide extra interfaces for adjusting the simulation.
     """
 
-    def __init__(self, AD: MockAppDaemon):
+    def __init__(self, AD: MockAppDaemon) -> None:
         self.AD = AD
         self._registered_callbacks: List[CallbackInfo] = []
 
@@ -22,29 +23,35 @@ class MockScheduler:
         self.sim_set_start_time(datetime.datetime(2000, 1, 1, 0, 0))
 
     # Implement the AppDaemon APIs for Scheduler
-    async def get_now(self) -> datetime:
+    async def get_now(self) -> datetime.datetime:
         """Return current localized naive datetime"""
         return self.get_now_sync()
 
-    def get_now_sync(self) -> datetime:
+    def get_now_sync(self) -> datetime.datetime:
         """Same as `get_now` but synchronous"""
         return pytz.utc.localize(self._now)
 
-    async def get_now_ts(self) -> int:
+    async def get_now_ts(self) -> float:
         """Retrun the current localized timestamp"""
         return (await self.get_now()).timestamp()
 
-    async def get_now_naive(self) -> datetime:
+    async def get_now_naive(self) -> datetime.datetime:
         return self.make_naive(await self.get_now())
 
     async def insert_schedule(
-        self, name, aware_dt, callback, repeat, type_, **kwargs
-    ):
+        self,
+        name: str,
+        aware_dt: datetime.datetime,
+        callback: Union[Callable, Mock],
+        repeat: bool,
+        type_: None,
+        **kwargs,
+    ) -> str:
         naive_dt = self.make_naive(aware_dt)
         return self._queue_calllback(callback, kwargs, naive_dt)
 
     async def cancel_timer(
-        self, name: str, handle, silent: bool = False
+        self, name: str, handle: str, silent: bool = False
     ) -> None:
         for callback in self._registered_callbacks:
             if callback.handle == handle:
@@ -61,7 +68,7 @@ class MockScheduler:
 
         return result
 
-    def make_naive(self, dt):
+    def make_naive(self, dt: datetime.datetime) -> datetime.datetime:
         local = dt.astimezone(self.AD.tz)
         return datetime.datetime(
             local.year,
@@ -74,7 +81,9 @@ class MockScheduler:
         )
 
     # Test framework simulation functions
-    def sim_set_start_time(self, time):
+    def sim_set_start_time(
+        self, time: Union[datetime.time, datetime.datetime]
+    ) -> None:
         """Set the absolute start time and set current time to that as well.
         if time is a datetime, it goes right to that.
         if time is time, it will set to that time with the current date.
@@ -92,7 +101,7 @@ class MockScheduler:
             time = datetime.datetime.combine(self._now.date(), time)
         self._start_time = self._now = time
 
-    def sim_get_start_time(self):
+    def sim_get_start_time(self) -> datetime.datetime:
         """returns localized naive datetime of the start of the simulation"""
         return pytz.utc.localize(self._start_time)
 
@@ -100,7 +109,9 @@ class MockScheduler:
         """Returns number of secs elapsed since the start of the simulation."""
         return (self._now - self._start_time).total_seconds()
 
-    def sim_fast_forward(self, time):
+    def sim_fast_forward(
+        self, time: Union[datetime.time, datetime.datetime, datetime.timedelta]
+    ) -> None:
         """Fastforward time and invoke callbacks.
 
         time can be a timedelta, time, or datetime
@@ -127,7 +138,12 @@ class MockScheduler:
         self._run_callbacks_and_advance_time(target_datetime)
 
     # Internal functions
-    def _queue_calllback(self, callback_function, kwargs, run_date_time):
+    def _queue_calllback(
+        self,
+        callback_function: Union[Callable, Mock],
+        kwargs: Dict[str, Union[str, int, uuid.UUID]],
+        run_date_time: datetime.datetime,
+    ) -> str:
         """queue a new callback and return its handle"""
         interval = kwargs.get("interval", 0)
         new_callback = CallbackInfo(
@@ -141,8 +157,8 @@ class MockScheduler:
         return new_callback.handle
 
     def _run_callbacks_and_advance_time(
-        self, target_datetime, run_callbacks=True
-    ):
+        self, target_datetime: datetime.datetime, run_callbacks: bool = True
+    ) -> None:
         """run all callbacks scheduled between now and target_datetime"""
         if target_datetime < self._now:
             raise ValueError("You can not fast forward to a time in the past.")
@@ -180,12 +196,18 @@ class MockScheduler:
 class CallbackInfo:
     """Class to hold info about a scheduled callback"""
 
-    def __init__(self, callback_function, kwargs, run_date_time, interval):
+    def __init__(
+        self,
+        callback_function: Union[Callable, Mock],
+        kwargs: Dict[str, Union[str, int, uuid.UUID]],
+        run_date_time: datetime.datetime,
+        interval: int,
+    ) -> None:
         self.handle = str(uuid.uuid4())
         self.run_date_time = run_date_time
         self.callback_function = callback_function
         self.kwargs = kwargs
         self.interval = interval
 
-    def __call__(self):
+    def __call__(self) -> None:
         self.callback_function(self.kwargs)
