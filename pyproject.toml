@@ -15,7 +15,7 @@ appdaemon = "4.4.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "23.7.0"
-flake8 = "6.0.0"
+flake8 = "6.1.0"
 flake8-isort = "6.0.0"
 ipython = "8.14.0"
 ipdb = "0.13.13"

@@ -88,7 +88,7 @@ class MockScheduler:
                 "You can not set start time while callbacks are scheduled"
             )
 
-        if type(time) == datetime.time:
+        if isinstance(time, datetime.time):
             time = datetime.datetime.combine(self._now.date(), time)
         self._start_time = self._now = time
 
@@ -106,9 +106,9 @@ class MockScheduler:
         time can be a timedelta, time, or datetime
         (all should be localized naive).
         """
-        if type(time) == datetime.timedelta:
+        if isinstance(time, datetime.timedelta):
             target_datetime = self._now + time
-        elif type(time) == datetime.time:
+        elif isinstance(time, datetime.time):
             if time > self._now.time():
                 target_datetime = datetime.datetime.combine(
                     self._now.date(), time
@@ -117,7 +117,7 @@ class MockScheduler:
                 # handle wrap around to next day if time is in the past already
                 target_date = self._now.date() + datetime.timedelta(days=1)
                 target_datetime = datetime.datetime.combine(target_date, time)
-        elif type(time) == datetime.datetime:
+        elif isinstance(time, datetime.datetime):
             target_datetime = time
         else:
             raise ValueError(
