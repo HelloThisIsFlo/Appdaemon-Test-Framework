@@ -3,7 +3,7 @@ version: 2.1
 executors:
   homeassistant:
     docker:
-      - image: "ghcr.io/hassio-addons/base:14.0.5"
+      - image: "ghcr.io/hassio-addons/appdaemon/amd64:0.13.4"
     environment:
       PATH: "/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.local/bin"
 
