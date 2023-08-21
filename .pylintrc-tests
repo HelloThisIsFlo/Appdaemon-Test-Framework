@@ -14,7 +14,7 @@ max-line-length=79
 
 function-rgx=[a-z_][a-z0-9_]{2,50}$
 
-fail-under=6.51
+fail-under=6.57
 
 [MESSAGES CONTROL]
 

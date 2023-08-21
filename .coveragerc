@@ -13,4 +13,4 @@ branch = True
 show_missing = True
 precision = 3
 skip_covered = True
-fail_under = 94.64
+fail_under = 94.85

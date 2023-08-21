@@ -1,6 +1,6 @@
 import textwrap
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 # Custom Matchers ##################################################
 
@@ -80,6 +80,9 @@ class Was(ABC):
     def called(self):
         self.called_with()
 
+    def toggled(self, **kwargs: Any) -> None:
+        """Toggle abstract method."""
+
 
 class WasWrapper(Was):
     def __init__(self, thing_to_check, hass_functions):
@@ -138,6 +141,26 @@ class WasWrapper(Was):
             service_full_name, **kwargs
         )
 
+    def toggled(self, **kwargs: Any) -> None:
+        """Assert that a given entity_id has been toggled."""
+        entity_id = self.thing_to_check
+
+        service_not_called = _capture_assert_failure_exception(
+            lambda: self.hass_functions["call_service"].assert_any_call(
+                ServiceOnAnyDomain("toggle"),
+                entity_id=entity_id,
+            )
+        )
+
+        toggle_helper_not_called = _capture_assert_failure_exception(
+            lambda: self.hass_functions["toggle"].assert_any_call(entity_id)
+        )
+
+        if service_not_called and toggle_helper_not_called:
+            raise EitherOrAssertionError(
+                service_not_called, toggle_helper_not_called
+            )
+
 
 class WasNotWrapper(Was):
     def __init__(self, was_wrapper: WasWrapper) -> None:
@@ -185,6 +208,18 @@ class WasNotWrapper(Was):
             raise AssertionError(
                 "Service shoud NOT have been called with the given args: "
                 + str(kwargs)
+            )
+
+    def toggled(self, **kwargs: Any) -> None:
+        """Assert that a given entity_id has NOT been toggled."""
+        thing_not_toggled = _capture_assert_failure_exception(
+            lambda: self.was_wrapper.toggled()
+        )
+
+        if not thing_not_toggled:
+            raise AssertionError(
+                "Should NOT have been toggled: "
+                + str(self.was_wrapper.thing_to_check)
             )
 
 

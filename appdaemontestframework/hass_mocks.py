@@ -186,6 +186,7 @@ class HassMocks:
             MockHandler(Hass, "turn_on"),
             MockHandler(Hass, "turn_off"),
             MockHandler(Hass, "fire_event"),
+            MockHandler(Hass, "toggle"),
             # > Custom callback functions
             MockHandler(Hass, "register_constraint"),
             MockHandler(Hass, "now_is_between"),

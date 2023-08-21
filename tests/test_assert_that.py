@@ -1,4 +1,5 @@
 import appdaemon.plugins.hass.hassapi as hass
+import pytest
 
 from appdaemontestframework import automation_fixture
 
@@ -68,6 +69,10 @@ class MockAutomation(hass.Hass):
                 transition=TRANSITION_DURATION,
             )
 
+    def toggle_light(self):
+        """Toggle light."""
+        self.toggle(LIGHT)
+
 
 @automation_fixture(MockAutomation)
 def automation():
@@ -136,3 +141,28 @@ class TestTurnedOff:
             assert_that(LIGHT).was_not.turned_off()
             automation.turn_off_light_with_transition(via_helper=True)
             assert_that(LIGHT).was.turned_off(transition=TRANSITION_DURATION)
+
+
+def test_toggled(assert_that, automation):
+    """Toggle mock works."""
+    # Given
+    assert_that(LIGHT).was_not.toggled()
+
+    # When
+    automation.toggle_light()
+
+    # Then
+    assert_that(LIGHT).was.toggled()
+
+
+def test_not_toggled(assert_that, automation):
+    """Not toggled raises exception."""
+    # Given
+    assert_that(LIGHT).was_not.toggled()
+
+    # When
+    automation.toggle_light()
+
+    # Then
+    with pytest.raises(AssertionError):
+        assert_that(LIGHT).was_not.toggled()
