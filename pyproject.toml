@@ -27,7 +27,7 @@ pytest-asyncio = "0.21.1"
 pytest-cov = "4.1.0"
 pytest-mock = "3.11.1"
 pytest-xdist = "3.3.1"
-tox = "4.9.0"
+tox = "4.11.3"
 types-pytz = "2023.3.0.1"
 
 [tool.black]
