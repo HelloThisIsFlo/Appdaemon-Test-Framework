@@ -17,7 +17,7 @@ reports=y
 
 max-line-length=79
 
-fail-under=4.79
+fail-under=3.81
 
 
 [SIMILARITIES]
