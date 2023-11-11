@@ -22,6 +22,7 @@ New feature should come with the proper unit tests.
 
 LIGHT = 'light.some_light'
 SWITCH = 'switch.some_switch'
+INPUT_SELECT = 'input_select.some_input_select'
 TRANSITION_DURATION = 2
 
 
@@ -141,3 +142,17 @@ class TestTurnedOff:
             assert_that(LIGHT).was_not.turned_off()
             automation.turn_off_light_with_transition(via_helper=True)
             assert_that(LIGHT).was.turned_off(transition=TRANSITION_DURATION)
+
+
+class TestSelectOption:
+    class TestViaHelper:
+        def test_option_is_set(self, assert_that, automation):
+            assert_that(INPUT_SELECT).was_not.set_to_option('new_option')
+            automation.select_option(INPUT_SELECT, 'new_option')
+            assert_that(INPUT_SELECT).was.set_to_option('new_option')
+
+    class TestViaService:
+        def test_option_is_set(self, assert_that, automation):
+            assert_that(INPUT_SELECT).was_not.set_to_option('new_service_option')
+            automation.call_service("input_select/select_option", entity_id=INPUT_SELECT, option='new_service_option')
+            assert_that(INPUT_SELECT).was.set_to_option('new_service_option')

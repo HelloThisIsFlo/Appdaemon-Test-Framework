@@ -68,6 +68,10 @@ class Was(ABC):
     def called_with(self, **kwargs):
         pass
 
+    @abstractmethod
+    def set_to_option(self, **kwargs):
+        pass
+
     def called(self):
         self.called_with()
 
@@ -120,6 +124,24 @@ class WasWrapper(Was):
         self.hass_functions['call_service'].assert_any_call(
             service_full_name, **kwargs)
 
+    def set_to_option(self, option_selected, **service_specific_parameters):
+        """ Assert that a given entity_id has been set to the chosen value """
+        entity_id = self.thing_to_check
+
+        service_not_called = _capture_assert_failure_exception(
+            lambda: self.hass_functions['call_service'].assert_any_call(
+                ServiceOnAnyDomain('select_option'),
+                **{'entity_id': entity_id, 'option': option_selected, **service_specific_parameters}))
+
+        set_option_helper_not_called = _capture_assert_failure_exception(
+            lambda: self.hass_functions['select_option'].assert_any_call(
+                entity_id,
+                option_selected,
+                **service_specific_parameters))
+
+        if service_not_called and set_option_helper_not_called:
+            raise EitherOrAssertionError(
+                service_not_called, set_option_helper_not_called)
 
 class WasNotWrapper(Was):
     def __init__(self, was_wrapper):
@@ -153,6 +175,16 @@ class WasNotWrapper(Was):
         if not service_not_called:
             raise AssertionError(
                 "Service shoud NOT have been called with the given args: " + str(kwargs))
+
+    def set_to_option(self, newvalue, **service_specific_parameters):
+        """ Assert that a given entity_id has NOT the value newvalue """
+        val = _capture_assert_failure_exception(
+            lambda: self.was_wrapper.set_to_option(newvalue, **service_specific_parameters)
+        )
+        if not val:
+            raise AssertionError(
+                "Should NOT have the value: "
+                + str(self.was_wrapper.thing_to_check))
 
 
 class ListensToWrapper:
