@@ -38,6 +38,12 @@ commands:
           paths:
             - /root/.local/
 
+      # Git - This is required to install the python dependencies that come from
+      #       a git repo. TODO: remove once those deps come directly from pypi
+      - run:
+          name: Install Git
+          command: apk add --update git
+
       # Python dependencies
       - restore_cache:
           name: Restore Python Dependencies
