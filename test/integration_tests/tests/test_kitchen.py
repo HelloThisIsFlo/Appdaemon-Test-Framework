@@ -1,4 +1,4 @@
-from apps.kitchen import Kitchen
+from apps.kitchen import STORAGE_NAMESPACE, Kitchen
 import pytest
 from mock import patch, MagicMock
 from apps.entity_ids import ID
@@ -258,3 +258,14 @@ class TestClickCancellation:
             assert_that(ID['bathroom']['water_heater']).was_not.turned_on()
             time_travel.fast_forward(1).minutes()
             assert_that(ID['bathroom']['water_heater']).was.turned_on()
+
+
+class TestStateStorage:
+    @pytest.mark.parametrize("preset,brightness", [("DARK", 20), ("BRIGHT", 100)])
+    def test_turn_on_preset_light(self, preset, brightness, given_that, when_new, assert_that):
+        given_that.state_of(ID["kitchen"]["light"], namespace=STORAGE_NAMESPACE).is_set_to(
+            "ok", attributes={"preset": preset}
+        )
+
+        when_new.click_button(type="long")
+        assert_that(ID["kitchen"]["light"]).was.turned_on(brightness=brightness)

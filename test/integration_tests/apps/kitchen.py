@@ -18,6 +18,12 @@ MSG_SHORT_OFF = f"was turned off for {SHORT_DELAY} minutes"
 MSG_LONG_OFF = f"was turned off for {LONG_DELAY} minutes"
 MSG_ON = "was turned back on"
 
+STORAGE_NAMESPACE = "app_storage"
+
+PRESETS = {
+    "BRIGHT": {"brightness": 100},
+    "DARK": {"brightness": 20},
+}
 
 class Kitchen(hass.Hass):
     def initialize(self):
@@ -47,7 +53,12 @@ class Kitchen(hass.Hass):
         self._send_water_heater_notification(MSG_LONG_OFF)
 
     def _new_button_long_press(self, _e, _d, _k):
-        pass
+        preset = PRESETS.get(
+            self.get_state(
+                ID["kitchen"]["light"], attribute="preset", namespace=STORAGE_NAMESPACE
+            )
+        )
+        self.turn_on(ID['kitchen']['light'], **preset)
 
     def _turn_off_water_heater_for_X_minutes(self, minutes):
         self.turn_off(ID['bathroom']['water_heater'])

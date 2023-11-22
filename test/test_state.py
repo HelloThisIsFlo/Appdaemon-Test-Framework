@@ -15,20 +15,20 @@ class MockAutomation(Hass):
     def initialize(self):
         pass
 
-    def is_light_turned_on(self) -> bool:
-        return self.get_state(LIGHT) == 'on'
+    def is_light_turned_on(self, namespace=None) -> bool:
+        return self.get_state(LIGHT, namespace=namespace) == 'on'
 
-    def get_light_brightness(self) -> int:
-        return self.get_state(LIGHT, attribute='brightness')
+    def get_light_brightness(self, namespace=None) -> int:
+        return self.get_state(LIGHT, attribute='brightness', namespace=namespace)
 
-    def get_all_attributes_from_light(self):
-        return self.get_state(LIGHT, attribute='all')
+    def get_all_attributes_from_light(self, namespace=None):
+        return self.get_state(LIGHT, attribute='all', namespace=namespace)
 
     def get_without_using_keyword(self):
         return self.get_state(LIGHT, 'brightness')
 
-    def get_complete_state_dictionary(self):
-        return self.get_state()
+    def get_complete_state_dictionary(self, namespace=None):
+        return self.get_state(namespace=namespace)
 
 
 @automation_fixture(MockAutomation)
@@ -41,6 +41,9 @@ def test_state_was_never_set__raise_error(given_that,
     with raises(StateNotSetError, match=r'.*State.*was never set.*'):
         automation.get_light_brightness()
 
+    with raises(StateNotSetError, match=r'.*State.*namespace was never set.*'):
+        automation.get_light_brightness(namespace='test')
+
 
 def test_set_and_get_state(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('off')
@@ -49,11 +52,20 @@ def test_set_and_get_state(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('on')
     assert automation.is_light_turned_on()
 
+    given_that.state_of(LIGHT, namespace='test').is_set_to('off')
+    assert not automation.is_light_turned_on(namespace='test')
+
+    given_that.state_of(LIGHT, namespace='test').is_set_to('on')
+    assert automation.is_light_turned_on(namespace='test')
+
 
 def test_attribute_was_never_set__raise_error(given_that,
                                               automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('on')
     assert automation.get_light_brightness() is None
+
+    given_that.state_of(LIGHT, namespace='test').is_set_to('on')
+    assert automation.get_light_brightness(namespace='test') is None
 
 
 def test_set_and_get_attribute(given_that, automation: MockAutomation):
@@ -63,14 +75,33 @@ def test_set_and_get_attribute(given_that, automation: MockAutomation):
     given_that.state_of(LIGHT).is_set_to('on', {'brightness': 22})
     assert automation.get_light_brightness() == 22
 
+    given_that.state_of(LIGHT, namespace='test').is_set_to('on', attributes={'brightness': 11})
+    assert automation.get_light_brightness(namespace='test') == 11
+
+    given_that.state_of(LIGHT, namespace='test').is_set_to('on', {'brightness': 22})
+    assert automation.get_light_brightness(namespace='test') == 22
+
 
 def test_set_and_get_all_attribute(given_that, automation: MockAutomation):
-    given_that.state_of(LIGHT).is_set_to('on', attributes={'brightness': 11,
-                                                           'color': 'blue'})
+    given_that.state_of(LIGHT).is_set_to(
+        "on", attributes={"brightness": 11, "color": "blue"}
+    )
+    given_that.state_of(LIGHT, namespace="test").is_set_to(
+        "on", attributes={"brightness": 22, "color": "red"}
+    )
     assert automation.get_all_attributes_from_light() == {
-        'state': 'on', 'last_updated': None, 'last_changed': None,
-        'entity_id': LIGHT,
-        'attributes': {'brightness': 11, 'color': 'blue'}
+        "state": "on",
+        "last_updated": None,
+        "last_changed": None,
+        "entity_id": LIGHT,
+        "attributes": {"brightness": 11, "color": "blue"},
+    }
+    assert automation.get_all_attributes_from_light(namespace="test") == {
+        "state": "on",
+        "last_updated": None,
+        "last_changed": None,
+        "entity_id": LIGHT,
+        "attributes": {"brightness": 22, "color": "red"},
     }
 
 
