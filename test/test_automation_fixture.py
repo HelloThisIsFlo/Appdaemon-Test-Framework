@@ -164,7 +164,7 @@ class TestAutomationFixture:
         """)
 
         result = testdir.runpytest()
-        result.assert_outcomes(error=1)
+        result.assert_outcomes(errors=1)
         assert expected_error_regex_was_found_in_stdout_lines(result, r"AutomationFixtureError.*argument")
 
     def test_name_attribute_of_hass_object_set_to_automation_class_name(self, testdir):
@@ -212,7 +212,7 @@ class TestAutomationFixture:
                 result = testdir.runpytest()
 
                 # Then: Found 1 error & stdout has a line with expected error
-                result.assert_outcomes(error=1)
+                result.assert_outcomes(errors=1)
 
                 if not expected_error_regex_was_found_in_stdout_lines(result, expected_error_regex):
                     pytest.fail(f"Couldn't fine line matching error: '{expected_error_regex}'")
