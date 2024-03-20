@@ -163,16 +163,16 @@ class HassMocks:
             # Wrap all these so we can re-use the AppDaemon code, but check
             # if they were called
             SpyMockHandler(Hass, "run_in"),
-            MockHandler(Hass, "run_once"),
-            MockHandler(Hass, "run_at"),
-            MockHandler(Hass, "run_daily"),
-            MockHandler(Hass, "run_hourly"),
-            MockHandler(Hass, "run_minutely"),
-            MockHandler(Hass, "run_every"),
+            SpyMockHandler(Hass, "run_once"),
+            SpyMockHandler(Hass, "run_at"),
+            SpyMockHandler(Hass, "run_daily"),
+            SpyMockHandler(Hass, "run_hourly"),
+            SpyMockHandler(Hass, "run_minutely"),
+            SpyMockHandler(Hass, "run_every"),
             SpyMockHandler(Hass, "cancel_timer"),
             # > Sunrise and sunset functions
-            MockHandler(Hass, "run_at_sunrise"),
-            MockHandler(Hass, "run_at_sunset"),
+            SpyMockHandler(Hass, "run_at_sunrise"),
+            SpyMockHandler(Hass, "run_at_sunset"),
             # > Listener callback registrations functions
             MockHandler(Hass, "listen_event"),
             MockHandler(Hass, "listen_state"),

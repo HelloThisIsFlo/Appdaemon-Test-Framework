@@ -268,7 +268,7 @@ class RegisteredWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
                 registered_wrapper._run_daily.assert_any_call(
-                    callback, time_, **kwargs
+                    callback.__self__, callback, time_, **kwargs
                 )
 
         return WithCallbackWrapper()
@@ -280,7 +280,7 @@ class RegisteredWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
                 registered_wrapper._run_mintely.assert_any_call(
-                    callback, time_, **kwargs
+                    callback.__self__, callback, time_, **kwargs
                 )
 
         return WithCallbackWrapper()
@@ -292,7 +292,7 @@ class RegisteredWrapper:
             def with_callback(self, callback):
                 registered_wrapper.automation_thing_to_check.initialize()
                 registered_wrapper._run_at.assert_any_call(
-                    callback, time_, **kwargs
+                    callback.__self__, callback, time_, **kwargs
                 )
 
         return WithCallbackWrapper()

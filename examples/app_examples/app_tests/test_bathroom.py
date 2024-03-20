@@ -33,7 +33,7 @@ def bathroom(given_that):
     for speaker in speakers:
         given_that.state_of(speaker).is_set_to("off")
 
-    given_that.time_is(time(hour=15))
+    given_that.time_is(time(hour=10))
 
     # Clear calls recorded during initialisation
     given_that.mock_functions_are_cleared()
@@ -70,25 +70,25 @@ def when_new(bathroom):
 class TestInitialize:
     def test_start_during_day(
         self,
-        given_that,
+        time_travel,
         when_new,
         assert_that,
         bathroom,
         assert_day_mode_started,
     ):
-        given_that.time_is(time(hour=13))
+        time_travel.fast_forward(3 * 60).minutes()
         bathroom.initialize()
         assert_day_mode_started()
 
     def test_start_during_evening(
         self,
-        given_that,
+        time_travel,
         when_new,
         assert_that,
         bathroom,
         assert_evening_mode_started,
     ):
-        given_that.time_is(time(hour=20))
+        time_travel.fast_forward(10 * 60).minutes()
         bathroom.initialize()
         assert_evening_mode_started()
 
@@ -131,9 +131,13 @@ class TestInitialize:
         )
 
         run_daily.assert_any_call(
-            bathroom._time_triggered, time(hour=DAY_HOUR), hour=DAY_HOUR
+            bathroom,
+            bathroom._time_triggered,
+            time(hour=DAY_HOUR),
+            hour=DAY_HOUR,
         )
         run_daily.assert_any_call(
+            bathroom,
             bathroom._time_triggered,
             time(hour=EVENING_HOUR),
             hour=EVENING_HOUR,
@@ -473,38 +477,38 @@ class TestDuringAfterShower:
 
         def test_during_day_activate_day_mode(
             self,
-            given_that,
+            time_travel,
             when_new,
             assert_that,
             assert_day_mode_started,
             start_after_shower_mode,
         ):
+            time_travel.fast_forward(4 * 60).minutes()
             scenarios = [
                 when_new.motion_kitchen,
                 when_new.motion_living_room,
                 when_new.no_more_motion_bathroom,
             ]
             for scenario in scenarios:
-                given_that.time_is(time(hour=14))
                 start_after_shower_mode()
                 scenario()
                 assert_day_mode_started()
 
         def test_during_evening_activate_evening_mode(
             self,
-            given_that,
+            time_travel,
             when_new,
             assert_that,
             assert_evening_mode_started,
             start_after_shower_mode,
         ):
+            time_travel.fast_forward(10 * 60).minutes()
             scenarios = [
                 when_new.motion_kitchen,
                 when_new.motion_living_room,
                 when_new.no_more_motion_bathroom,
             ]
             for scenario in scenarios:
-                given_that.time_is(time(hour=20))
                 start_after_shower_mode()
                 scenario()
                 assert_evening_mode_started()
