@@ -68,16 +68,16 @@ class GivenThatWrapper:
                 else:
                     return state["attributes"].get(attribute)
 
-        self._hass_mocks.hass_functions[
-            "get_state"
-        ].side_effect = get_state_mock
+        self._hass_mocks.hass_functions["get_state"].side_effect = (
+            get_state_mock
+        )
 
         def entity_exists_mock(entity_id):
             return entity_id in self.mocked_states
 
-        self._hass_mocks.hass_functions[
-            "entity_exists"
-        ].side_effect = entity_exists_mock
+        self._hass_mocks.hass_functions["entity_exists"].side_effect = (
+            entity_exists_mock
+        )
 
     def _init_mocked_passed_args(self) -> None:
         self.mocked_passed_args = self._hass_mocks.hass_functions["args"]
@@ -111,9 +111,9 @@ class GivenThatWrapper:
         class IsWrapper:
             @staticmethod
             def is_set_to(argument_value):
-                given_that_wrapper.mocked_passed_args[
-                    argument_key
-                ] = argument_value
+                given_that_wrapper.mocked_passed_args[argument_key] = (
+                    argument_value
+                )
 
         return IsWrapper()
 

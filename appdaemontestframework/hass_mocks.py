@@ -200,9 +200,9 @@ class HassMocks:
         # with calls to public methods in the HassMocks object going forward.
         self._hass_functions = {}
         for mock_handler in self._mock_handlers:
-            self._hass_functions[
-                mock_handler.function_or_field_name
-            ] = mock_handler.mock
+            self._hass_functions[mock_handler.function_or_field_name] = (
+                mock_handler.mock
+            )
 
     # Mock handling
     def unpatch_mocks(self) -> None:

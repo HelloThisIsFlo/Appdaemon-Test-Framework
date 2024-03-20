@@ -1,6 +1,5 @@
 """When wrapper module."""
 
-
 from datetime import datetime
 
 

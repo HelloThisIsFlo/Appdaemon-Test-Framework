@@ -1,6 +1,5 @@
 """Tests for When wrapper."""
 
-
 import appdaemon.plugins.hass.hassapi as hass
 
 from appdaemontestframework import automation_fixture
