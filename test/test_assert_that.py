@@ -1,8 +1,5 @@
-from datetime import time, datetime
-
 import appdaemon.plugins.hass.hassapi as hass
 import pytest
-from pytest import mark
 
 from appdaemontestframework import automation_fixture
 
@@ -73,6 +70,12 @@ class MockAutomation(hass.Hass):
                 transition=TRANSITION_DURATION
             )
 
+    def call_invalid_service_name(self):
+        self.call_service(
+            'switch.turn_off',
+            entity_id=SWITCH
+        )
+
 
 @automation_fixture(MockAutomation)
 def automation():
@@ -141,3 +144,28 @@ class TestTurnedOff:
             assert_that(LIGHT).was_not.turned_off()
             automation.turn_off_light_with_transition(via_helper=True)
             assert_that(LIGHT).was.turned_off(transition=TRANSITION_DURATION)
+
+
+class TestServiceNameValidation:
+    class TestValidServiceName:
+        def test_valid_service_asserted_and_is_called_does_not_raise(self, assert_that, automation):
+            automation.turn_off_switch(via_helper=False)
+            assert_that('switch/turn_off') \
+                .was.called_with(entity_id=SWITCH)
+
+        def test_valid_service_asserted_and_is_not_called_raises_assertion_error(self, assert_that, automation):
+            with pytest.raises(AssertionError):
+                assert_that('switch/turn_off') \
+                    .was.called_with(entity_id=SWITCH)
+
+    class TestInvalidServiceName:
+        def test_invalid_service_asserted_and_is_called_raises_value_error(self, assert_that, automation):
+            automation.call_invalid_service_name()
+            with pytest.raises(ValueError):
+                assert_that('switch.turn_off')\
+                    .was.called_with(entity_id=SWITCH)
+
+        def test_invalid_service_asserted_and_is_not_called_raises_value_or_assertion_error(self, assert_that, automation):
+            with pytest.raises((ValueError, AssertionError)):
+                assert_that('switch.turn_off')\
+                    .was.called_with(entity_id=SWITCH)
