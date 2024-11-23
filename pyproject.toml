@@ -11,7 +11,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-appdaemon = { git = "https://github.com/LuisMunozVillarreal/appdaemon.git", rev = "364ce8f078667520fec77b99e27f22a5ee6459a9" }
+appdaemon = { git = "https://github.com/LuisMunozVillarreal/appdaemon.git", rev = "02dfb695488c05a3a901204ac9ce0de63cf589b8" }
 
 [tool.poetry.group.dev.dependencies]
 black = "24.4.2"
