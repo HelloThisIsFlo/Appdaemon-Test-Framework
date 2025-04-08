@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 
 from appdaemontestframework.common import AppdaemonTestFrameworkError
@@ -5,12 +6,19 @@ from appdaemontestframework.hass_mocks import HassMocks
 
 
 class StateNotSetError(AppdaemonTestFrameworkError):
-    def __init__(self, entity_id):
-        super().__init__(f"""
-        State for entity: '{entity_id}' was never set!
-        Please make sure to set the state with `given_that.state_of({entity_id}).is_set_to(STATE)`
-        before trying to access the mocked state
-        """)
+    def __init__(self, entity_id, namespace):
+        if namespace != 'default':
+            super().__init__(f"""
+            State for entity: '{entity_id}' in '{namespace}' namespace was never set!
+            Please make sure to set the state with `given_that.state_of({entity_id}, NAMESPACE).is_set_to(STATE)`
+            before trying to access the mocked state
+            """)
+        else:
+            super().__init__(f"""
+            State for entity: '{entity_id}' was never set!
+            Please make sure to set the state with `given_that.state_of({entity_id}).is_set_to(STATE)`
+            before trying to access the mocked state
+            """)
 
 
 class AttributeNotSetError(AppdaemonTestFrameworkError):
@@ -24,13 +32,14 @@ class GivenThatWrapper:
         self._init_mocked_passed_args()
 
     def _init_mocked_states(self):
-        self.mocked_states = {}
+        self.mocked_states = defaultdict(dict)
 
-        def get_state_mock(entity_id=None, *, attribute=None):
+        def get_state_mock(entity_id=None, *, attribute=None, namespace=None):
+            namespace = namespace or "default"
             if entity_id is None:
                 resdict = dict()
-                for entityid in self.mocked_states:
-                    state = self.mocked_states[entityid]
+                for entityid in self.mocked_states[namespace]:
+                    state = self.mocked_states[namespace][entityid]
                     resdict.update({
                         entityid: {
                             "state": state['main'],
@@ -39,10 +48,10 @@ class GivenThatWrapper:
                     })
                 return resdict
             else:
-                if entity_id not in self.mocked_states:
-                    raise StateNotSetError(entity_id)
+                if entity_id not in self.mocked_states[namespace]:
+                    raise StateNotSetError(entity_id, namespace)
 
-                state = self.mocked_states[entity_id]
+                state = self.mocked_states[namespace][entity_id]
 
                 if attribute is None:
                     return state['main']
@@ -63,8 +72,9 @@ class GivenThatWrapper:
 
         self._hass_mocks.hass_functions['get_state'].side_effect = get_state_mock
 
-        def entity_exists_mock(entity_id):
-            return entity_id in self.mocked_states
+        def entity_exists_mock(entity_id, namespace=None):
+            namespace = namespace or "default"
+            return entity_id in self.mocked_states[namespace]
 
         self._hass_mocks.hass_functions['entity_exists'].side_effect = entity_exists_mock
 
@@ -72,7 +82,8 @@ class GivenThatWrapper:
         self.mocked_passed_args = self._hass_mocks.hass_functions['args']
         self.mocked_passed_args.clear()
 
-    def state_of(self, entity_id):
+    def state_of(self, entity_id, namespace=None):
+        namespace = namespace or "default"
         given_that_wrapper = self
 
         class IsWrapper:
@@ -83,7 +94,7 @@ class GivenThatWrapper:
                           last_changed: datetime = None):
                 if not attributes:
                     attributes = {}
-                given_that_wrapper.mocked_states[entity_id] = {
+                given_that_wrapper.mocked_states[namespace][entity_id] = {
                     'main': state,
                     'attributes': attributes,
                     'last_updated': last_updated,
