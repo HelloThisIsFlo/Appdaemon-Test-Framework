@@ -1,0 +1,23 @@
+[project]
+name = "example-appdaemon-project"
+version = "0.1.0"
+description = "Example project using Appdaemon Test Framework"
+requires-python = ">=3.8"
+dependencies = [
+    "appdaemon>=4.0.0",
+    "appdaemontestframework>=4.1.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=6.0.0",
+    "pytest-asyncio>=0.20.0",
+    "coverage[toml]>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+addopts = "--verbose" 

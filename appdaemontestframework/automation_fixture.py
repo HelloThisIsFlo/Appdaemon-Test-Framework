@@ -1,6 +1,5 @@
 import warnings
 from inspect import isfunction, signature
-import pkg_resources
 
 import pytest
 from appdaemon.plugins.hass.hassapi import Hass
@@ -12,18 +11,25 @@ class AutomationFixtureError(AppdaemonTestFrameworkError):
     pass
 
 
-def _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks):
+def _instantiate_and_initialize_automation(
+    function, automation_class, given_that, hass_functions, hass_mocks
+):
+    from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
+    from appdaemon.models.config.app import AppConfig
+
     _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks)
 
-    automation = automation_class(
-            None,
-            automation_class.__name__,
-            None,
-            None,
-            None,
-            None,
-            None
+    # Create mock AppDaemon and AppConfig for new Appdaemon version
+    mock_ad = MockAppDaemon()
+    mock_config = AppConfig(
+        name=automation_class.__name__,
+        module=automation_class.__module__,
+        **{
+            "class": automation_class.__name__
+        },  # 'class' is a Python keyword, so we use dict unpacking
     )
+
+    automation = automation_class(mock_ad, mock_config)
     automation.initialize()
     given_that.mock_functions_are_cleared()
     return automation
@@ -31,24 +37,25 @@ def _instantiate_and_initialize_automation(function, automation_class, given_tha
 
 def _inject_helpers_and_call_function(function, given_that, hass_functions, hass_mocks):
     injectable_fixtures = {
-        'given_that': given_that,
-        'hass_functions': hass_functions,
-        'hass_mocks': hass_mocks,
+        "given_that": given_that,
+        "hass_functions": hass_functions,
+        "hass_mocks": hass_mocks,
     }
 
     def _check_valid(param):
         if param not in injectable_fixtures:
             raise AutomationFixtureError(
-                f"'{param}' is not a valid fixture! | The only fixtures injectable in '@automation_fixture' are: {list(injectable_fixtures.keys())}")
+                f"'{param}' is not a valid fixture! | The only fixtures injectable in '@automation_fixture' are: {list(injectable_fixtures.keys())}"
+            )
 
-        if param == 'hass_functions':
+        if param == "hass_functions":
             warnings.warn(
                 """
                 Injecting `hass_functions` into automation fixtures is deprecated.
                 Replace `hass_functions` with `hass_mocks` injections and access hass_functions with `hass_mocks.hass_functions`
                 """,
-                DeprecationWarning)
-
+                DeprecationWarning,
+            )
 
     args = []
     for param in signature(function).parameters:
@@ -67,22 +74,28 @@ def ensure_automation_is_valid(automation_class):
         return list(func_parameters.keys()) != ["self"]
 
     def __init___was_overridden():
-        return '__init__' in automation_class.__dict__
+        return "__init__" in automation_class.__dict__
 
     # noinspection PyPep8Naming,SpellCheckingInspection
     def not_subclass_of_Hass():
         return not issubclass(automation_class, Hass)
 
-    if not function_exist_in_automation_class('initialize'):
+    if not function_exist_in_automation_class("initialize"):
         raise AutomationFixtureError(
-            f"'{automation_class.__name__}' has no 'initialize' function! Make sure you implemented it!")
-    if function_has_arguments_other_than_self('initialize'):
+            f"'{automation_class.__name__}' has no 'initialize' function! Make sure you implemented it!"
+        )
+    if function_has_arguments_other_than_self("initialize"):
         raise AutomationFixtureError(
-            f"'{automation_class.__name__}' 'initialize' should have no arguments other than 'self'!")
+            f"'{automation_class.__name__}' 'initialize' should have no arguments other than 'self'!"
+        )
     if __init___was_overridden():
-        raise AutomationFixtureError(f"'{automation_class.__name__}' should not override '__init__'")
+        raise AutomationFixtureError(
+            f"'{automation_class.__name__}' should not override '__init__'"
+        )
     if not_subclass_of_Hass():
-        raise AutomationFixtureError(f"'{automation_class.__name__}' should be a subclass of 'Hass'")
+        raise AutomationFixtureError(
+            f"'{automation_class.__name__}' should be a subclass of 'Hass'"
+        )
 
 
 class _AutomationFixtureDecoratorWithoutArgs:
@@ -93,9 +106,13 @@ class _AutomationFixtureDecoratorWithoutArgs:
 
     def __call__(self, function):
         @pytest.fixture(params=self.automation_classes, ids=self._generate_id)
-        def automation_fixture_with_initialisation(request, given_that, hass_functions, hass_mocks):
+        def automation_fixture_with_initialisation(
+            request, given_that, hass_functions, hass_mocks
+        ):
             automation_class = request.param
-            return _instantiate_and_initialize_automation(function, automation_class, given_that, hass_functions, hass_mocks)
+            return _instantiate_and_initialize_automation(
+                function, automation_class, given_that, hass_functions, hass_mocks
+            )
 
         return automation_fixture_with_initialisation
 
@@ -111,11 +128,14 @@ class _AutomationFixtureDecoratorWithArgs:
 
     def __call__(self, function):
         @pytest.fixture(params=self.automation_classes_with_args, ids=self._generate_id)
-        def automation_fixture_with_initialisation(request, given_that, hass_functions, hass_mocks):
+        def automation_fixture_with_initialisation(
+            request, given_that, hass_functions, hass_mocks
+        ):
             automation_class = request.param[0]
             automation_args = request.param[1]
             automation = _instantiate_and_initialize_automation(
-                function, automation_class, given_that, hass_functions, hass_mocks)
+                function, automation_class, given_that, hass_functions, hass_mocks
+            )
             return (automation, automation_args)
 
         return automation_fixture_with_initialisation
@@ -169,7 +189,8 @@ def automation_fixture(*args):
     """
     if not args or isfunction(args[0]):
         raise AutomationFixtureError(
-            'Do not forget to pass the automation class(es) as argument')
+            "Do not forget to pass the automation class(es) as argument"
+        )
 
     if type(args[0]) is not tuple:
         automation_classes = args

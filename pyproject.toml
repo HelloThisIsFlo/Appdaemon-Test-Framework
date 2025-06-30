@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "appdaemontestframework"
+version = "4.1.0"
+description = "Clean, human-readable tests for Appdaemon"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+    { name = "Florian Kempenich", email = "Flori@nKempenich.com" },
+]
+keywords = [
+    "appdaemon",
+    "homeassistant", 
+    "test",
+    "tdd",
+    "clean-code",
+    "home-automation"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9", 
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+    "Topic :: Home Automation",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "appdaemon>=4.0.0",
+    "packaging>=20.0",
+    "mock>=3.0.5",
+    "setuptools>=75.3.2",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=6.0.0",
+    "pytest-asyncio>=0.20.0",
+    "coverage[toml]>=6.0",
+]
+dev = [
+    "appdaemontestframework[test]",
+    "pylint>=2.0.0",
+    "autopep8>=1.5.0",
+    "tox>=3.0.0",
+]
+
+[project.urls]
+Homepage = "https://floriankempenich.github.io/Appdaemon-Test-Framework"
+Documentation = "https://floriankempenich.github.io/Appdaemon-Test-Framework"
+Repository = "https://github.com/FlorianKempenich/Appdaemon-Test-Framework"
+Issues = "https://github.com/FlorianKempenich/Appdaemon-Test-Framework/issues"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/appdaemontestframework",
+    "/README.md",
+    "/LICENSE",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["appdaemontestframework"]
+
+[tool.pytest.ini_options]
+addopts = "--ignore=doc"
+markers = [
+    "only: marks tests as the only ones to run",
+    "using_pytester: marks tests that use pytester",
+]
+
+[tool.coverage.run]
+source = ["appdaemontestframework"]
+omit = ["*/tests/*", "*/test_*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+] 
+
+[dependency-groups]
+dev = [
+    "appdaemon>=4.4.2",
+    "coverage>=7.6.1",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.24.0",
+]
