@@ -1,11 +1,15 @@
 import logging
 import warnings
-
-from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
-import appdaemon.utils
 import mock
-from appdaemon.plugins.hass.hassapi import Hass
+import appdaemon
+import asyncio
+import threading
+import datetime
 from packaging.version import Version
+from appdaemontestframework.appdaemon_mock.appdaemon import MockAppDaemon
+from appdaemon.plugins.hass.hassapi import Hass
+
+_hass_instances = []
 
 CURRENT_APPDAEMON_VERSION = Version(appdaemon.utils.__version__)
 
@@ -52,6 +56,64 @@ class _DeprecatedAndUnsupportedAppdaemonCheck:
             )
 
 
+class AsyncSpyMockHandler(object):
+    """
+    Mock Handler that provides async spy functionality. When invoked, it will
+    call our MockScheduler methods instead of the original async methods,
+    but still provide all Mock-related functionality for tracking calls.
+    """
+
+    def __init__(self, object_to_patch, function_name, mock_scheduler_method=None):
+        self.function_or_field_name = function_name
+        self.mock_scheduler_method = mock_scheduler_method
+
+        # Create a mock that tracks calls but delegates to our mock scheduler
+        def async_side_effect(*args, **kwargs):
+            # The side_effect receives the method arguments directly (callback, delay, ...)
+            # We need to find the automation instance separately
+            method_args = args
+
+            # Delegate to our mock scheduler method if provided
+            if self.mock_scheduler_method:
+                # Pass None as hass_self since our mock_scheduler_method will find the real instance
+                result = self.mock_scheduler_method(None, *method_args, **kwargs)
+            else:
+                # For methods without custom implementation, return a suitable default
+                if function_name in [
+                    "run_in",
+                    "run_at",
+                    "run_daily",
+                    "run_hourly",
+                    "run_minutely",
+                    "run_every",
+                    "run_once",
+                ]:
+                    # Return a mock handle for scheduler methods
+                    result = f"mock_handle_{function_name}_{id(method_args)}"
+                else:
+                    result = self.mock.return_value
+
+            # Track the call in the mock manually to avoid signature issues
+            if not hasattr(self.mock, "call_count"):
+                self.mock.call_count = 0
+                self.mock.call_args_list = []
+
+            self.mock.call_count += 1
+            call_obj = mock.call(*args, **kwargs)
+            self.mock.call_args = call_obj
+            self.mock.call_args_list.append(call_obj)
+
+            return result
+
+        self.patch = mock.patch.object(
+            object_to_patch,
+            function_name,
+            side_effect=async_side_effect,
+            autospec=False,
+        )
+        self.mock = self.patch.start()
+
+
 class HassMocks:
     def __init__(self):
         _DeprecatedAndUnsupportedAppdaemonCheck.show_warning_only_once()
@@ -75,6 +137,101 @@ class HassMocks:
             self.AD = AD
             self.logger = logging.getLogger(__name__)
 
+        # Create async-compatible scheduler method implementations
+        def mock_datetime(hass_self_unused, *args, **kwargs):
+            """Mock implementation of datetime that uses our MockScheduler"""
+            # Find the real automation instance
+            real_automation = None
+            for instance in hass_mocks._hass_instances:
+                if hasattr(instance, "AD") and hasattr(instance.AD, "sched"):
+                    real_automation = instance
+                    break
+
+            if real_automation is None:
+                raise RuntimeError("Could not find real automation instance")
+
+            # Use our mock scheduler to get the current time
+            current_time = real_automation.AD.sched.get_now_sync()
+            # Convert to naive datetime as expected by the automation
+            return real_automation.AD.sched.make_naive(current_time)
+
+        def mock_time(hass_self_unused, *args, **kwargs):
+            """Mock implementation of time that uses our MockScheduler"""
+            # Find the real automation instance
+            real_automation = None
+            for instance in hass_mocks._hass_instances:
+                if hasattr(instance, "AD") and hasattr(instance.AD, "sched"):
+                    real_automation = instance
+                    break
+
+            if real_automation is None:
+                raise RuntimeError("Could not find real automation instance")
+
+            # Use our mock scheduler to get the current time
+            current_time = real_automation.AD.sched.get_now_sync()
+            # Convert to naive datetime and return just the time part
+            naive_datetime = real_automation.AD.sched.make_naive(current_time)
+            return naive_datetime.time()
+
+        def mock_run_in(hass_self_unused, *args, **kwargs):
+            """Mock implementation of run_in that uses our MockScheduler"""
+            # Extract callback and delay from args
+            # run_in(callback, delay) or run_in(callback, delay, **kwargs)
+            callback = args[0] if len(args) > 0 else kwargs.get("callback")
+            delay = (
+                args[1]
+                if len(args) > 1
+                else kwargs.get("delay", kwargs.get("seconds", 0))
+            )
+
+            # Convert delay to seconds if needed
+            if hasattr(delay, "total_seconds"):
+                delay_seconds = delay.total_seconds()
+            else:
+                delay_seconds = float(delay)
+
+            # Find the real automation instance from the hass_instances
+            real_automation = None
+            for instance in hass_mocks._hass_instances:
+                if hasattr(instance, "AD") and hasattr(instance.AD, "sched"):
+                    real_automation = instance
+                    break
+
+            if real_automation is None:
+                raise RuntimeError("Could not find real automation instance")
+
+            # Calculate target time using the real automation's scheduler
+            current_time = real_automation.AD.sched.get_now_sync()
+            target_time = current_time + datetime.timedelta(seconds=delay_seconds)
+
+            # Use our mock scheduler
+            return real_automation.AD.sched.insert_schedule_sync(
+                name="run_in",
+                aware_dt=target_time,
+                callback=callback,
+                repeat=False,
+                type_="run_in",
+                **kwargs,
+            )
+
+        def mock_cancel_timer(hass_self_unused, *args, **kwargs):
+            """Mock implementation of cancel_timer"""
+            handle = args[0] if len(args) > 0 else kwargs.get("handle")
+
+            # Find the real automation instance
+            real_automation = None
+            for instance in hass_mocks._hass_instances:
+                if hasattr(instance, "AD") and hasattr(instance.AD, "sched"):
+                    real_automation = instance
+                    break
+
+            if real_automation is None:
+                raise RuntimeError("Could not find real automation instance")
+
+            return real_automation.AD.sched.cancel_timer_sync(
+                name="cancel_timer", handle=handle
+            )
+
         # This is a list of all mocked out functions.
         self._mock_handlers = [
             ### Meta
@@ -84,17 +241,17 @@ class HassMocks:
             ### logging
             MockHandler(Hass, "log", side_effect=self._log_log),
             MockHandler(Hass, "error", side_effect=self._log_error),
-            ### Scheduler callback registrations functions
-            # Wrap all these so we can re-use the AppDaemon code, but check
-            # if they were called
-            SpyMockHandler(Hass, "run_in"),
-            MockHandler(Hass, "run_once"),
-            MockHandler(Hass, "run_at"),
-            MockHandler(Hass, "run_daily"),
-            MockHandler(Hass, "run_hourly"),
-            MockHandler(Hass, "run_minutely"),
-            MockHandler(Hass, "run_every"),
-            SpyMockHandler(Hass, "cancel_timer"),
+            ### Scheduler callback registrations functions - now with async support
+            AsyncSpyMockHandler(Hass, "run_in", mock_scheduler_method=mock_run_in),
+            AsyncSpyMockHandler(Hass, "run_once"),
+            AsyncSpyMockHandler(Hass, "run_at"),
+            AsyncSpyMockHandler(Hass, "run_daily"),
+            AsyncSpyMockHandler(Hass, "run_hourly"),
+            AsyncSpyMockHandler(Hass, "run_minutely"),
+            AsyncSpyMockHandler(Hass, "run_every"),
+            AsyncSpyMockHandler(
+                Hass, "cancel_timer", mock_scheduler_method=mock_cancel_timer
+            ),
             ### Sunrise and sunset functions
             MockHandler(Hass, "run_at_sunrise"),
             MockHandler(Hass, "run_at_sunset"),
@@ -104,7 +261,8 @@ class HassMocks:
             ### State functions / attr
             MockHandler(Hass, "set_state"),
             MockHandler(Hass, "get_state"),
-            SpyMockHandler(Hass, "time"),
+            AsyncSpyMockHandler(Hass, "time", mock_scheduler_method=mock_time),
+            AsyncSpyMockHandler(Hass, "datetime", mock_scheduler_method=mock_datetime),
             DictMockHandler(Hass, "args"),
             ### Interactions functions
             MockHandler(Hass, "call_service"),

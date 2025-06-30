@@ -1,12 +1,5 @@
 import pytest
 
-# Skip entire module due to async/event loop compatibility issues with Appdaemon 4.5+
-# These integration tests rely on time travel and scheduler functionality that requires
-# async support which is not yet implemented in the test framework
-pytestmark = pytest.mark.skip(
-    reason="Integration tests require async/event loop support for Appdaemon 4.5+"
-)
-
 from apps.bathroom import Bathroom, BATHROOM_VOLUMES, DEFAULT_VOLUMES, FAKE_MUTE_VOLUME
 from appdaemon.plugins.hass.hassapi import Hass
 from mock import patch, MagicMock
