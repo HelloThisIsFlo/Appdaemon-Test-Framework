@@ -2,7 +2,7 @@
 name = "example-appdaemon-project"
 version = "0.1.0"
 description = "Example project using Appdaemon Test Framework"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "appdaemon>=4.0.0",
     "appdaemontestframework>=4.1.0",

@@ -8,7 +8,7 @@ version = "4.1.0"
 description = "Clean, human-readable tests for Appdaemon"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [
     { name = "Florian Kempenich", email = "Flori@nKempenich.com" },
 ]
@@ -27,8 +27,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9", 
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -53,7 +51,6 @@ dev = [
     "appdaemontestframework[test]",
     "pylint>=2.0.0",
     "autopep8>=1.5.0",
-    "tox>=3.0.0",
 ]
 
 [project.urls]
