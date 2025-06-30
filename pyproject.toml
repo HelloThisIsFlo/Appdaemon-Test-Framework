@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "appdaemontestframework"
-version = "4.1.0"
+version = "5.0.0"
 description = "Clean, human-readable tests for Appdaemon"
 readme = "README.md"
 license = "MIT"
