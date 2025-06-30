@@ -1,6 +1,6 @@
 # Appdaemon Test Framework
 
-[![Build Status](https://www.travis-ci.com/FlorianKempenich/Appdaemon-Test-Framework.svg?branch=master)](https://travis-ci.com/github/FlorianKempenich/Appdaemon-Test-Framework) [![PyPI](https://img.shields.io/pypi/v/appdaemontestframework.svg)](https://pypi.org/project/appdaemontestframework/)
+[![CI](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/actions/workflows/ci.yml/badge.svg)](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/actions/workflows/ci.yml) [![PyPI](https://img.shields.io/pypi/v/appdaemontestframework.svg)](https://pypi.org/project/appdaemontestframework/)
 
 Clean, human-readable tests for your Appdaemon automations.
 
@@ -88,7 +88,7 @@ Let's test an Appdaemon automation we created, which, say, handles automatic lig
    ```
    > ##### Note
    >
-   > The following fixtures are **injected** by pytest using the **[`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file** and the **initialisation fixture created at Step 1**:
+   > The following fixtures are **injected** by pytest using the **[`conftest.py`](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file** and the **initialisation fixture created at Step 1**:
    >
    > - `living_room`
    > - `given_that`
@@ -337,7 +337,7 @@ class LivingRoom(hass.Hass):
 
   **NOTE:** The above examples can be used with run_minutely.
 
-_See related test file for more examples: [test_assert_callback_registration.py](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/test/test_assert_callback_registration.py)_
+_See related test file for more examples: [test_assert_callback_registration.py](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/test/test_assert_callback_registration.py)_
 
 ### Bonus — Travel in Time: `time_travel`
 
@@ -384,8 +384,8 @@ assert_that('some_other/service').was.called()
 
 ### Simple
 
-- [**Pytest**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/pytest_example.py)
-- [**Unittest**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
+- [**Pytest**](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/doc/pytest_example.py)
+- [**Unittest**](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
 
 ### Special cases
 
@@ -442,14 +442,14 @@ class AfterLightTurnedOnByMotion:
 
 ```
 
-### [Complete Project](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/tree/master/doc/full_example)
+### [Complete Project](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/tree/master/doc/full_example)
 
 - **Kitchen**
-  - [**Automation**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/apps/kitchen.py)
-  - [**Tests**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py)
+  - [**Automation**](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/doc/full_example/apps/kitchen.py)
+  - [**Tests**](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_kitchen.py)
 - **Bathroom**
-  - [**Automation**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/apps/bathroom.py)
-  - [**Tests**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_bathroom.py)
+  - [**Automation**](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/doc/full_example/apps/bathroom.py)
+  - [**Tests**](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/doc/full_example/tests/test_bathroom.py)
 
 ---
 
@@ -468,7 +468,7 @@ This test framework abstracts away all that complexity, allowing for a smooth TD
 **Couldn't we just use the MVP pattern with clear interfaces at the boundaries?**
 _Yes we could... but would we?
 Let's be pragmatic, with this kind of project we're developing for our home, and we're a team of one.
-While being a huge proponent for [clean architecture](https://floriankempenich.com/post/11), I believe using such a complex architecture for such a simple project would only result in bringing more complexity than necessary._
+While being a huge proponent for [clean architecture](https://professionalbeginner.com/post/11), I believe using such a complex architecture for such a simple project would only result in bringing more complexity than necessary._
 
 ### Enjoy the simplicity
 
@@ -492,7 +492,7 @@ After all tests have run, the `hass_mocks` test fixture will automatically unpat
 **`hass_functions`** are injected in the helpers when creating their instances.
 After all tests, **`unpatch_callback`** is used to un-patch all patched functions.
 
-Setup and teardown are handled in the [`pytest_conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/pytest_conftest.py) file.
+Setup and teardown are handled in the [`pytest_conftest.py`](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/appdaemontestframework/pytest_conftest.py) file.
 
 #### Appdaemon Test Framework flow
 
@@ -646,8 +646,8 @@ pytest -W ignore::DeprecationWarning
 If you do no wish to use `pytest`, first maybe reconsider, `pytest` is awesome :)
 If you're really set on using something else, worry not it's pretty straighforward too ;)
 
-What the [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file is doing is simply handling the setup & teardown, as well as providing the helpers as injectable fixtures.
-It is pretty easy to replicate the same behavior with your test framework of choice. For instance, with `unittest` a base `TestCase` can replace pytest [`conftest.py`](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py). See the [Unittest Example](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
+What the [`conftest.py`](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py) file is doing is simply handling the setup & teardown, as well as providing the helpers as injectable fixtures.
+It is pretty easy to replicate the same behavior with your test framework of choice. For instance, with `unittest` a base `TestCase` can replace pytest [`conftest.py`](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/new-features/doc/full_example/conftest.py). See the [Unittest Example](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/doc/unittest_example.py)
 
 ### Direct call to mocked functions
 
@@ -655,7 +655,7 @@ It is pretty easy to replicate the same behavior with your test framework of cho
 
 **Want a functionality not implemented by the helpers?**
 You can inject `hass_mocks` directly in your tests and use `hass_mocks.hass_functions`, patched functions are `MagicMocks`.
-The list of patched functions can be found in the [**`hass_mocks` module**](https://github.com/FlorianKempenich/Appdaemon-Test-Framework/blob/master/appdaemontestframework/hass_mocks.py#L20framework.py#L14).
+The list of patched functions can be found in the [**`hass_mocks` module**](https://github.com/HelloThisIsFlo/Appdaemon-Test-Framework/blob/master/appdaemontestframework/hass_mocks.py#L20framework.py#L14).
 
 ---
 
@@ -706,5 +706,5 @@ If you prefer using pip:
 
 ## Author Information
 
-Follow me on Twitter: [@ThisIsFlorianK](https://twitter.com/ThisIsFlorianK)
-Find out more about my work: [Florian Kempenich — Personal Website](https://floriankempenich.com)
+Follow me on Twitter: [@HelloThisIsFlo](https://twitter.com/HelloThisIsFlo)
+Find out more about my work: [Flo Kempenich — Personal Website](https://professionalbeginner.com)
