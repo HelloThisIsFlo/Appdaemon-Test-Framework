@@ -64,6 +64,8 @@ class HassMocks:
 
         def _hass_init_mock(self, _ad, config_model, *_args):
             hass_mocks._hass_instances.append(self)
+            # Store the config_model for new Appdaemon versions
+            self._config_model = config_model
             # In new Appdaemon, name comes from config_model
             if hasattr(config_model, "name"):
                 self._name = config_model.name

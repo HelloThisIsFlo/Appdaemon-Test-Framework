@@ -7,8 +7,8 @@ from pytest import mark, fixture
 
 
 class MockAutomation(Hass):
-    def __init__(self, ad, name, logger, error, args, config, app_config, global_vars):
-        super().__init__(ad, name, logger, error, args, config, app_config, global_vars)
+    def __init__(self, ad, app_config):
+        super().__init__(ad, app_config)
         self.was_created = True
         self.was_initialized = False
 
@@ -24,7 +24,7 @@ def expected_error_regex_was_found_in_stdout_lines(result, expected_error_regex)
 
 
 @mark.using_pytester
-@mark.usefixtures('configure_appdaemontestframework_for_pytester')
+@mark.usefixtures("configure_appdaemontestframework_for_pytester")
 class TestAutomationFixture:
     def test_fixture_is_available_for_injection(self, testdir):
         testdir.makepyfile(
@@ -42,7 +42,8 @@ class TestAutomationFixture:
 
             def test_is_injected_as_fixture(mock_automation):
                 assert mock_automation is not None
-        """)
+        """
+        )
 
         result = testdir.runpytest()
         result.assert_outcomes(passed=1)
@@ -66,12 +67,15 @@ class TestAutomationFixture:
 
             def test_was_initialized(mock_automation):
                 assert mock_automation.was_initialized
-        """)
+        """
+        )
 
         result = testdir.runpytest()
         result.assert_outcomes(passed=1)
 
-    def test_calls_to_appdaemon_during_initialize_are_cleared_before_entering_test(self, testdir):
+    def test_calls_to_appdaemon_during_initialize_are_cleared_before_entering_test(
+        self, testdir
+    ):
         testdir.makepyfile(
             """
             from appdaemon.plugins.hass.hassapi import Hass
@@ -89,7 +93,8 @@ class TestAutomationFixture:
             def test_some_test(mock_automation):
                 assert mock_automation is not None
 
-        """)
+        """
+        )
 
         result = testdir.runpytest()
         result.assert_outcomes(passed=1)
@@ -115,7 +120,8 @@ class TestAutomationFixture:
 
             def test_some_test(mock_automation):
                 assert mock_automation is not None
-        """)
+        """
+        )
 
         result = testdir.runpytest()
         result.assert_outcomes(passed=2)
@@ -140,7 +146,8 @@ class TestAutomationFixture:
 
             def test_some_test(mock_automation):
                 mock_automation.assert_light_on()
-        """)
+        """
+        )
 
         result = testdir.runpytest()
         result.assert_outcomes(passed=1)
@@ -161,15 +168,18 @@ class TestAutomationFixture:
 
             def test_some_test(mock_automation):
                 assert mock_automation is not None
-        """)
+        """
+        )
 
         result = testdir.runpytest()
-        result.assert_outcomes(error=1)
-        assert expected_error_regex_was_found_in_stdout_lines(result, r"AutomationFixtureError.*argument")
+        result.assert_outcomes(errors=1)
+        assert expected_error_regex_was_found_in_stdout_lines(
+            result, r"AutomationFixtureError.*argument"
+        )
 
     def test_name_attribute_of_hass_object_set_to_automation_class_name(self, testdir):
-            testdir.makepyfile(
-                """
+        testdir.makepyfile(
+            """
                 from appdaemon.plugins.hass.hassapi import Hass
                 from appdaemontestframework import automation_fixture
 
@@ -183,18 +193,20 @@ class TestAutomationFixture:
 
                 def test_name_attribute_of_hass_object_set_to_automation_class_name(mock_automation):
                     assert mock_automation.name == 'MockAutomation'
-            """)
+            """
+        )
 
-            result = testdir.runpytest()
-            result.assert_outcomes(passed=1)
+        result = testdir.runpytest()
+        result.assert_outcomes(passed=1)
 
     class TestInvalidAutomation:
         @fixture
         def assert_automation_class_fails(self, testdir):
             def wrapper(automation_class_src, expected_error_regex):
                 # Given: Test file with given automation class
-                testdir.makepyfile(dedent(
-                    """
+                testdir.makepyfile(
+                    dedent(
+                        """
                     from appdaemon.plugins.hass.hassapi import Hass
                     from appdaemontestframework import automation_fixture
 
@@ -206,29 +218,41 @@ class TestAutomationFixture:
 
                     def test_some_test(mock_automation):
                         assert mock_automation is not None
-                """) % dedent(automation_class_src))
+                """
+                    )
+                    % dedent(automation_class_src)
+                )
 
                 # When: Running 'pytest'
                 result = testdir.runpytest()
 
                 # Then: Found 1 error & stdout has a line with expected error
-                result.assert_outcomes(error=1)
+                result.assert_outcomes(errors=1)
 
-                if not expected_error_regex_was_found_in_stdout_lines(result, expected_error_regex):
-                    pytest.fail(f"Couldn't fine line matching error: '{expected_error_regex}'")
+                if not expected_error_regex_was_found_in_stdout_lines(
+                    result, expected_error_regex
+                ):
+                    pytest.fail(
+                        f"Couldn't fine line matching error: '{expected_error_regex}'"
+                    )
 
             return wrapper
 
-        def test_automation_has_no_initialize_function(self, assert_automation_class_fails):
+        def test_automation_has_no_initialize_function(
+            self, assert_automation_class_fails
+        ):
             assert_automation_class_fails(
                 automation_class_src="""
                                      class MockAutomation(Hass):
                                          def some_other_function(self):
                                              self.turn_on('light.living_room')
                                      """,
-                expected_error_regex=r"AutomationFixtureError: 'MockAutomation' .* no 'initialize' function")
+                expected_error_regex=r"AutomationFixtureError: 'MockAutomation' .* no 'initialize' function",
+            )
 
-        def test_initialize_function_has_arguments_other_than_self(self, assert_automation_class_fails):
+        def test_initialize_function_has_arguments_other_than_self(
+            self, assert_automation_class_fails
+        ):
             assert_automation_class_fails(
                 automation_class_src="""
                                      class MockAutomation(Hass):
@@ -236,20 +260,22 @@ class TestAutomationFixture:
                                              self.turn_on('light.living_room')
                                      """,
                 expected_error_regex=r"AutomationFixtureError: 'MockAutomation'.*"
-                                     r"'initialize' should have no arguments other than 'self'")
+                r"'initialize' should have no arguments other than 'self'",
+            )
 
         def test___init___was_overridden(self, assert_automation_class_fails):
             assert_automation_class_fails(
                 automation_class_src="""
                                      class MockAutomation(Hass):
-                                         def __init__(self, ad, name, logger, error, args, config, app_config, global_vars):
-                                             super().__init__(ad, name, logger, error, args, config, app_config, global_vars)
+                                         def __init__(self, ad, app_config):
+                                             super().__init__(ad, app_config)
                                              self.log("do some things in '__init__'")
 
                                          def initialize(self):
                                              self.turn_on('light.living_room')
                                      """,
-                expected_error_regex=r"AutomationFixtureError: 'MockAutomation'.*should not override '__init__'")
+                expected_error_regex=r"AutomationFixtureError: 'MockAutomation'.*should not override '__init__'",
+            )
 
         # noinspection PyPep8Naming,SpellCheckingInspection
         def test_not_a_subclass_of_Hass(self, assert_automation_class_fails):
@@ -259,7 +285,8 @@ class TestAutomationFixture:
                                          def initialize(self):
                                             pass
                                      """,
-                expected_error_regex=r"AutomationFixtureError: 'MockAutomation'.*should be a subclass of 'Hass'")
+                expected_error_regex=r"AutomationFixtureError: 'MockAutomation'.*should be a subclass of 'Hass'",
+            )
 
     class TestWithArgs:
         def test_automation_is_injected_with_args(self, testdir):
@@ -283,7 +310,8 @@ class TestAutomationFixture:
 
                     assert isinstance(automation, MockAutomation)
                     assert arg == "some_arg"
-            """)
+            """
+            )
 
             result = testdir.runpytest()
             result.assert_outcomes(passed=1)
@@ -316,7 +344,8 @@ class TestAutomationFixture:
 
                     assert isinstance(automation, MockAutomation) or isinstance(automation, OtherAutomation)
                     assert arg == "some_arg" or arg == "other_arg"
-            """)
+            """
+            )
 
             result = testdir.runpytest()
             result.assert_outcomes(passed=2)
