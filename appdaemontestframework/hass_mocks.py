@@ -67,10 +67,22 @@ class AsyncSpyMockHandler(object):
         self.function_or_field_name = function_name
         self.mock_scheduler_method = mock_scheduler_method
 
-        # Create a mock that tracks calls but delegates to our mock scheduler
-        def async_side_effect(*args, **kwargs):
-            # The side_effect receives the method arguments directly (callback, delay, ...)
-            # We need to find the automation instance separately
+        # Create a wrapper that does both: tracks the call AND executes our logic
+        def async_side_effect(mock_self, *args, **kwargs):
+            # The first argument is the mock itself when using side_effect
+            # Let the mock record the call normally first
+            # We can't use _mock_call directly, so we'll manually track
+            if not hasattr(mock_self, "call_count"):
+                mock_self.call_count = 0
+            if not hasattr(mock_self, "call_args_list"):
+                mock_self.call_args_list = []
+
+            mock_self.call_count += 1
+            call_obj = mock.call(*args, **kwargs)
+            mock_self.call_args = call_obj
+            mock_self.call_args_list.append(call_obj)
+
+            # Now execute our custom logic
             method_args = args
 
             # Delegate to our mock scheduler method if provided
@@ -91,25 +103,17 @@ class AsyncSpyMockHandler(object):
                     # Return a mock handle for scheduler methods
                     result = f"mock_handle_{function_name}_{id(method_args)}"
                 else:
-                    result = self.mock.return_value
-
-            # Track the call in the mock manually to avoid signature issues
-            if not hasattr(self.mock, "call_count"):
-                self.mock.call_count = 0
-                self.mock.call_args_list = []
-
-            self.mock.call_count += 1
-            call_obj = mock.call(*args, **kwargs)
-            self.mock.call_args = call_obj
-            self.mock.call_args_list.append(call_obj)
+                    result = mock_self.return_value
 
             return result
 
+        # Set up the patch with our wrapper as side_effect and autospec=True
+        # so that mock_self is passed as first argument
         self.patch = mock.patch.object(
             object_to_patch,
             function_name,
             side_effect=async_side_effect,
-            autospec=False,
+            autospec=True,
         )
         self.mock = self.patch.start()
 
@@ -243,12 +247,12 @@ class HassMocks:
             MockHandler(Hass, "error", side_effect=self._log_error),
             ### Scheduler callback registrations functions - now with async support
             AsyncSpyMockHandler(Hass, "run_in", mock_scheduler_method=mock_run_in),
-            AsyncSpyMockHandler(Hass, "run_once"),
-            AsyncSpyMockHandler(Hass, "run_at"),
-            AsyncSpyMockHandler(Hass, "run_daily"),
-            AsyncSpyMockHandler(Hass, "run_hourly"),
-            AsyncSpyMockHandler(Hass, "run_minutely"),
-            AsyncSpyMockHandler(Hass, "run_every"),
+            MockHandler(Hass, "run_once"),
+            MockHandler(Hass, "run_at"),
+            MockHandler(Hass, "run_daily"),
+            MockHandler(Hass, "run_hourly"),
+            MockHandler(Hass, "run_minutely"),
+            MockHandler(Hass, "run_every"),
             AsyncSpyMockHandler(
                 Hass, "cancel_timer", mock_scheduler_method=mock_cancel_timer
             ),
