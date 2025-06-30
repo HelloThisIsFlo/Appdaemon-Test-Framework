@@ -66,7 +66,7 @@ def test_click_light_turn_on_for_5_minutes(given_that, living_room, assert_that)
    from appdaemontestframework.pytest_conftest import *
    ```
 
-### Write you first unit test
+### Write your first unit test
 
 Let's test an Appdaemon automation we created, which, say, handles automatic lighting in the Living Room: `class LivingRoom`
 
